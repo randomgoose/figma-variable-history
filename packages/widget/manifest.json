@@ -1,0 +1,20 @@
+{
+  "name": "Variable Commit History",
+  "id": "1321462824753043896",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": [
+    "figma"
+  ],
+  "containsWidget": true,
+  "widgetApi": "1.0.0",
+  "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://s3-alpha.figma.com/"
+    ]
+  },
+  "permissions": ["currentuser"]
+}
