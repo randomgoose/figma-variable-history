@@ -1,12 +1,7 @@
-import { IconMagnifyingGlassSolid, IconMinusSolid } from "fidget-ui/icons";
 import { ICommit } from "../../types";
-import { colors, Avatar, IconButton, TextField, AvatarGroup, } from 'fidget-ui'
-import { Pagination } from "../pagination";
-import { PREFIX } from "../../constants";
+import { colors, Avatar, AvatarGroup, } from 'fidget-ui'
 
-const { AutoLayout: Flex, Text, useSyncedState } = figma.widget
-
-const PAGE_SIZE = 12;
+const { AutoLayout: Flex, Text } = figma.widget
 
 interface CommitsProps {
     commits: ICommit[];
@@ -32,9 +27,9 @@ const styles: {
         strokeAlign: 'outside'
     },
     summary: {
-        fontSize: 12,
+        fontSize: 16,
         fill: colors.neutral[900],
-        fontWeight: 'medium'
+        fontWeight: 'semi-bold',
     },
 
 }
@@ -56,22 +51,11 @@ function parsedDate(date: number) {
     }
 }
 
-export function Commits({ commits, currentCommit, setCurrentCommit, onClickCommit }: CommitsProps) {
-    const [currentPage, setCurrentPage] = useSyncedState(`${PREFIX}__commits_current_page`, 0)
-    const [keyword, setKeyword] = useSyncedState(`${PREFIX}__commits_keyword`, '')
-    const [, setCurrentDetailPage] = useSyncedState(`${PREFIX}__commit_detail_current_page`, 0)
-
-    const pages = Math.round(Object.entries(commits).length / PAGE_SIZE)
-
-    async function getCommitById(id: string) {
-        return figma.root.getPluginData(id);
-    }
+export function Commits({ commits, currentCommit, onClickCommit }: CommitsProps) {
 
     return <Flex direction="vertical" padding={{ top: 2 }} width={'fill-parent'}>
-        <TextField width={'fill-parent'} id={`commits_history`} fontSize={11} variant="flush" value={keyword} onTextEditEnd={e => setKeyword(e.characters)} placeholder="Search" elementLeft={<IconMagnifyingGlassSolid width={12} height={12} color={colors.neutral[400]} />} />
         {commits
             .sort((a, b) => b.date - a.date)
-            .filter(({ summary, description }) => summary.includes(keyword) || description?.includes(keyword))
             .map(({ id, collaborators, date, summary }) => (
                 <Flex
                     name="commit"
@@ -79,18 +63,7 @@ export function Commits({ commits, currentCommit, setCurrentCommit, onClickCommi
                     key={id}
                     fill={currentCommit?.id === id ? colors.neutral[900] : colors.white}
                     hoverStyle={{ fill: currentCommit?.id === id ? colors.neutral[800] : colors.neutral[100] }}
-                    onClick={async () => {
-                        const commit = await getCommitById(id)
-
-                        if (commit) {
-                            setCurrentCommit(JSON.parse(commit))
-                            figma.closePlugin()
-                        }
-
-                        setCurrentDetailPage(0)
-
-                        onClickCommit && onClickCommit(JSON.parse(commit))
-                    }}>
+                >
 
                     <Text
                         {...styles.summary}
@@ -111,15 +84,5 @@ export function Commits({ commits, currentCommit, setCurrentCommit, onClickCommi
                 </Flex>
             ))}
 
-        {
-            pages > 1
-                ? <Pagination
-                    onIncrease={() => setCurrentPage(prev => prev + 1 <= Math.round(Object.entries(commits).length / PAGE_SIZE) ? prev + 1 : prev)}
-                    onDecrease={() => setCurrentPage(prev => prev - 1 >= 0 ? prev - 1 : prev)}
-                    currentPage={currentPage}
-                    pages={pages}
-                />
-                : null
-        }
     </Flex>
 }

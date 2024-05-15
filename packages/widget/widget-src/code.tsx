@@ -19,27 +19,18 @@ const styles: {
 } = {
   container: {
     minWidth: 720,
-    minHeight: 640,
-    spacing: 8,
-    padding: 8,
-    cornerRadius: 12,
-    fill: colors.neutral[900]
+    padding: 24,
+    fill: colors.white,
+    cornerRadius: 16,
+    direction: 'vertical'
   }
 }
 
 function Widget() {
   const [variables, setVariables] = useSyncedState<Variable[]>(`${PREFIX}__variables`, [])
-  const [currentCommit, setCurrentCommit] = useSyncedState<ICommit | null>(`${PREFIX}__currentCommit`, null)
   const [currentChange, setCurrentChange] = useSyncedState<IChange | null>(`${PREFIX}__currentChange`, null)
   const [commits, setCommits] = useSyncedState<ICommit[]>(`${PREFIX}__commits`, [])
-  const [summary, setSummary] = useSyncedState<string>(`${PREFIX}__summary`, '')
-  const [description, setDescription] = useSyncedState<string>(`${PREFIX}__description`, '')
-  const [route, setRoute] = useSyncedState<'changes' | 'history'>(`${PREFIX}__route`, 'changes')
   const [changes, setChanges] = useSyncedState<{ [key: string]: IChange }>(`${PREFIX}__changes`, {})
-  const [page, setPage] = useSyncedState<number>(`${PREFIX}__commit_main_current_page`, 0);
-  const [collaborators, setCollaborators] = useSyncedState<User[]>(`${PREFIX}__collaborators`, []);
-
-  const numOfChanges = Object.keys(changes).length
 
   useGlobalConfig({
     Button: {
@@ -90,8 +81,10 @@ function Widget() {
       setVariables(localVariables)
     }
 
-    const keys = figma.root.getPluginDataKeys()
-    const _commits = keys.map(key => JSON.parse(figma.root.getPluginData(key))).sort((a, b) => b.date - a.date).reverse()
+    const keys = figma.root.getSharedPluginDataKeys(PREFIX)
+    const _commits = keys.map(key => JSON.parse(figma.root.getSharedPluginData(PREFIX, key))).sort((a, b) => b.date - a.date).reverse()
+
+    console.log(_commits)
 
     if (commits.length !== _commits.length) {
       setCommits(_commits)
@@ -119,32 +112,33 @@ function Widget() {
     }
   }
 
-  async function commit() {
-    const variables = figma.variables.getLocalVariables().map(v => cloneObject(v))
-    const collections = figma.variables.getLocalVariableCollections().map(c => cloneObject(c))
-    const timestamp = new Date().getTime()
+  // async function commit() {
+  //   const variables = figma.variables.getLocalVariables().map(v => cloneObject(v))
+  //   const collections = figma.variables.getLocalVariableCollections().map(c => cloneObject(c))
+  //   const timestamp = new Date().getTime()
 
-    const record: ICommit = {
-      id: `${PREFIX}_${timestamp}`,
-      summary,
-      description,
-      date: timestamp,
-      variables,
-      collections,
-      collaborators: collaborators.length > 0 ? [...collaborators] : figma.currentUser ? [figma.currentUser] : [],
-    }
+  //   const record: ICommit = {
+  //     id: `${PREFIX}_${timestamp}`,
+  //     summary,
+  //     description,
+  //     date: timestamp,
+  //     variables,
+  //     collections,
+  //     collaborators: collaborators.length > 0 ? [...collaborators] : figma.currentUser ? [figma.currentUser] : [],
+  //   }
 
-    figma.root.setPluginData(`${PREFIX}_${timestamp}`, JSON.stringify(record))
-    setSummary("")
-    setDescription("")
-    setCollaborators([])
-    setCurrentChange(null)
-    setChanges({})
-  }
+  //   figma.root.setPluginData(`${PREFIX}_${timestamp}`, JSON.stringify(record))
+  //   setSummary("")
+  //   setDescription("")
+  //   setCollaborators([])
+  //   setCurrentChange(null)
+  //   setChanges({})
+  // }
 
   return (
     <Flex name='Container' {...styles.container}>
-      <Flex direction='vertical' height={'fill-parent'}>
+      {commits.map((commit, index) => <CommitDetail commit={commit} lastCommit={index - 1 >= 0 ? commits[index - 1] : undefined} />)}
+      {/* <Flex direction='vertical' height={'fill-parent'}>
         <Flex height={'fill-parent'} fill={colors.white} cornerRadius={8} direction='vertical'>
           <Tabs
             activeKey={route}
@@ -220,7 +214,7 @@ function Widget() {
         route === 'changes'
           ? currentChange ? <ChangeDetail showHeader change={currentChange} variables={variables} /> : <Flex cornerRadius={8} verticalAlignItems='center' horizontalAlignItems={'center'} width={'fill-parent'} height={'fill-parent'} fill={colors.white}><Text fontSize={11} fill={colors.neutral[500]}>Select a change record to view.</Text></Flex>
           : currentCommit ? <CommitDetail commit={currentCommit} lastCommit={getLastCommit(currentCommit)} /> : <Flex cornerRadius={8} verticalAlignItems='center' horizontalAlignItems={'center'} width={'fill-parent'} height={'fill-parent'} fill={colors.white}><Text fontSize={11} fill={colors.neutral[500]}>Select a change record to view.</Text></Flex>
-      }
+      } */}
     </Flex>
   )
 }

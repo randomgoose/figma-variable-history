@@ -26,7 +26,7 @@ export const styles: {
     },
     summary: {
         name: 'Summary',
-        fontSize: 12,
+        fontSize: 16,
         width: 'fill-parent',
         fontWeight: 'semi-bold',
         fill: colors.neutral[700]
@@ -38,7 +38,7 @@ export const styles: {
     body: {
         name: 'Body',
         width: 'fill-parent',
-        height: 'fill-parent',
+        height: 'hug-contents',
         spacing: 1
     }
 }
