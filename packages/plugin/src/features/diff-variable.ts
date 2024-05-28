@@ -1,4 +1,4 @@
-function diffVariableValue(a: VariableValue, b: VariableValue) {
+export function isSameVariableValue(a: VariableValue, b: VariableValue): boolean {
     if (typeof a !== typeof b) {
         return false
     }
@@ -18,17 +18,19 @@ function diffVariableValue(a: VariableValue, b: VariableValue) {
 
                 // Compare RGB & RGBA
                 else if ('r' in a && 'r' in b) {
-                    if (Math.round(a.r) !== b.r) {
+                    if (Math.round(a.r * 255) !== Math.round(b.r * 255)) {
                         return false
                     }
 
-                    if (a.g !== b.g) {
+                    if (Math.round(a.g * 255) !== Math.round(b.g * 255)) {
                         return false
                     }
 
-                    if (a.b !== b.b) {
+                    if (Math.round(a.b * 255) !== Math.round(b.b * 255)) {
                         return false
                     }
+
+                    return true
                 }
             }
             else {
@@ -36,10 +38,13 @@ function diffVariableValue(a: VariableValue, b: VariableValue) {
             }
         }
     }
+
+    return false
 }
 
 export function diffVariables(a: Variable, b: Variable) {
     let diff: any = {}
+
 
     if (a.name !== b.name) {
         diff.name = [a.name, b.name]
@@ -49,9 +54,12 @@ export function diffVariables(a: Variable, b: Variable) {
         diff.description = [a.description, b.description]
     }
 
-
     if (a.resolvedType !== b.resolvedType) {
         diff.resolvedType = [a.resolvedType, b.resolvedType]
+    }
+
+    if ((a.codeSyntax.ANDROID !== b.codeSyntax.ANDROID) || (a.codeSyntax.WEB !== b.codeSyntax.WEB) || (a.codeSyntax.iOS !== b.codeSyntax.iOS)) {
+        diff.codeSyntax = [a.codeSyntax, b.codeSyntax]
     }
 
     // Compare values by mode
@@ -61,14 +69,25 @@ export function diffVariables(a: Variable, b: Variable) {
             .map(([modeId, value]) => {
                 if (!a.valuesByMode[modeId]) {
                     return [modeId, [undefined, b.valuesByMode[modeId]]]
-                } else if (!b.valuesByMode[modeId]) {
+                }
+                else if (!b.valuesByMode[modeId]) {
                     return [modeId, [a.valuesByMode[modeId], undefined]]
                 }
                 else {
-                    return [modeId, [a.valuesByMode[modeId], b.valuesByMode[modeId]]]
-                }
-            }))
+                    if (!isSameVariableValue(a.valuesByMode[modeId], b.valuesByMode[modeId])) {
 
-            console.log(valuesByMode)
+                        return [modeId, [a.valuesByMode[modeId], b.valuesByMode[modeId]]]
+                    } else {
+                        return [modeId, []]
+                    }
+                }
+            })
+            .filter(([, value]) => value.length > 0)
+    )
+
+
+    if (Object.keys(valuesByMode).length > 0) {
+        diff.valuesByMode = valuesByMode
+    }
     return diff
 }

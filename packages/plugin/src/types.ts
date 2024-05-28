@@ -34,3 +34,33 @@ export interface RefreshHandler extends EventHandler {
   name: "REFRESH",
   handler: () => void
 }
+
+export interface GenerateChangeLogHandler extends EventHandler {
+  name: 'GENERATE_CHANGE_LOG',
+  handler: () => void
+}
+
+export interface RestoreCommitHandler extends EventHandler {
+  name: 'RESTORE_COMMIT',
+  handler: (id: string) => void
+}
+
+export interface ResolveVariableValueHandler extends EventHandler {
+  name: 'RESOLVE_VARIABLE_VALUE',
+  handler: (data: { variable: Variable, modeId: string }) => void
+}
+
+export interface SetResolvedVariableValueHandler extends EventHandler {
+  name: 'SET_RESOLVED_VARIABLE_VALUE',
+  handler: (data: { id: string; modeId: string; value: any; resolvedType: string }) => void
+}
+
+export interface GetVariableByIdHander extends EventHandler {
+  name: 'GET_VARIABLE_BY_ID',
+  handler: (id: string) => void
+}
+
+export interface SetVariableAliasHandler extends EventHandler {
+  name: 'SET_VARIABLE_ALIAS',
+  handler: (data: { id: string, name: string }) => void
+}

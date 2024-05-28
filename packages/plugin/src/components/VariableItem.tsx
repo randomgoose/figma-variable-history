@@ -7,7 +7,7 @@ import { String } from '../icons/String'
 import { Boolean } from '../icons/Boolean'
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-context-menu'
 
-export function VariableItem({ variable, type }: { variable: Variable; type?: 'Added' | 'Removed' | 'Modified' }) {
+export function VariableItem({ variable, type, onClick }: { variable: Variable; type?: 'Added' | 'Removed' | 'Modified'; onClick?: (id: string) => void; }) {
     const { id, name, resolvedType } = variable
 
     const icon = () => {
@@ -28,11 +28,13 @@ export function VariableItem({ variable, type }: { variable: Variable; type?: 'A
     return (
         <Root>
             <Trigger asChild>
-                <Link key={id} href={`/variable/${id}`} className={styles.variableItem}>
+                {/* <Link key={id} href={`/variable/${id}`} className={styles.variableItem}> */}
+                <div className={styles.variableItem} onClick={() => onClick && onClick(id)}>
                     {icon()}
                     <div>{name}</div>
                     <div style={{ marginLeft: 'auto' }}>{type}</div>
-                </Link>
+                </div>
+                {/* </Link> */}
             </Trigger>
             <Portal>
                 <Content className={styles.dropdown__content} style={{ width: 200 }}>

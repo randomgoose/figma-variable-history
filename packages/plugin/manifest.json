@@ -1,12 +1,16 @@
 {
   "api": "1.0.0",
   "editorType": [
-    "figma"
+    "figma",
+    "dev"
   ],
   "id": "react-editor",
   "name": "Variable Version History",
   "main": "build/main.js",
   "ui": "build/ui.js",
+  "capabilities": [
+    "inspect"
+  ],
   "permissions": [
     "currentuser"
   ]

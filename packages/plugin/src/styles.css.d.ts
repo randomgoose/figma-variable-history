@@ -6,10 +6,12 @@ declare const styles: {
   readonly "commitItem__icon": string;
   readonly "commitItem__user": string;
   readonly "commitMessage": string;
+  readonly "commits__header": string;
   readonly "container": string;
   readonly "dropdown__content": string;
   readonly "dropdown__item": string;
   readonly "footer": string;
+  readonly "parsedValue": string;
   readonly "swatch": string;
   readonly "title": string;
   readonly "variableDetail__header": string;
