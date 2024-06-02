@@ -1,4 +1,4 @@
-export function isSameVariableValue(a: VariableValue, b: VariableValue): boolean {
+export function isSameVariableValue(a?: VariableValue, b?: VariableValue): boolean {
     if (typeof a !== typeof b) {
         return false
     }

@@ -5,15 +5,19 @@ interface AppState {
     variables: Variable[];
     collections: VariableCollection[];
     commits: ICommit[];
+    colorFormat: 'RGB' | 'HEX';
+    resolvedVariableValues: { [key: string]: { valuesByMode: { [key: string]: { value: VariableValue; resolvedType: string } } } };
+    variableAliases: { [key: string]: string };
+    exportModalContent: string;
+    exportModalOpen: boolean;
     setVariables: (variables: Variable[]) => void;
     setCollections: (collections: VariableCollection[]) => void;
     setCommits: (commits: ICommit[]) => void;
-    setColorFormat: (colorFormat: 'RGB' | 'HEX') => void;
-    colorFormat: 'RGB' | 'HEX';
-    resolvedVariableValues: { [key: string]: { valuesByMode: { [key: string]: { value: VariableValue; resolvedType: string } } } };
     setResolvedVariableValue: (data: { id: string, value: VariableValue; resolvedType: string; modeId: string }) => void;
-    variableAliases: { [key: string]: string };
+    setColorFormat: (colorFormat: 'RGB' | 'HEX') => void;
     setVariableAlias: (data: { id: string; name: string }) => void;
+    setExportModalContent: (content: string) => void;
+    setExportModalOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>(
@@ -39,6 +43,10 @@ export const useAppStore = create<AppState>(
             }
         })),
         variableAliases: {},
-        setVariableAlias: ({ id, name }) => set((prev) => ({ ...prev, variableAliases: { ...prev.variableAliases, [id]: name } }))
+        setVariableAlias: ({ id, name }) => set((prev) => ({ ...prev, variableAliases: { ...prev.variableAliases, [id]: name } })),
+        exportModalContent: '',
+        exportModalOpen: false,
+        setExportModalContent: (content: string) => set(() => ({ exportModalContent: content })),
+        setExportModalOpen: (open: boolean) => set(() => ({ exportModalOpen: open }))
     }),
 )

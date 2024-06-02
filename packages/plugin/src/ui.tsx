@@ -9,9 +9,7 @@ import {
 import { emit, on } from '@create-figma-plugin/utilities'
 import { h } from 'preact'
 import { useCallback, useEffect, useState } from 'preact/hooks'
-import { ImportLocalCommitsHandler, ImportVariablesHandler, RefreshHandler, SetResolvedVariableValueHandler, SetVariableAliasHandler } from './types'
-import { Router, } from 'preact-router'
-import { createHashHistory } from 'history'
+import { ImportLocalCommitsHandler, ImportVariablesHandler, RefreshHandler, SetExportModalContentHandler, SetResolvedVariableValueHandler, SetVariableAliasHandler } from './types'
 import { VariableItem } from './components/VariableItem'
 import { VariableDetail } from './components/VariableDetail'
 import { commit, diffVariables, getVariableChanges } from './features'
@@ -20,12 +18,11 @@ import styles from './styles.css'
 import { useAppStore } from './store'
 
 function Plugin() {
-  const { variables, setVariables, collections, setCollections, commits, setCommits, setResolvedVariableValue, setVariableAlias } = useAppStore()
+  const { variables, setVariables, collections, setCollections, commits, setCommits, setResolvedVariableValue, setVariableAlias, setExportModalContent, setExportModalOpen } = useAppStore()
   const [tab, setTab] = useState("Changes")
   const [summary, setSummary] = useState<string>('')
   const [description, setDescription] = useState<string>('')
   const [open, setOpen] = useState(false)
-  const history = createHashHistory()
   const [selected, setSelected] = useState<string>('')
 
   on<ImportVariablesHandler>('IMPORT_VARIABLES', ({ variables, collections }) => {
@@ -43,6 +40,11 @@ function Plugin() {
 
   on<SetVariableAliasHandler>("SET_VARIABLE_ALIAS", ({ id, name }) => {
     setVariableAlias({ id, name })
+  })
+
+  on<SetExportModalContentHandler>("SET_EXPORT_MODAL_CONTENT", (content) => {
+    setExportModalOpen(true)
+    setExportModalContent(content)
   })
 
   const lastCommit = commits[0]
@@ -73,48 +75,42 @@ function Plugin() {
   }, [variables, collections, summary, description])
 
   return (
-    <Router history={history as any}>
-      <div path='/' style={{ height: '100vh' }}>
-        <Tabs
-          onValueChange={value => setTab(value)}
-          options={[
-            {
-              value: 'Changes',
-              children: <div className={styles.container} onClick={() => { emit("RESTORE_COMMIT") }}>
-                <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--figma-color-border)' }}>
-                  <Modal open={open} title='Commit variable changes' onCloseButtonClick={() => setOpen(false)}>
-                    <div className={styles.commitForm}>
-                      <Textbox width={240} value={summary} onChange={e => setSummary(e.currentTarget.value)} variant='border' placeholder='Summary' />
-                      <TextboxMultiline onChange={e => setDescription(e.currentTarget.value)} value={description} variant='border' placeholder='Description (optional)' />
-                      <Button onClick={handleClick}>Confirm</Button>
-                    </div>
-                  </Modal>
-
-                  <div style={{ height: '100%', overflow: 'auto', }}>
-                    {addedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Added' />)}
-                    {modifiedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Modified' />)}
-                  </div>
-
-                  <div className={styles.footer}>
-                    <div>{addedVariables.length + modifiedVariables.length + removedVariables.length} changes</div>
-                    <Button disabled={disabled} onClick={() => setOpen(true)}>Commit</Button>
-                  </div>
+    <Tabs
+      onValueChange={value => setTab(value)}
+      options={[
+        {
+          value: 'Changes',
+          children: <div className={styles.container} onClick={() => { emit("RESTORE_COMMIT") }}>
+            <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--figma-color-border)' }}>
+              <Modal open={open} title='Commit variable changes' onCloseButtonClick={() => setOpen(false)}>
+                <div className={styles.commitForm}>
+                  <Textbox width={240} value={summary} onChange={e => setSummary(e.currentTarget.value)} variant='border' placeholder='Summary' />
+                  <TextboxMultiline onChange={e => setDescription(e.currentTarget.value)} value={description} variant='border' placeholder='Description (optional)' />
+                  <Button onClick={handleClick}>Confirm</Button>
                 </div>
+              </Modal>
 
-                {selected ? <VariableDetail id={selected} /> : null}
+              <div style={{ height: '100%', overflow: 'auto', }}>
+                {addedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Added' />)}
+                {modifiedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Modified' />)}
               </div>
-            },
-            {
-              value: 'Commits',
-              children: <Commits commits={commits} />
-            }
-          ]}
-          value={tab}
-        />
-      </div>
-      {/* <Route path='/variable/:id' component={VariableDetail} />
-      <Route path='/commit/:id' component={CommitDetail} /> */}
-    </Router>
+
+              <div className={styles.footer}>
+                <div>{addedVariables.length + modifiedVariables.length + removedVariables.length} changes</div>
+                <Button disabled={disabled} onClick={() => setOpen(true)}>Commit</Button>
+              </div>
+            </div>
+
+            {selected ? <VariableDetail id={selected} /> : null}
+          </div>
+        },
+        {
+          value: 'Commits',
+          children: <Commits commits={commits} />
+        }
+      ]}
+      value={tab}
+    />
   )
 }
 

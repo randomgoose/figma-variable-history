@@ -5,6 +5,7 @@
       "react": ["./node_modules/preact/compat"],
       "react-dom": ["./node_modules/preact/compat"]
     },
+    "lib": ["ES2021"],
     "skipLibCheck": true,
     "typeRoots": ["node_modules/@figma", "node_modules/@types"],
   },

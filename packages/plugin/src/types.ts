@@ -64,3 +64,18 @@ export interface SetVariableAliasHandler extends EventHandler {
   name: 'SET_VARIABLE_ALIAS',
   handler: (data: { id: string, name: string }) => void
 }
+
+export interface NotifyHandler extends EventHandler {
+  name: "NOTIFY",
+  handler: (message: string) => void
+}
+
+export interface ConvertCommitVariablesToCssHandler extends EventHandler {
+  name: "CONVERT_VARIABLES_TO_CSS",
+  handler: (commitId: string) => void
+}
+
+export interface SetExportModalContentHandler extends EventHandler { 
+  name: "SET_EXPORT_MODAL_CONTENT",
+  handler: (content: string) => void
+}

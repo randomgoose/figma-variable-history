@@ -1,4 +1,3 @@
-import { Link } from 'preact-router'
 import { h } from 'preact'
 import styles from '../styles.css'
 import { Color } from '../icons/Color'
@@ -6,6 +5,7 @@ import { Number } from '../icons/Number'
 import { String } from '../icons/String'
 import { Boolean } from '../icons/Boolean'
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-context-menu'
+import { revertVariable } from '../features'
 
 export function VariableItem({ variable, type, onClick }: { variable: Variable; type?: 'Added' | 'Removed' | 'Modified'; onClick?: (id: string) => void; }) {
     const { id, name, resolvedType } = variable
@@ -38,7 +38,9 @@ export function VariableItem({ variable, type, onClick }: { variable: Variable; 
             </Trigger>
             <Portal>
                 <Content className={styles.dropdown__content} style={{ width: 200 }}>
-                    <Item className={styles.dropdown__item}>Discard changes</Item>
+                    <Item className={styles.dropdown__item} onClick={() => {
+                        // revertVariable(variable.id,)
+                    }}>Discard changes</Item>
                 </Content>
             </Portal>
         </Root>

@@ -1,5 +1,5 @@
 import { ICommit } from "../types";
-import { getLocalCommits, parseDate } from "../features";
+import { getLocalCommits, isSameVariableValue, parseDate } from "../features";
 import { ParsedValue } from "../widget-components/ParsedValue";
 import { getVariableChanges } from "./get-variable-changes";
 
@@ -67,6 +67,8 @@ export async function generateChangeLog() {
                                         const collection = commit.collections.find(c => c.id === v.variableCollectionId)
                                         const prev = lastCommit?.variables.find(vc => vc.id === v.id)
 
+                                        const isSameDescription = v.description === prev?.description
+
                                         return <AL direction="vertical" width={'fill-parent'} spacing={4} key={v.id}>
 
                                             <AL height={20} verticalAlignItems="center">
@@ -79,31 +81,38 @@ export async function generateChangeLog() {
                                                     <Text height={24} fontSize={11} verticalAlignText="center">Values</Text>
                                                     {/* The list of modified variables */}
                                                     {
-                                                        Object.entries(v.valuesByMode).map(([modeId, value]) => {
+                                                        Object
+                                                            .entries(v.valuesByMode)
+                                                            .filter(([modeId, value]) => !isSameVariableValue(value, prev?.valuesByMode[modeId]))
+                                                            .map(([modeId, value]) => {
 
-                                                            return <AL width={'fill-parent'} verticalAlignItems="center" key={modeId}>
+                                                                return <AL width={'fill-parent'} verticalAlignItems="center" key={modeId}>
 
-                                                                <Text fontSize={11} fill={colors.text.secondary}>{collection?.modes.find(mode => mode.modeId === modeId)?.name}</Text>
+                                                                    <Text fontSize={11} fill={colors.text.secondary}>{collection?.modes.find(mode => mode.modeId === modeId)?.name}</Text>
 
-                                                                <AL horizontalAlignItems={'end'} width={'fill-parent'} spacing={4} height={28} verticalAlignItems="center">
-                                                                    <ParsedValue value={prev?.valuesByMode[modeId]} variables={commit.variables} format={'RGB'} />
-                                                                    <ArrowRight />
-                                                                    <ParsedValue value={v.valuesByMode[modeId]} variables={commit.variables} format={'RGB'} />
+                                                                    <AL horizontalAlignItems={'end'} width={'fill-parent'} spacing={4} height={28} verticalAlignItems="center">
+                                                                        <ParsedValue value={prev?.valuesByMode[modeId]} variables={commit.variables} format={'RGB'} />
+                                                                        <ArrowRight />
+                                                                        <ParsedValue value={v.valuesByMode[modeId]} variables={commit.variables} format={'RGB'} />
+                                                                    </AL>
                                                                 </AL>
-                                                            </AL>
-                                                        })
+                                                            })
                                                     }
                                                 </AL>
 
-                                                <AL width={'fill-parent'}>
-                                                    <Text height={24} fontSize={11} verticalAlignText="center" width={'fill-parent'}>Description</Text>
-                                                    {/* Variable description */}
-                                                    <AL spacing={4} verticalAlignItems="start" minHeight={24}>
-                                                        <Text fontSize={11} width={120}>{prev?.description || 'No description'}</Text>
-                                                        <ArrowRight />
-                                                        <Text fontSize={11} width={120}>{v.description}</Text>
-                                                    </AL>
-                                                </AL>
+                                                {
+                                                    isSameDescription
+                                                        ? null
+                                                        : <AL width={'fill-parent'}>
+                                                            <Text height={24} fontSize={11} verticalAlignText="center" width={'fill-parent'}>Description</Text>
+                                                            {/* Variable description */}
+                                                            <AL spacing={4} verticalAlignItems="start" minHeight={24}>
+                                                                <Text fontSize={11} width={240} fill={prev?.description ? colors.text.default : colors.text.disabled}>{prev?.description || 'No description'}</Text>
+                                                                <ArrowRight />
+                                                                <Text fontSize={11} width={240}>{v.description}</Text>
+                                                            </AL>
+                                                        </AL>
+                                                }
 
                                                 <AL width={'fill-parent'}>
                                                     <Text height={24} fontSize={11} verticalAlignText="center" width={'fill-parent'}>Scopes</Text>
@@ -114,6 +123,7 @@ export async function generateChangeLog() {
                                                         <Text fontSize={11} width={120}>{v.description}</Text>
                                                     </AL>
                                                 </AL>
+
                                             </AL>
                                         </AL>
                                     })

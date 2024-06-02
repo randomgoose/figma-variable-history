@@ -1,8 +1,9 @@
 import { cloneObject, emit, on, showUI } from '@create-figma-plugin/utilities'
-import { CommitHandler, GenerateChangeLogHandler, GetVariableByIdHander, ImportLocalCommitsHandler, ImportVariablesHandler, RefreshHandler, ResolveVariableValueHandler, RestoreCommitHandler, SetResolvedVariableValueHandler, SetVariableAliasHandler } from './types';
+import { CommitHandler, ConvertCommitVariablesToCssHandler, GenerateChangeLogHandler, GetVariableByIdHander, ImportLocalCommitsHandler, ImportVariablesHandler, RefreshHandler, ResolveVariableValueHandler, RestoreCommitHandler, SetExportModalContentHandler, SetResolvedVariableValueHandler, SetVariableAliasHandler } from './types';
 import { generateChangeLog } from './features/generate-change-log';
-import { saveCommitToRoot, getLocalCommits } from './features';
+import { saveCommitToRoot, getLocalCommits, convertVariablesToCss } from './features';
 import { restore } from './features/restore';
+import { getLocalCommitById } from './features/get-local-commit-by-id';
 
 async function emitData() {
   const variables = (await figma.variables.getLocalVariablesAsync()).map(v => cloneObject(v));
@@ -16,7 +17,7 @@ async function emitData() {
 export default async function () {
   on<RestoreCommitHandler>("RESTORE_COMMIT", (id) => {
     const commit = getLocalCommits().find(c => c.id === id)
-    restore(commit)
+    commit && restore(commit)
   })
   on<CommitHandler>('COMMIT', commit => { saveCommitToRoot(commit) });
   on<RefreshHandler>('REFRESH', emitData);
@@ -40,6 +41,14 @@ export default async function () {
 
     if (variable) {
       emit<SetVariableAliasHandler>("SET_VARIABLE_ALIAS", { id: variable.id, name: variable.name })
+    }
+  })
+
+  on<ConvertCommitVariablesToCssHandler>("CONVERT_VARIABLES_TO_CSS", async (commitId: string) => {
+    const commit = getLocalCommitById(commitId)
+    if (commit) {
+      const content = await convertVariablesToCss(commit)
+      emit<SetExportModalContentHandler>("SET_EXPORT_MODAL_CONTENT", encodeURIComponent(content))
     }
   })
 

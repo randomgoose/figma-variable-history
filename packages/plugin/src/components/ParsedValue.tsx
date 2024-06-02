@@ -2,7 +2,7 @@ import { h } from "preact"
 import styles from "../styles.css"
 import { convertRgbColorToHexColor, emit } from "@create-figma-plugin/utilities";
 import { convertFigmaRgbtoString, copyText } from "../features";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect } from "preact/hooks";
 import { GetVariableByIdHander, ResolveVariableValueHandler } from "../types";
 import { useAppStore } from "../store";
 
@@ -36,7 +36,6 @@ export function ParsedValue({ variable, modeId, variables, format }: { variable:
             if ('type' in value) {
                 const alias = variableAliases[value.id]
                 const resolvedValue = resolvedVariableValues[variable.id]?.valuesByMode[modeId].value
-                console.log("resolved", resolvedValue)
 
                 if (alias) {
                     switch (typeof resolvedValue) {
@@ -49,7 +48,7 @@ export function ParsedValue({ variable, modeId, variables, format }: { variable:
                                 if ('a' in resolvedValue) {
                                     a = resolvedValue.a
                                 }
-                                return <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                return <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} className={styles.parsedValue}>
                                     <div className={styles.swatch} style={{ background: convertFigmaRgbtoString({ r, g, b }) }} />
                                     <div className={styles.variable__pill}>{alias}</div>
                                 </div>
@@ -67,11 +66,7 @@ export function ParsedValue({ variable, modeId, variables, format }: { variable:
                     const _b = Math.round(value.b * 255)
                     const v = format === 'RGB' ? `rgba(${_r}, ${_g}, ${_b}, ${(value.a * 100).toFixed(0) + '%'})` : `#${convertRgbColorToHexColor({ r: value.r, g: value.g, b: value.b })}`
 
-                    return <div
-                        style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                        onClick={() => copyText(v)}
-                        className={styles.parsedValue}
-                    >
+                    return <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} onClick={() => copyText(v)} className={styles.parsedValue}>
                         <div className={styles.swatch} style={{ background: convertFigmaRgbtoString({ r: _r, g: _g, b: _b, a: value.a }) }} />
                         {v}
                     </div>
