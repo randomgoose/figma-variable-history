@@ -5,6 +5,37 @@ import { ICommit } from "../types";
 export async function restore(commit: ICommit) {
     const { variables, collections } = commit
 
+    variables.forEach(async v => {
+        const _v = figma.variables.getVariableById(v.id)
+
+        // Reset an existing variable
+        if (_v) {
+            _v.name = v.name
+            _v.description = v.description
+            _v.hiddenFromPublishing = v.hiddenFromPublishing
+
+            Object.entries(v.codeSyntax).forEach(([platform, value]) => {
+                _v.setVariableCodeSyntax(platform as any, value)
+            })
+
+            _v.scopes = v.scopes
+        }
+        // Recreate a deleted variable
+        else {
+            // Check if variable collection exists
+            const collection = await figma.variables.getVariableCollectionByIdAsync(v.variableCollectionId)
+
+            if (collection) {
+                const newVariable = figma.variables.createVariable(v.name, collection, v.resolvedType)
+            } else {
+                const _c = collections.find(c => c.id === v.variableCollectionId)
+                
+                const newCollection = figma.variables.createVariableCollection(_c?.name || "Untitled Collection")
+            }
+        }
+
+    })
+
     // const localVariables = (await figma.variables.getLocalVariablesAsync()).map(v => cloneObject(v))
     // const localCollections = (await figma.variables.getLocalVariableCollectionsAsync()).map(v => cloneObject(v))
     // const timestamp = (new Date()).getTime()

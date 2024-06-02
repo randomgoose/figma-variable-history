@@ -19,10 +19,12 @@ export function ParsedValue({ value, variables, format = 'RGB' }: { value?: Vari
             return <Text fill={'#00000080'} fontSize={11}>Not defined</Text>
         case 'object':
             if ('type' in value) {
-                const target = variables.find(v => v.id === value.id)
-                v = target
-                    ? target.name
-                    : 'undefined'
+                const target = figma.variables.getVariableById(value.id)
+                return v = target
+                    ? <AutoLayout verticalAlignItems="center" fill={'#f5f5f5'} padding={{ vertical: 0, horizontal: 5 }} cornerRadius={4} stroke={'#e6e6e6'} height={20}>
+                        <Text fontSize={11} lineHeight={'16px'}>{target.name}</Text>
+                    </AutoLayout>
+                    : <Text>undefined</Text>
             } else {
                 if ('a' in value) {
                     const _r = Math.round(value.r * 255)
