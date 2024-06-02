@@ -77,6 +77,7 @@ export function Commits(props: { commits: ICommit[] }) {
 
                                         <div className={styles.commitItem__content}>
                                             <div style={{ fontWeight: 500 }}>{commit.summary || 'Untitled commit'}</div>
+                                            {commit.description ? <div style={{ fontWeight: 500 }}>{commit.description}</div> : null}
                                             {
                                                 collaborator
                                                     ? <div class={styles.commitItem__user}>

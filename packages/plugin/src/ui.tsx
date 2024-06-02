@@ -7,7 +7,7 @@ import {
   Modal,
 } from '@create-figma-plugin/ui'
 import { emit, on } from '@create-figma-plugin/utilities'
-import { h } from 'preact'
+import { Fragment, h } from 'preact'
 import { useCallback, useEffect, useState } from 'preact/hooks'
 import { ImportLocalCommitsHandler, ImportVariablesHandler, RefreshHandler, SetExportModalContentHandler, SetResolvedVariableValueHandler, SetVariableAliasHandler } from './types'
 import { VariableItem } from './components/VariableItem'
@@ -16,6 +16,7 @@ import { commit, diffVariables, getVariableChanges } from './features'
 import { Commits } from './components/Commits'
 import styles from './styles.css'
 import { useAppStore } from './store'
+import { EmptyState } from './components/EmptyState'
 
 function Plugin() {
   const { variables, setVariables, collections, setCollections, commits, setCommits, setResolvedVariableValue, setVariableAlias, setExportModalContent, setExportModalOpen } = useAppStore()
@@ -57,9 +58,10 @@ function Plugin() {
   const { } = getVariableChanges({ prev: lastCommit ? lastCommit.variables : [], current: variables })
 
 
-  const addedVariables = variables.filter(v => !lastCommit?.variables.find(vc => vc.id === v.id));
+  const addedVariables = variables.filter(v => !lastCommit?.variables.find(vc => vc.id === v.id)) || [];
   const removedVariables = lastCommit?.variables.filter(v => !variables.find(vc => vc.id === v.id)) || []
-  const modifiedVariables = variables.filter(v => lastCommit?.variables.find(vc => vc.id === v.id && Object.keys(diffVariables(v, vc)).length > 0))
+  const modifiedVariables = variables.filter(v => lastCommit?.variables.find(vc => vc.id === v.id && Object.keys(diffVariables(v, vc)).length > 0)) || []
+  const numOfChanges = addedVariables.length + modifiedVariables.length + removedVariables.length
 
   const disabled = addedVariables.length + modifiedVariables.length + removedVariables.length === 0
 
@@ -81,7 +83,7 @@ function Plugin() {
         {
           value: 'Changes',
           children: <div className={styles.container} onClick={() => { emit("RESTORE_COMMIT") }}>
-            <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--figma-color-border)' }}>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--figma-color-border)' }}>
               <Modal open={open} title='Commit variable changes' onCloseButtonClick={() => setOpen(false)}>
                 <div className={styles.commitForm}>
                   <Textbox width={240} value={summary} onChange={e => setSummary(e.currentTarget.value)} variant='border' placeholder='Summary' />
@@ -90,9 +92,14 @@ function Plugin() {
                 </div>
               </Modal>
 
-              <div style={{ height: '100%', overflow: 'auto', }}>
-                {addedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Added' />)}
-                {modifiedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Modified' />)}
+              <div style={{ height: '100%', overflow: 'auto' }}>
+                {numOfChanges > 0
+                  ? <Fragment>
+                    {addedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Added' />)}
+                    {modifiedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Modified' />)}
+                  </Fragment>
+                  : <EmptyState />
+                }
               </div>
 
               <div className={styles.footer}>
