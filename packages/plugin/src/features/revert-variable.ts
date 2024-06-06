@@ -1,5 +1,4 @@
-import { ICommit } from "../types";
+import { ICommit } from '../types';
 
-export function revertVariable(variableId: string, commit: ICommit) {
-
-}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function revertVariable(variableId: string, commit: ICommit) {}

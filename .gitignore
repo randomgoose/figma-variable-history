@@ -13,6 +13,9 @@ build/
 # JetBrain
 .idea
 
+#VSCode
+.vscode
+
 # Yarn
 .yarn/
 .yarnrc.yml

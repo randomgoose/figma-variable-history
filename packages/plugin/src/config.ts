@@ -1,1 +1,1 @@
-export const PREFIX = '__VARIABLE_COMMITS_'
+export const PREFIX = '__VARIABLE_COMMITS_';

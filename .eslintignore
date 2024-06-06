@@ -1,0 +1,4 @@
+**/node_modules/**
+**/dist/**
+*.json
+packages/plugin/manifest.json
