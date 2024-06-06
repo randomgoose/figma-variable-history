@@ -1,5 +1,6 @@
 import { convertRgbColorToHexColor } from '@create-figma-plugin/utilities';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { Text, AutoLayout, Rectangle, h } = figma.widget;
 
 export function ParsedValue({
@@ -24,7 +25,7 @@ export function ParsedValue({
       break;
     case 'undefined':
       return (
-        <Text fill={'#00000080'} fontSize={11}>
+        <Text fill="#00000080" fontSize={11}>
           Not defined
         </Text>
       );
@@ -34,13 +35,13 @@ export function ParsedValue({
         return (v = target ? (
           <AutoLayout
             verticalAlignItems="center"
-            fill={'#f5f5f5'}
+            fill="#f5f5f5"
             padding={{ vertical: 0, horizontal: 5 }}
             cornerRadius={4}
-            stroke={'#e6e6e6'}
+            stroke="#e6e6e6"
             height={20}
           >
-            <Text fontSize={11} lineHeight={'16px'}>
+            <Text fontSize={11} lineHeight="16px">
               {target.name}
             </Text>
           </AutoLayout>
@@ -66,7 +67,7 @@ export function ParsedValue({
                 stroke={{ r: 0, g: 0, b: 0, a: 0.1 }}
                 fill={{ r: value.r, g: value.g, b: value.b, a: value.a }}
               />
-              <Text fontSize={11} fill={'#000000e5'}>
+              <Text fontSize={11} fill="#000000e5">
                 {v}
               </Text>
             </AutoLayout>
@@ -83,7 +84,7 @@ export function ParsedValue({
   }
 
   return (
-    <Text fontSize={11} fill={'#000000e5'}>
+    <Text fontSize={11} fill="#000000e5">
       {v}
     </Text>
   );

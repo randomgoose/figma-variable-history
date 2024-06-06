@@ -1,4 +1,5 @@
-import { h } from "preact";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { h } from 'preact';
 import { Checkbox, IconArrowRight16, Text } from '@create-figma-plugin/ui';
 import { intersection } from 'lodash-es';
 import styles from '../../styles.css';

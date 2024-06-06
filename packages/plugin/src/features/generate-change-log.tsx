@@ -3,6 +3,7 @@ import { getLocalCommits, isSameVariableValue, parseDate } from '../features';
 import { ParsedValue } from '../widget-components/ParsedValue';
 import { getVariableChanges } from './get-variable-changes';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { AutoLayout: AL, Text, Image, h } = figma.widget;
 
 const colors = {
@@ -45,7 +46,7 @@ export async function generateChangeLog() {
           <AL direction="vertical" width={320} spacing={8}>
             {/* Commit Summary */}
             <AL direction="vertical" spacing={4}>
-              <Text fontWeight={'semi-bold'}>{commit.summary}</Text>
+              <Text fontWeight="semi-bold">{commit.summary}</Text>
               {/* Commit Description */}
               <Text
                 fontSize={11}
@@ -71,21 +72,21 @@ export async function generateChangeLog() {
             </AL>
           </AL>
 
-          <AL direction="vertical" width={'fill-parent'} spacing={16} name="Changes">
+          <AL direction="vertical" width="fill-parent" spacing={16} name="Changes">
             {added?.length > 0 ? (
-              <AL direction="vertical" width={'fill-parent'} spacing={12}>
+              <AL direction="vertical" width="fill-parent" spacing={12}>
                 <Text fontSize={11}>🆕 Added</Text>
                 <AL
                   padding={16}
                   wrap={true}
-                  width={'fill-parent'}
-                  fill={'#fcfcfc'}
+                  width="fill-parent"
+                  fill="#fcfcfc"
                   spacing={4}
                   cornerRadius={6}
                 >
                   {added.map((v) => (
                     <AL key={v.id} width={149} height={20} verticalAlignItems="center">
-                      <Text fontSize={11} fontWeight={'normal'} truncate>
+                      <Text fontSize={11} fontWeight="normal" truncate>
                         {v.name}
                       </Text>
                     </AL>
@@ -95,7 +96,7 @@ export async function generateChangeLog() {
             ) : null}
 
             {modified?.length > 0 ? (
-              <AL direction="vertical" width={'fill-parent'} spacing={12}>
+              <AL direction="vertical" width="fill-parent" spacing={12}>
                 <Text fontSize={11}>🔧 Changed</Text>
                 {modified.map((v) => {
                   const collection = commit.collections.find(
@@ -106,20 +107,20 @@ export async function generateChangeLog() {
                   const isSameDescription = v.description === prev?.description;
 
                   return (
-                    <AL direction="vertical" width={'fill-parent'} spacing={4} key={v.id}>
+                    <AL direction="vertical" width="fill-parent" spacing={4} key={v.id}>
                       <AL height={20} verticalAlignItems="center">
                         <Text fontSize={11}>{v.name}</Text>
                       </AL>
 
                       <AL
                         padding={16}
-                        width={'fill-parent'}
-                        fill={'#fcfcfc'}
+                        width="fill-parent"
+                        fill="#fcfcfc"
                         cornerRadius={6}
                         direction="vertical"
                         spacing={16}
                       >
-                        <AL direction="vertical" width={'fill-parent'}>
+                        <AL direction="vertical" width="fill-parent">
                           <Text height={24} fontSize={11} verticalAlignText="center">
                             Values
                           </Text>
@@ -131,14 +132,14 @@ export async function generateChangeLog() {
                             )
                             .map(([modeId]) => {
                               return (
-                                <AL width={'fill-parent'} verticalAlignItems="center" key={modeId}>
+                                <AL width="fill-parent" verticalAlignItems="center" key={modeId}>
                                   <Text fontSize={11} fill={colors.text.secondary}>
                                     {collection?.modes.find((mode) => mode.modeId === modeId)?.name}
                                   </Text>
 
                                   <AL
-                                    horizontalAlignItems={'end'}
-                                    width={'fill-parent'}
+                                    horizontalAlignItems="end"
+                                    width="fill-parent"
                                     spacing={4}
                                     height={28}
                                     verticalAlignItems="center"
@@ -146,13 +147,13 @@ export async function generateChangeLog() {
                                     <ParsedValue
                                       value={prev?.valuesByMode[modeId]}
                                       variables={commit.variables}
-                                      format={'RGB'}
+                                      format="RGB"
                                     />
                                     <ArrowRight />
                                     <ParsedValue
                                       value={v.valuesByMode[modeId]}
                                       variables={commit.variables}
-                                      format={'RGB'}
+                                      format="RGB"
                                     />
                                   </AL>
                                 </AL>
@@ -161,12 +162,12 @@ export async function generateChangeLog() {
                         </AL>
 
                         {isSameDescription ? null : (
-                          <AL width={'fill-parent'}>
+                          <AL width="fill-parent">
                             <Text
                               height={24}
                               fontSize={11}
                               verticalAlignText="center"
-                              width={'fill-parent'}
+                              width="fill-parent"
                             >
                               Description
                             </Text>
@@ -189,12 +190,12 @@ export async function generateChangeLog() {
                           </AL>
                         )}
 
-                        <AL width={'fill-parent'}>
+                        <AL width="fill-parent">
                           <Text
                             height={24}
                             fontSize={11}
                             verticalAlignText="center"
-                            width={'fill-parent'}
+                            width="fill-parent"
                           >
                             Scopes
                           </Text>

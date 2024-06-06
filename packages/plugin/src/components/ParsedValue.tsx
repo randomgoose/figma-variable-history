@@ -1,4 +1,5 @@
-import { h } from "preact";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { h } from 'preact';
 import styles from '../styles.css';
 import { convertRgbColorToHexColor, emit } from '@create-figma-plugin/utilities';
 import { convertFigmaRgbtoString, copyText } from '../features';

@@ -1,4 +1,5 @@
-import { h } from "preact";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { h } from 'preact';
 import {
   ConvertCommitVariablesToCssHandler,
   GenerateChangeLogHandler,
@@ -62,7 +63,7 @@ export function Commits(props: { commits: ICommit[] }) {
   return (
     <div className={styles.container} style={{ flexDirection: 'row' }}>
       {/* Download trigger */}
-      <a id={'download'} style={{ visibility: 'hidden' }} ref={ref} />
+      <a id="download" style={{ visibility: 'hidden' }} ref={ref} />
 
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
         <div className={styles.commits__header}>

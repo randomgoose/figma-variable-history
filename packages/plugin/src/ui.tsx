@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
 import { Button, render, TextboxMultiline, Tabs, Textbox, Modal } from '@create-figma-plugin/ui';
 import { emit, on } from '@create-figma-plugin/utilities';

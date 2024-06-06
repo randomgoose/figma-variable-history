@@ -1,4 +1,5 @@
-import { h } from 'preact'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { h } from 'preact';
 import { IconArrowRight16 } from '@create-figma-plugin/ui';
 import styles from '../../styles.css';
 

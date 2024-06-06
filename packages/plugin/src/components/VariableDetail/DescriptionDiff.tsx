@@ -1,5 +1,7 @@
 import styles from '../../styles.css';
-import { h } from "preact"
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { h } from 'preact';
 import ReactDiffViewer from 'react-diff-viewer';
 
 export function DescriptionDiff({ current, prev }: { current: Variable; prev: Variable }) {

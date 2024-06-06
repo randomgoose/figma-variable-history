@@ -1,4 +1,5 @@
-import { h } from "preact";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { h } from 'preact';
 
 export function EmptyState() {
   return (

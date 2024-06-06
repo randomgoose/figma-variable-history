@@ -1,4 +1,5 @@
-import { h } from "preact"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { h } from 'preact';
 
 import { useAppStore } from '../../store';
 import styles from '../../styles.css';
