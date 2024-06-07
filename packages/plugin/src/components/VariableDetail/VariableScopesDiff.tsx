@@ -1,9 +1,9 @@
+import styles from '../../styles.module.css';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
 import { Checkbox, IconArrowRight16, Text } from '@create-figma-plugin/ui';
-import { intersection } from 'lodash-es';
-import styles from '../../styles.css';
-import { difference } from 'lodash-es';
+import { difference, intersection } from 'lodash-es';
 
 function ScopeCheckbox({ label, sub, checked }: { label: string; sub: boolean; checked: boolean }) {
   return (

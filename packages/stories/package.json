@@ -8,6 +8,8 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@create-figma-plugin/ui": "^3.2.0",
+    "@create-figma-plugin/utilities": "^3.2.0",
     "figma-variable-history": "*"
   },
   "devDependencies": {

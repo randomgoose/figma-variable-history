@@ -1,6 +1,7 @@
+import styles from '../../styles.module.css';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Fragment, h } from 'preact';
-import styles from '../../styles.css';
 import { useAppStore } from '../../store';
 import { CodeSyntaxDiff } from './CodeSyntaxDiff';
 import { DescriptionDiff } from './DescriptionDiff';

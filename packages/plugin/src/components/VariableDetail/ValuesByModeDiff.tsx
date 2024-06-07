@@ -1,8 +1,8 @@
+import styles from '../../styles.module.css';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
-
 import { useAppStore } from '../../store';
-import styles from '../../styles.css';
 import { ParsedValue } from '../ParsedValue';
 import { Dropdown, IconArrowRight16 } from '@create-figma-plugin/ui';
 import { isSameVariableValue } from '../../features';

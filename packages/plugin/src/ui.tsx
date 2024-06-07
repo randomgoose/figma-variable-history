@@ -1,3 +1,5 @@
+import styles from './styles.module.css';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
 import { Button, render, TextboxMultiline, Tabs, Textbox, Modal } from '@create-figma-plugin/ui';
@@ -16,11 +18,10 @@ import { VariableItem } from './components/VariableItem';
 import { VariableDetail } from './components/VariableDetail';
 import { commit, diffVariables, getVariableChanges } from './features';
 import { Commits } from './components/Commits';
-import styles from './styles.css';
 import { useAppStore } from './store';
-import { EmptyState } from './components/EmptyState';
+import { EmptyState } from './components';
 
-function Plugin() {
+export function Plugin() {
   const {
     variables,
     setVariables,

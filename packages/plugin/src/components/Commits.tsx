@@ -1,3 +1,5 @@
+import styles from '../styles.module.css';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
 import {
@@ -7,7 +9,6 @@ import {
   RestoreCommitHandler,
 } from '../types';
 import { parseDate } from '../features';
-import styles from '../styles.css';
 import { Content, Item, Portal, Root, Trigger } from '@radix-ui/react-context-menu';
 import { useCallback, useRef, useState } from 'preact/hooks';
 import { Button, IconButton, IconStarFilled16, Modal } from '@create-figma-plugin/ui';

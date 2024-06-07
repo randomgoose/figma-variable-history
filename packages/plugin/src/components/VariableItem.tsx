@@ -1,7 +1,7 @@
+import styles from '../styles.module.css';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
-
-import styles from '../styles.css';
 import { Color } from '../icons/Color';
 import { Number } from '../icons/Number';
 import { String } from '../icons/String';
