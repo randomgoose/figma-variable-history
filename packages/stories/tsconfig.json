@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "react-dom": ["./node_modules/preact/compat"]
+    },
+    "lib": ["ES2021"],
+    "skipLibCheck": true,
+    "typeRoots": ["node_modules/@types"],
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

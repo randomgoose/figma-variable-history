@@ -23,3 +23,5 @@ build/
 # ESlint
 .eslintcache
 packages/home/html.js
+
+*storybook.log

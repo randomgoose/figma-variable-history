@@ -1,4 +1,9 @@
 {
+  "name": "figma-variable-history",
+  "version": "1.0.0",
+  "main": "./build/main.js",
+  "module": "./src/components",
+  "types": "./src/components",
   "scripts": {
     "build": "build-figma-plugin --typecheck --minify",
     "watch": "build-figma-plugin --typecheck --watch"
