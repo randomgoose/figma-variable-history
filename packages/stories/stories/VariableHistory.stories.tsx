@@ -1,17 +1,19 @@
 import * as React from 'preact/compat';
+import { useEffect } from 'preact/hooks';
 import { Plugin } from 'figma-variable-history/src/ui';
 
-import '@create-figma-plugin/ui/css/fonts.css';
-import '@create-figma-plugin/ui/css/theme.css';
+import PluginMain from 'figma-variable-history/src/main';
 
 function App() {
+  useEffect(() => {
+    PluginMain();
+  }, []);
+
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: 300,
       }}
       className="figma-light"
     >

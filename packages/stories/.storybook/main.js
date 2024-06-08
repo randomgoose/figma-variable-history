@@ -12,12 +12,15 @@ const config = {
     name: '@storybook/preact-vite',
     options: {},
   },
+  staticDirs: ['../mock'],
   stories: ['../stories/**/*.mdx', '../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
   viteFinal(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
       react: 'preact/compat',
       'react-dom': 'preact/compat',
+      // vite can't resolve path like '!../css/style.css'
+      '!..': () => '..',
     };
 
     return config;

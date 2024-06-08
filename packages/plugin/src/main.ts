@@ -1,5 +1,5 @@
 import { cloneObject, emit, on, showUI } from '@create-figma-plugin/utilities';
-import {
+import type {
   CommitHandler,
   ConvertCommitVariablesToCssHandler,
   GenerateChangeLogHandler,
