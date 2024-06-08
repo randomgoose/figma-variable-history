@@ -15,7 +15,6 @@ function App() {
         display: 'flex',
         flexDirection: 'column',
       }}
-      className="figma-light"
     >
       <Plugin />
     </div>

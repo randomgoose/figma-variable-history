@@ -40,5 +40,6 @@
         return localVariableCollections;
       },
     },
+    widget: {},
   };
 })();

@@ -29,8 +29,6 @@ export function ValuesByModeDiff({
     ([modeId]) => !current.valuesByMode[modeId]
   );
 
-  console.log(current.name, hasChangedValues, hasNewModes, hasRemovedModes);
-
   return hasChangedValues || hasNewModes || hasRemovedModes ? (
     <div className={styles.variableDetail__section}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
