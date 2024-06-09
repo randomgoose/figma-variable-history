@@ -18,18 +18,6 @@ export function DescriptionDiff({ current, prev }: { current: Variable; prev: Va
           showDiffOnly={true}
           hideLineNumbers
         />
-        {/* {
-                prev
-                    ? <Fragment>
-                        <div style={{ color: prev?.description ? 'var(--figma-color-text)' : 'var(--figma-color-text-disabled)' }}>{prev?.description || 'No description'}</div>
-                        <div className={styles.variableDetail__itemArrow}>
-                            <IconArrowRight16 />
-                        </div>
-                    </Fragment>
-                    : null
-
-            }
-            <div >{current?.description}</div> */}
       </div>
     </div>
   );

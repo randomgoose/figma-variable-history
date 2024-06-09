@@ -1,17 +1,21 @@
 import { diffVariables } from './diff-variable';
 
-export function getVariableChanges({ prev, current }: { prev?: Variable[]; current: Variable[] }) {
+export function getVariableChanges({
+  prev = [],
+  current = [],
+}: {
+  prev?: Variable[];
+  current?: Variable[];
+}): { added: Variable[]; modified: Variable[]; removed: Variable[] } {
   const added = prev
-    ? current?.filter((v) => !prev?.find((vc) => vc.id === v.id))
-    : current
-    ? current
-    : [];
+    ? current.filter(({ id: cvId }) => !prev.find(({ id: pvId }) => pvId === cvId))
+    : current;
   const modified = prev
-    ? current?.filter((v) =>
-        prev?.find((vc) => vc.id === v.id && Object.keys(diffVariables(v, vc)).length > 0)
+    ? current.filter((cv) =>
+        prev?.find((pv) => pv.id === cv.id && Object.keys(diffVariables(cv, pv)).length > 0)
       )
     : [];
-  const removed = prev ? prev.filter((v) => !current?.find((vc) => vc.id === v.id)) : [];
+  const removed = prev.filter((pv) => !current?.find((cv) => cv.id === pv.id));
 
   return { added, modified, removed };
 }

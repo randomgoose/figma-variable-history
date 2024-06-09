@@ -15,7 +15,6 @@ export function ParsedValue({
 }: {
   variable: Variable;
   modeId: string;
-  variables: Variable[];
   format?: 'RGB' | 'HEX';
 }) {
   const value = variable.valuesByMode[modeId];
@@ -28,72 +27,44 @@ export function ParsedValue({
     }
   }, [value, variable]);
 
-  switch (typeof value) {
-    case 'string':
-    case 'number':
-    case 'boolean':
-      const valueStr = `${value}`;
-      return <div onClick={() => copyText(valueStr)}>{valueStr}</div>;
+  const eleVariableNotDefined = (
+    <div style={{ color: 'var(--figma-color-text-secondary)' }}>Not defined</div>
+  );
 
-    case 'undefined':
-      return <div style={{ color: 'var(--figma-color-text-secondary)' }}>Not defined</div>;
+  if (value === null || value === undefined) {
+    return eleVariableNotDefined;
+  }
 
-    case 'object':
-      if ('type' in value) {
-        const alias = variableAliases[value.id];
-        const resolvedValue = resolvedVariableValues[variable.id]?.valuesByMode[modeId].value;
+  if (value && typeof value === 'object') {
+    const isAlias = 'type' in value;
+    const alias = isAlias ? variableAliases[value.id] : '';
+    const resolvedValue = isAlias
+      ? resolvedVariableValues[variable.id]?.valuesByMode[modeId].value
+      : value;
 
-        if (alias) {
-          switch (typeof resolvedValue) {
-            case 'object':
-              if ('r' in resolvedValue) {
-                const { r, g, b } = resolvedValue;
+    if (typeof resolvedValue === 'object' && 'r' in resolvedValue) {
+      const parsedValue =
+        format === 'RGB'
+          ? convertFigmaRGBtoString(resolvedValue)
+          : `#${convertRgbColorToHexColor(resolvedValue)}`;
 
-                let a = 1;
-
-                if ('a' in resolvedValue) {
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                  a = resolvedValue.a;
-                }
-                return (
-                  <div
-                    style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                    className={styles.parsedValue}
-                  >
-                    <div
-                      className={styles.swatch}
-                      style={{ background: convertFigmaRGBtoString({ r, g, b }) }}
-                    />
-                    <div className={styles.variable__pill}>{alias}</div>
-                  </div>
-                );
-              } else {
-                return null;
-              }
-          }
-        } else {
-          return <div>undefined</div>;
-        }
-      } else {
-        const parsedValue =
-          format === 'RGB'
-            ? convertFigmaRGBtoString(value)
-            : convertRgbColorToHexColor(value) || '';
-
-        return (
-          <div
-            className={styles.parsedValue}
-            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-            onClick={() => copyText(parsedValue)}
-          >
-            <div className={styles.swatch} style={{ background: parsedValue }} />
-            {parsedValue}
-          </div>
-        );
-      }
-      break;
-
-    default:
-      return <div>{String(value)}</div>;
+      return (
+        <div
+          className={styles.parsedValue}
+          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+          onClick={() => copyText(parsedValue)}
+        >
+          <div className={styles.swatch} style={{ background: parsedValue }} />
+          <span className={isAlias ? styles.variable__pill : undefined}>
+            {alias || parsedValue}
+          </span>
+        </div>
+      );
+    } else {
+      return eleVariableNotDefined;
+    }
+  } else {
+    const valueStr = `${value}`;
+    return <div onClick={() => copyText(valueStr)}>{valueStr}</div>;
   }
 }

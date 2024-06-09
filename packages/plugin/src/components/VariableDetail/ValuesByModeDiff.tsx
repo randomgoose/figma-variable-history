@@ -7,32 +7,24 @@ import { ParsedValue } from '../ParsedValue';
 import { Dropdown, IconArrowRight16 } from '@create-figma-plugin/ui';
 import { isSameVariableValue } from '../../features';
 
-export function ValuesByModeDiff({
-  current,
-  prev,
-  variables,
-}: {
-  current: Variable;
-  prev: Variable;
-  variables: Variable[];
-}) {
+export function ValuesByModeDiff({ current, prev }: { current: Variable; prev: Variable }) {
   const { collections, colorFormat, setColorFormat } = useAppStore();
   const collection = collections.find((c) => c.id === current?.variableCollectionId);
 
-  const hasChangedValues = Object.entries(current?.valuesByMode).some(
+  const changedValues = Object.entries(current?.valuesByMode).filter(
     ([modeId, value]) => !isSameVariableValue(value, prev.valuesByMode[modeId])
   );
-  const hasNewModes = Object.entries(current?.valuesByMode).some(
-    ([modeId]) => !prev.valuesByMode[modeId]
+  const hasNewModes = Object.entries(current?.valuesByMode).find(
+    ([modeId]) => prev.valuesByMode[modeId] === undefined
   );
-  const hasRemovedModes = Object.entries(prev?.valuesByMode).some(
-    ([modeId]) => !current.valuesByMode[modeId]
+  const hasRemovedModes = Object.entries(prev?.valuesByMode).find(
+    ([modeId]) => current.valuesByMode[modeId] === undefined
   );
 
-  return hasChangedValues || hasNewModes || hasRemovedModes ? (
+  return changedValues.length || hasNewModes || hasRemovedModes ? (
     <div className={styles.variableDetail__section}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <h3 className={styles.variableDetail__sectionTitle} style={{ margin: 0, width: '100%' }}>
+        <h3 className={styles.variableDetail__sectionTitle} style={{ margin: 0 }}>
           Values
         </h3>
         <Dropdown
@@ -45,32 +37,20 @@ export function ValuesByModeDiff({
         />
       </div>
 
-      {Object.entries(current?.valuesByMode)
-        .filter(([modeId, value]) => !isSameVariableValue(value, prev.valuesByMode[modeId]))
-        .map(([modeId]) => (
-          <div className={styles.variableDetail__item} key={modeId}>
-            <div>{collection?.modes.find((mode) => mode.modeId === modeId)?.name}</div>
-            <div>
-              <ParsedValue
-                variable={prev}
-                modeId={modeId}
-                variables={variables}
-                format={colorFormat}
-              />
-            </div>
-            <div className={styles.variableDetail__itemArrow}>
-              <IconArrowRight16 />
-            </div>
-            <div>
-              <ParsedValue
-                variable={current}
-                modeId={modeId}
-                variables={variables}
-                format={colorFormat}
-              />
-            </div>
+      {changedValues.map(([modeId]) => (
+        <div className={styles.variableDetail__item} key={modeId}>
+          <div>{collection?.modes.find((mode) => mode.modeId === modeId)?.name}</div>
+          <div>
+            <ParsedValue variable={prev} modeId={modeId} format={colorFormat} />
           </div>
-        ))}
+          <div className={styles.variableDetail__itemArrow}>
+            <IconArrowRight16 />
+          </div>
+          <div>
+            <ParsedValue variable={current} modeId={modeId} format={colorFormat} />
+          </div>
+        </div>
+      ))}
     </div>
   ) : null;
 }

@@ -1,40 +1,27 @@
 export function isSameVariableValue(a?: VariableValue, b?: VariableValue): boolean {
-  if (typeof a !== typeof b) {
-    return false;
-  } else if (typeof a === typeof b) {
-    // Compare variable values that are strings, floats (numbers) or booleans
-    if (typeof a !== 'object') {
-      return a === b;
-    } else {
-      if (typeof b === 'object') {
-        // Compare variable aliases
-        if ('type' in b && 'type' in a) {
-          return a.id === b.id;
-        }
+  if (typeof a === 'object' && typeof b === 'object') {
+    // Compare variable aliases
+    if ('type' in b && 'type' in a) {
+      return a.id === b.id;
+    }
 
-        // Compare RGB & RGBA
-        else if ('r' in a && 'r' in b) {
-          if (Math.round(a.r * 255) !== Math.round(b.r * 255)) {
-            return false;
-          }
-
-          if (Math.round(a.g * 255) !== Math.round(b.g * 255)) {
-            return false;
-          }
-
-          if (Math.round(a.b * 255) !== Math.round(b.b * 255)) {
-            return false;
-          }
-
-          return true;
-        }
-      } else {
+    // Compare RGB & RGBA
+    if ('r' in a && 'r' in b) {
+      // Compare alpha
+      if (('a' in a ? a.a : 1) !== ('a' in b ? b.a : 1)) {
         return false;
       }
-    }
-  }
 
-  return false;
+      return !(['r', 'g', 'b'] as Array<'r' | 'g' | 'b'>).find(
+        (key) => Math.round(a[key] * 255) !== Math.round(b[key] * 255)
+      );
+    }
+
+    return false;
+    // Compare variable values that are strings, floats (numbers) or booleans
+  } else {
+    return a === b;
+  }
 }
 
 export function diffVariables(a: Variable, b: Variable) {

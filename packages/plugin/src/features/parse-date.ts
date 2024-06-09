@@ -1,12 +1,15 @@
 export function parseDate(timestamp: number) {
-  const d = new Date().getTime() - timestamp;
+  const d = Date.now() - timestamp;
+  const minute = 1000 * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
 
-  if (d < 1000 * 60) {
+  if (d < minute) {
     return 'Just now';
-  } else if (d < 1000 * 60 * 60) {
-    return `${Math.floor(d / (1000 * 60))} minutes ago`;
-  } else if (d < 1000 * 60 * 60 * 24) {
-    return `${Math.floor(d / (1000 * 60 * 60))} hours ago`;
+  } else if (d < hour) {
+    return `${Math.floor(d / minute)} minutes ago`;
+  } else if (d < day) {
+    return `${Math.floor(d / hour)} hours ago`;
   }
 
   return new Date(timestamp).toLocaleDateString();

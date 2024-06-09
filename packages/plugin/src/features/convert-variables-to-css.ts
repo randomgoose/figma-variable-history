@@ -3,50 +3,48 @@ import { convertFigmaRGBtoString } from './convert-figma-rgb-to-string';
 
 export async function convertVariablesToCss(commit: ICommit) {
   const { variables, collections } = commit;
+  const modes = [];
 
-  return (
-    await Promise.all(
-      collections.map(async (c) =>
-        (
-          await Promise.all(
-            c.modes.map(async (m) => {
-              return (
-                `[data-theme="${m.name}"] {\n` +
-                (
-                  await Promise.all(
-                    variables
-                      .filter((v) => v.valuesByMode[m.modeId])
-                      .map(async (v) => {
-                        const value = v.valuesByMode[m.modeId];
-                        let cssValue = '';
+  for (const collection of collections) {
+    for (const mode of collection.modes) {
+      modes.push(mode);
+    }
+  }
 
-                        switch (typeof value) {
-                          case 'object':
-                            if ('type' in value) {
-                              cssValue = `var(--${
-                                (await figma.variables.getVariableByIdAsync(value.id))?.name || ''
-                              })`;
-                            } else if ('r' in value) {
-                              cssValue = convertFigmaRGBtoString(value);
-                            }
-                            break;
-                          default:
-                            cssValue = '';
-                            break;
-                        }
+  return modes
+    .map(async ({ name: modeName, modeId }) => {
+      const variableCSSStatements = (
+        await Promise.all(
+          variables.map(async ({ name, valuesByMode }) => {
+            if (!valuesByMode[modeId]) return '';
 
-                        return `  --${v.name.replaceAll('/', '-').toLowerCase()}: ${cssValue};`;
-                      })
-                  )
-                ).join('\n') +
-                `\n}\n`
-              );
-            })
-          )
-        ).join('\n')
-      )
-    )
-  ).join('\n');
+            const value = valuesByMode[modeId];
+            let cssValue = '';
+
+            switch (typeof value) {
+              case 'object':
+                if ('type' in value) {
+                  const alias = (await figma.variables.getVariableByIdAsync(value.id))?.name;
+                  alias && (cssValue = `var(--${alias})`);
+                } else if ('r' in value) {
+                  cssValue = convertFigmaRGBtoString(value);
+                }
+                break;
+              default:
+                break;
+            }
+
+            return cssValue ? `  --${name.replaceAll('/', '-').toLowerCase()}: ${cssValue};` : '';
+          })
+        )
+      ).filter(Boolean);
+
+      return `[data-theme="${modeName}"] {
+${variableCSSStatements.join('\n')}
+}
+`;
+    })
+    .join('\n');
 
   // const { modes, variableIds } = collection
 

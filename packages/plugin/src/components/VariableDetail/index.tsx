@@ -28,7 +28,7 @@ export function VariableDetail(props: any) {
       <div style={{ overflow: 'auto' }}>
         {current && prev ? (
           <Fragment>
-            <ValuesByModeDiff current={current} prev={prev} variables={variables} />
+            <ValuesByModeDiff current={current} prev={prev} />
             <DescriptionDiff current={current} prev={prev} />
             <CodeSyntaxDiff current={current} prev={prev} />
             <VariableScopesDiff current={current} prev={prev} />
