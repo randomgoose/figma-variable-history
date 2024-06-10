@@ -2,15 +2,16 @@ import styles from '../../styles.module.css';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Fragment, h } from 'preact';
-import { useAppStore } from '../../store';
+import { useContext } from 'preact/hooks';
 import { CodeSyntaxDiff } from './CodeSyntaxDiff';
 import { DescriptionDiff } from './DescriptionDiff';
 import { ValuesByModeDiff } from './ValuesByModeDiff';
 import { VariableScopesDiff } from './VariableScopesDiff';
+import { AppContext } from '../AppContext';
 
 export function VariableDetail(props: any) {
   const { id } = props;
-  const { variables, commits } = useAppStore();
+  const { variables, commits } = useContext(AppContext);
 
   const current = variables.find((v) => v.id === id);
   const prev: Variable | undefined = commits?.[0]?.variables.find((v) => v.id === id);

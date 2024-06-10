@@ -3,67 +3,24 @@ import styles from './styles.module.css';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
 import { Button, render, TextboxMultiline, Tabs, Textbox, Modal } from '@create-figma-plugin/ui';
-import { emit, on } from '@create-figma-plugin/utilities';
+import { emit } from '@create-figma-plugin/utilities';
 import { Fragment } from 'preact';
-import { useCallback, useEffect, useState } from 'preact/hooks';
-import {
-  ImportLocalCommitsHandler,
-  ImportVariablesHandler,
-  RefreshHandler,
-  SetExportModalContentHandler,
-  SetResolvedVariableValueHandler,
-  SetVariableAliasHandler,
-} from './types';
+import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
+import { RefreshHandler } from './types';
 import { VariableItem } from './components/VariableItem';
 import { VariableDetail } from './components/VariableDetail';
 import { commit, diffVariables, getVariableChanges } from './features';
 import { Commits } from './components/Commits';
-import { useAppStore } from './store';
 import { EmptyState } from './components';
+import { AppContext, AppContextProvider } from './components/AppContext';
 
-export function Plugin() {
-  const {
-    variables,
-    setVariables,
-    collections,
-    setCollections,
-    commits,
-    setCommits,
-    setResolvedVariableValue,
-    setVariableAlias,
-    setExportModalContent,
-    setExportModalOpen,
-  } = useAppStore();
+function Plugin() {
+  const { variables, collections, commits } = useContext(AppContext);
   const [tab, setTab] = useState('Changes');
   const [summary, setSummary] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<string>('');
-
-  on<ImportVariablesHandler>('IMPORT_VARIABLES', ({ variables, collections }) => {
-    setVariables(variables);
-    setCollections(collections);
-  });
-
-  on<ImportLocalCommitsHandler>('IMPORT_LOCAL_COMMITS', (commits) => {
-    setCommits(commits);
-  });
-
-  on<SetResolvedVariableValueHandler>(
-    'SET_RESOLVED_VARIABLE_VALUE',
-    ({ id, modeId, value, resolvedType }) => {
-      setResolvedVariableValue({ id, modeId, value, resolvedType });
-    }
-  );
-
-  on<SetVariableAliasHandler>('SET_VARIABLE_ALIAS', ({ id, name }) => {
-    setVariableAlias({ id, name });
-  });
-
-  on<SetExportModalContentHandler>('SET_EXPORT_MODAL_CONTENT', (content) => {
-    setExportModalOpen(true);
-    setExportModalContent(content);
-  });
 
   const lastCommit = commits[0];
 
@@ -196,6 +153,14 @@ export function Plugin() {
       ]}
       value={tab}
     />
+  );
+}
+
+export function App() {
+  return (
+    <AppContextProvider>
+      <Plugin />
+    </AppContextProvider>
   );
 }
 

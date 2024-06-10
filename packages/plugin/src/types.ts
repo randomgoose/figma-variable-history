@@ -1,13 +1,25 @@
-import { EventHandler } from '@create-figma-plugin/utilities';
+import type { Delta } from 'jsondiffpatch';
+import type { EventHandler } from '@create-figma-plugin/utilities';
 
 export type ICommit = {
   id: string;
   summary: string;
   description?: string;
+  // TODO delete these two
   variables: Variable[];
   collections: VariableCollection[];
   date: number;
   collaborators: User[];
+  // TODO make this necessary
+  delta?: {
+    variables: Delta;
+    collections: Delta;
+  };
+};
+
+export type ICommitHead = Omit<ICommit, 'delta'> & {
+  variables: Variable[];
+  collections: VariableCollection[];
 };
 
 export interface InsertCodeHandler extends EventHandler {
@@ -17,7 +29,7 @@ export interface InsertCodeHandler extends EventHandler {
 
 export interface CommitHandler extends EventHandler {
   name: 'COMMIT';
-  handler: (commit: ICommit) => void;
+  handler: (commit: Omit<ICommit, 'delta'>) => void;
 }
 
 export interface ImportVariablesHandler extends EventHandler {
@@ -55,7 +67,7 @@ export interface SetResolvedVariableValueHandler extends EventHandler {
   handler: (data: { id: string; modeId: string; value: any; resolvedType: string }) => void;
 }
 
-export interface GetVariableByIdHander extends EventHandler {
+export interface GetVariableByIdHandler extends EventHandler {
   name: 'GET_VARIABLE_BY_ID';
   handler: (id: string) => void;
 }
@@ -75,7 +87,7 @@ export interface ConvertCommitVariablesToCssHandler extends EventHandler {
   handler: (commitId: string) => void;
 }
 
-export interface SetExportModalContentHandler extends EventHandler {
-  name: 'SET_EXPORT_MODAL_CONTENT';
-  handler: (content: string) => void;
+export interface ConvertCommitVariablesToCssDoneHandler extends EventHandler {
+  name: 'CONVERT_VARIABLES_TO_CSS_DONE';
+  handler: (commitId: string) => void;
 }

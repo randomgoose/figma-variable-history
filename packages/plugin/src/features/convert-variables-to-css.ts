@@ -11,40 +11,42 @@ export async function convertVariablesToCss(commit: ICommit) {
     }
   }
 
-  return modes
-    .map(async ({ name: modeName, modeId }) => {
-      const variableCSSStatements = (
-        await Promise.all(
-          variables.map(async ({ name, valuesByMode }) => {
-            if (!valuesByMode[modeId]) return '';
+  return (
+    await Promise.all(
+      modes.map(async ({ name: modeName, modeId }) => {
+        const variableCSSStatements = (
+          await Promise.all(
+            variables.map(async ({ name, valuesByMode }) => {
+              if (!valuesByMode[modeId]) return '';
 
-            const value = valuesByMode[modeId];
-            let cssValue = '';
+              const value = valuesByMode[modeId];
+              let cssValue = '';
 
-            switch (typeof value) {
-              case 'object':
-                if ('type' in value) {
-                  const alias = (await figma.variables.getVariableByIdAsync(value.id))?.name;
-                  alias && (cssValue = `var(--${alias})`);
-                } else if ('r' in value) {
-                  cssValue = convertFigmaRGBtoString(value);
-                }
-                break;
-              default:
-                break;
-            }
+              switch (typeof value) {
+                case 'object':
+                  if ('type' in value) {
+                    const alias = (await figma.variables.getVariableByIdAsync(value.id))?.name;
+                    alias && (cssValue = `var(--${alias})`);
+                  } else if ('r' in value) {
+                    cssValue = convertFigmaRGBtoString(value);
+                  }
+                  break;
+                default:
+                  break;
+              }
 
-            return cssValue ? `  --${name.replaceAll('/', '-').toLowerCase()}: ${cssValue};` : '';
-          })
-        )
-      ).filter(Boolean);
+              return cssValue ? `  --${name.replaceAll('/', '-').toLowerCase()}: ${cssValue};` : '';
+            })
+          )
+        ).filter(Boolean);
 
-      return `[data-theme="${modeName}"] {
+        return `[data-theme="${modeName}"] {
 ${variableCSSStatements.join('\n')}
 }
 `;
-    })
-    .join('\n');
+      })
+    )
+  ).join('\n');
 
   // const { modes, variableIds } = collection
 

@@ -1,10 +1,10 @@
 import * as React from 'preact/compat';
 import { useEffect } from 'preact/hooks';
-import { Plugin } from 'figma-variable-history/src/ui';
+import { App } from 'figma-variable-history/src/ui';
 
 import PluginMain from 'figma-variable-history/src/main';
 
-function App() {
+function Demo() {
   useEffect(() => {
     PluginMain();
   }, []);
@@ -16,14 +16,14 @@ function App() {
         flexDirection: 'column',
       }}
     >
-      <Plugin />
+      <App />
     </div>
   );
 }
 
 export default {
   title: 'VariableHistory',
-  component: App,
+  component: Demo,
 };
 
 export const Primary = {};

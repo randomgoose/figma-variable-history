@@ -4,9 +4,9 @@ import styles from '../styles.module.css';
 import { h } from 'preact';
 import { convertRgbColorToHexColor, emit } from '@create-figma-plugin/utilities';
 import { convertFigmaRGBtoString, copyText } from '../features';
-import { useEffect } from 'preact/hooks';
-import { GetVariableByIdHander, ResolveVariableValueHandler } from '../types';
-import { useAppStore } from '../store';
+import { useContext, useEffect } from 'preact/hooks';
+import { GetVariableByIdHandler, ResolveVariableValueHandler } from '../types';
+import { AppContext } from './AppContext';
 
 export function ParsedValue({
   variable,
@@ -18,12 +18,12 @@ export function ParsedValue({
   format?: 'RGB' | 'HEX';
 }) {
   const value = variable.valuesByMode[modeId];
-  const { resolvedVariableValues, variableAliases } = useAppStore();
+  const { resolvedVariableValues, variableAliases } = useContext(AppContext);
 
   useEffect(() => {
     if (typeof value === 'object' && 'type' in value) {
       emit<ResolveVariableValueHandler>('RESOLVE_VARIABLE_VALUE', { variable, modeId });
-      emit<GetVariableByIdHander>('GET_VARIABLE_BY_ID', value.id);
+      emit<GetVariableByIdHandler>('GET_VARIABLE_BY_ID', value.id);
     }
   }, [value, variable]);
 

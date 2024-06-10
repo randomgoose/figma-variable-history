@@ -2,26 +2,35 @@ import styles from '../styles.module.css';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { emit, on } from '@create-figma-plugin/utilities';
+import { Button, IconButton, IconStarFilled16, Modal } from '@create-figma-plugin/ui';
+import { Content, Item, Portal, Root, Trigger } from '@radix-ui/react-context-menu';
+
 import {
+  ConvertCommitVariablesToCssDoneHandler,
   ConvertCommitVariablesToCssHandler,
   GenerateChangeLogHandler,
   ICommit,
   RestoreCommitHandler,
 } from '../types';
 import { parseDate } from '../features';
-import { Content, Item, Portal, Root, Trigger } from '@radix-ui/react-context-menu';
-import { useCallback, useRef, useState } from 'preact/hooks';
-import { Button, IconButton, IconStarFilled16, Modal } from '@create-figma-plugin/ui';
-import { emit } from '@create-figma-plugin/utilities';
 import { getVariableChanges } from '../features';
 import { VariableItem } from './VariableItem';
-import { useAppStore } from '../store';
-import SyntaxHighlighter from 'react-syntax-highlighter';
 
 export function Commits({ commits }: { commits: ICommit[] }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [selected, setSelected] = useState('');
-  const { exportModalOpen, exportModalContent, setExportModalOpen } = useAppStore();
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportModalContent, setExportModalContent] = useState('');
+
+  useEffect(() => {
+    on<ConvertCommitVariablesToCssDoneHandler>('CONVERT_VARIABLES_TO_CSS_DONE', (content) => {
+      setExportModalOpen(true);
+      setExportModalContent(content);
+    });
+  }, []);
 
   const decodedContent = decodeURIComponent(exportModalContent);
   const index = commits.findIndex((c) => c.id === selected);
@@ -166,7 +175,6 @@ export function Commits({ commits }: { commits: ICommit[] }) {
           <SyntaxHighlighter customStyle={{ margin: 0, overflow: 'auto' }} language="CSS">
             {decodedContent}
           </SyntaxHighlighter>
-          {/* {decodeURIComponent(exportModalContent)} */}
           <Button style={{ width: '100%' }} secondary onClick={onExport}>
             Export
           </Button>

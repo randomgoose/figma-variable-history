@@ -1,15 +1,15 @@
 import { cloneObject, emit, on, showUI } from '@create-figma-plugin/utilities';
 import type {
   CommitHandler,
+  ConvertCommitVariablesToCssDoneHandler,
   ConvertCommitVariablesToCssHandler,
   GenerateChangeLogHandler,
-  GetVariableByIdHander,
+  GetVariableByIdHandler,
   ImportLocalCommitsHandler,
   ImportVariablesHandler,
   RefreshHandler,
   ResolveVariableValueHandler,
   RestoreCommitHandler,
-  SetExportModalContentHandler,
   SetResolvedVariableValueHandler,
   SetVariableAliasHandler,
 } from './types';
@@ -34,11 +34,15 @@ export default async function () {
     const commit = getLocalCommits().find((c) => c.id === id);
     commit && restore(commit);
   });
+
   on<CommitHandler>('COMMIT', (commit) => {
     saveCommitToRoot(commit);
   });
+
   on<RefreshHandler>('REFRESH', emitData);
+
   on<GenerateChangeLogHandler>('GENERATE_CHANGE_LOG', generateChangeLog);
+
   on<ResolveVariableValueHandler>('RESOLVE_VARIABLE_VALUE', ({ variable, modeId }) => {
     const v = figma.variables.getLocalVariables().find((_v) => _v.id === variable.id);
     const c = figma.variables
@@ -60,7 +64,7 @@ export default async function () {
     }
   });
 
-  on<GetVariableByIdHander>('GET_VARIABLE_BY_ID', async (id) => {
+  on<GetVariableByIdHandler>('GET_VARIABLE_BY_ID', async (id) => {
     const variable = await figma.variables.getVariableByIdAsync(id);
 
     if (variable) {
@@ -72,7 +76,10 @@ export default async function () {
     const commit = getLocalCommitById(commitId);
     if (commit) {
       const content = await convertVariablesToCss(commit);
-      emit<SetExportModalContentHandler>('SET_EXPORT_MODAL_CONTENT', encodeURIComponent(content));
+      emit<ConvertCommitVariablesToCssDoneHandler>(
+        'CONVERT_VARIABLES_TO_CSS_DONE',
+        encodeURIComponent(content)
+      );
     }
   });
 

@@ -2,13 +2,14 @@ import styles from '../../styles.module.css';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
-import { useAppStore } from '../../store';
+import { useContext } from 'preact/hooks';
 import { ParsedValue } from '../ParsedValue';
 import { Dropdown, IconArrowRight16 } from '@create-figma-plugin/ui';
 import { isSameVariableValue } from '../../features';
+import { AppContext } from '../AppContext';
 
 export function ValuesByModeDiff({ current, prev }: { current: Variable; prev: Variable }) {
-  const { collections, colorFormat, setColorFormat } = useAppStore();
+  const { collections, colorFormat, setColorFormat } = useContext(AppContext);
   const collection = collections.find((c) => c.id === current?.variableCollectionId);
 
   const changedValues = Object.entries(current?.valuesByMode).filter(
