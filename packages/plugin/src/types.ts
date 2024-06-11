@@ -1,25 +1,13 @@
-import type { Delta } from 'jsondiffpatch';
 import type { EventHandler } from '@create-figma-plugin/utilities';
 
 export type ICommit = {
   id: string;
   summary: string;
   description?: string;
-  // TODO delete these two
   variables: Variable[];
   collections: VariableCollection[];
   date: number;
   collaborators: User[];
-  // TODO make this necessary
-  delta?: {
-    variables: Delta;
-    collections: Delta;
-  };
-};
-
-export type ICommitHead = Omit<ICommit, 'delta'> & {
-  variables: Variable[];
-  collections: VariableCollection[];
 };
 
 export interface InsertCodeHandler extends EventHandler {

@@ -1,10 +1,11 @@
 import { ICommit } from '../types';
-import { getLocalCommits, isSameVariableValue, parseDate } from '../features';
+import { CommitBridge, isSameVariableValue, parseDate } from '../features';
 import { ParsedValue } from '../widget-components/ParsedValue';
 import { getVariableChanges } from './get-variable-changes';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { AutoLayout: AL, Text, Image, h } = figma.widget;
+const commitBridge = CommitBridge.create();
 
 const colors = {
   text: {
@@ -30,7 +31,8 @@ function ArrowRight() {
 }
 
 export async function generateChangeLog() {
-  const commits: ICommit[] = getLocalCommits();
+  // TODO rewrite this
+  const commits: ICommit[] = commitBridge.getCommits();
 
   const frames = await Promise.all(
     commits.map(async (commit: ICommit, index) => {

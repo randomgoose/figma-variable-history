@@ -1,29 +1,15 @@
 (function mockFigmaAPI() {
-  const { localVariables, localVariableCollections, sharedPluginData } = window.FIGMA_MOCK_DATA;
-  const dataArr = sharedPluginData
-    .map((str) => {
-      try {
-        return JSON.parse(str);
-      } catch (e) {}
-      return null;
-    })
-    .filter(Boolean);
+  const { localVariables, localVariableCollections } = window.FIGMA_MOCK_DATA;
 
   window.__html__ = '';
   window.figma = {
     showUI() {},
     root: {
-      getSharedPluginDataKeys(namespace) {
-        return dataArr.map(({ date }) => `${namespace}${date}`);
+      setSharedPluginData(_namespace, key, data) {
+        localStorage.setItem(key, data);
       },
-      getSharedPluginData(namespace, key) {
-        for (let i = 0; i < key.length; i++) {
-          const { date } = dataArr[i];
-          if (key.endsWith(date)) {
-            return sharedPluginData[i];
-          }
-        }
-        return null;
+      getSharedPluginData(_namespace, key) {
+        return localStorage.getItem(key);
       },
     },
     variables: {

@@ -14,29 +14,28 @@ import type {
   SetVariableAliasHandler,
 } from './types';
 import { generateChangeLog } from './features/generate-change-log';
-import { saveCommitToRoot, getLocalCommits, convertVariablesToCss } from './features';
-import { restore } from './features/restore';
-import { getLocalCommitById } from './features/get-local-commit-by-id';
+import { CommitBridge, convertVariablesToCss } from './features';
+
+const commitBridge = CommitBridge.create();
 
 async function emitData() {
   const variables = (await figma.variables.getLocalVariablesAsync()).map((v) => cloneObject(v));
   const collections = (await figma.variables.getLocalVariableCollectionsAsync()).map((c) =>
     cloneObject(c)
   );
-  const commits = getLocalCommits();
+  const commits = commitBridge.getCommits();
 
   emit<ImportVariablesHandler>('IMPORT_VARIABLES', { variables, collections });
   emit<ImportLocalCommitsHandler>('IMPORT_LOCAL_COMMITS', commits);
 }
 
 export default async function () {
-  on<RestoreCommitHandler>('RESTORE_COMMIT', (id) => {
-    const commit = getLocalCommits().find((c) => c.id === id);
-    commit && restore(commit);
+  on<RestoreCommitHandler>('RESTORE_COMMIT', () => {
+    // TODO
   });
 
   on<CommitHandler>('COMMIT', (commit) => {
-    saveCommitToRoot(commit);
+    commitBridge.commit(commit);
   });
 
   on<RefreshHandler>('REFRESH', emitData);
@@ -73,7 +72,7 @@ export default async function () {
   });
 
   on<ConvertCommitVariablesToCssHandler>('CONVERT_VARIABLES_TO_CSS', async (commitId: string) => {
-    const commit = getLocalCommitById(commitId);
+    const commit = commitBridge.getCommitById(commitId);
     if (commit) {
       const content = await convertVariablesToCss(commit);
       emit<ConvertCommitVariablesToCssDoneHandler>(
@@ -84,5 +83,6 @@ export default async function () {
   });
 
   showUI({ height: 480, width: 720 });
+
   await emitData();
 }

@@ -6,10 +6,10 @@ import { Button, render, TextboxMultiline, Tabs, Textbox, Modal } from '@create-
 import { emit } from '@create-figma-plugin/utilities';
 import { Fragment } from 'preact';
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
-import { RefreshHandler } from './types';
+import { CommitHandler, RefreshHandler } from './types';
 import { VariableItem } from './components/VariableItem';
 import { VariableDetail } from './components/VariableDetail';
-import { commit, diffVariables, getVariableChanges } from './features';
+import { diffVariables, getVariableChanges } from './features';
 import { Commits } from './components/Commits';
 import { EmptyState } from './components';
 import { AppContext, AppContextProvider } from './components/AppContext';
@@ -52,7 +52,16 @@ function Plugin() {
     if (!summary) {
       alert('Please provide a summary');
     } else {
-      commit({ summary, description, variables, collections, collaborators: [] });
+      const timestamp = +new Date();
+      emit<CommitHandler>('COMMIT', {
+        id: `${timestamp}`,
+        date: timestamp,
+        summary,
+        description,
+        variables,
+        collections,
+        collaborators: [],
+      });
       setOpen(false);
       emit<RefreshHandler>('REFRESH');
     }
@@ -164,4 +173,4 @@ export function App() {
   );
 }
 
-export default render(Plugin);
+export default render(App);
