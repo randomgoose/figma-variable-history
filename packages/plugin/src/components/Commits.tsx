@@ -1,6 +1,6 @@
 import { ConvertCommitVariablesToCssHandler, GenerateChangeLogHandler, ICommit, RestoreCommitHandler } from "../types";
 import { h } from "preact";
-import { parseDate } from "../features";
+import { copyText, parseDate } from "../features";
 import styles from "../styles.css";
 import { Content, Item, Portal, Root, Trigger } from "@radix-ui/react-context-menu";
 import { useCallback, useRef, useState } from "preact/hooks";
@@ -121,9 +121,14 @@ export function Commits(props: { commits: ICommit[] }) {
             onCloseButtonClick={() => setExportModalOpen(false)}
         >
             <div style={{ padding: 16, display: 'flex', flexDirection: 'column', height: 'calc(100% - 41px)', gap: 12 }}>
-                <SyntaxHighlighter customStyle={{ margin: 0, overflow: 'auto', }} language="CSS">{decodedContent}</SyntaxHighlighter>
+                <SyntaxHighlighter customStyle={{ margin: 0, overflow: 'auto' }} language="CSS">{decodedContent}</SyntaxHighlighter>
                 {/* {decodeURIComponent(exportModalContent)} */}
-                <Button style={{ width: '100%' }} secondary onClick={onExport}>Export</Button>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <Button style={{ width: '100%' }} secondary onClick={() => { copyText(decodedContent) }}>
+                        Copy
+                    </Button>
+                    <Button style={{ width: '100%' }} onClick={onExport}>Download</Button>
+                </div>
             </div>
 
         </Modal>

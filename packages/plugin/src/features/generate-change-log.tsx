@@ -106,7 +106,7 @@ export async function generateChangeLog() {
                                                         : <AL width={'fill-parent'}>
                                                             <Text height={24} fontSize={11} verticalAlignText="center" width={'fill-parent'}>Description</Text>
                                                             {/* Variable description */}
-                                                            <AL spacing={4} verticalAlignItems="start" minHeight={24}>
+                                                            <AL spacing={4} verticalAlignItems="center" minHeight={24}>
                                                                 <Text fontSize={11} width={240} fill={prev?.description ? colors.text.default : colors.text.disabled}>{prev?.description || 'No description'}</Text>
                                                                 <ArrowRight />
                                                                 <Text fontSize={11} width={240}>{v.description}</Text>

@@ -5,6 +5,7 @@ import {
   Tabs,
   Textbox,
   Modal,
+  Disclosure,
 } from '@create-figma-plugin/ui'
 import { emit, on } from '@create-figma-plugin/utilities'
 import { Fragment, h } from 'preact'
@@ -12,11 +13,11 @@ import { useCallback, useEffect, useState } from 'preact/hooks'
 import { ImportLocalCommitsHandler, ImportVariablesHandler, RefreshHandler, SetExportModalContentHandler, SetResolvedVariableValueHandler, SetVariableAliasHandler } from './types'
 import { VariableItem } from './components/VariableItem'
 import { VariableDetail } from './components/VariableDetail'
-import { commit, diffVariables, getVariableChanges } from './features'
+import { commit, getVariableChanges } from './features'
 import { Commits } from './components/Commits'
 import styles from './styles.css'
 import { useAppStore } from './store'
-import { EmptyState } from './components/EmptyState'
+import { getVariableChangesGroupedByCollection } from './features/get-variable-changes-grouped-by-collection'
 
 function Plugin() {
   const { variables, setVariables, collections, setCollections, commits, setCommits, setResolvedVariableValue, setVariableAlias, setExportModalContent, setExportModalOpen } = useAppStore()
@@ -25,6 +26,7 @@ function Plugin() {
   const [description, setDescription] = useState<string>('')
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<string>('')
+  const [openCollections, setOpenCollections] = useState<string[]>([])
 
   on<ImportVariablesHandler>('IMPORT_VARIABLES', ({ variables, collections }) => {
     setVariables(variables)
@@ -55,15 +57,16 @@ function Plugin() {
     addEventListener('focus', () => emit<RefreshHandler>('REFRESH'))
   }, [])
 
-  const { } = getVariableChanges({ prev: lastCommit ? lastCommit.variables : [], current: variables })
+  const { added, removed, modified } = getVariableChanges({ prev: lastCommit ? lastCommit.variables : [], current: variables })
+  const groupedChanges = getVariableChangesGroupedByCollection({ prev: lastCommit ? lastCommit.variables : [], current: variables })
+  console.log("G", groupedChanges)
 
+  // const addedVariables = variables.filter(v => !lastCommit?.variables.find(vc => vc.id === v.id)) || [];
+  // const removedVariables = lastCommit?.variables.filter(v => !variables.find(vc => vc.id === v.id)) || []
+  // const modifiedVariables = variables.filter(v => lastCommit?.variables.find(vc => vc.id === v.id && Object.keys(diffVariables(v, vc)).length > 0)) || []
+  const numOfChanges = added.length + modified.length + removed.length
 
-  const addedVariables = variables.filter(v => !lastCommit?.variables.find(vc => vc.id === v.id)) || [];
-  const removedVariables = lastCommit?.variables.filter(v => !variables.find(vc => vc.id === v.id)) || []
-  const modifiedVariables = variables.filter(v => lastCommit?.variables.find(vc => vc.id === v.id && Object.keys(diffVariables(v, vc)).length > 0)) || []
-  const numOfChanges = addedVariables.length + modifiedVariables.length + removedVariables.length
-
-  const disabled = addedVariables.length + modifiedVariables.length + removedVariables.length === 0
+  const disabled = added.length + modified.length + removed.length === 0
 
   const handleClick = useCallback(() => {
     if (!summary) {
@@ -93,17 +96,33 @@ function Plugin() {
               </Modal>
 
               <div style={{ height: '100%', overflow: 'auto' }}>
-                {numOfChanges > 0
+                {
+                  Object
+                    .entries(groupedChanges)
+                    .map(([collectionId, { added, modified, removed }]) => {
+                      const hasChanges = added.length + modified.length + removed.length > 0
+
+                      return (
+                        hasChanges
+                          ? <Disclosure title={collections.find(c => c.id === collectionId)?.name || 'Untitled'} open={open} key={collectionId}>
+                            {added.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Added' />)}
+                            {modified.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Modified' />)}
+                          </Disclosure>
+                          : null
+                      )
+                    })
+                }
+                {/* {numOfChanges > 0
                   ? <Fragment>
-                    {addedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Added' />)}
-                    {modifiedVariables.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Modified' />)}
+                    {added.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Added' />)}
+                    {modified.map(v => <VariableItem onClick={(id) => { setSelected(id) }} variable={v} key={v.id} type='Modified' />)}
                   </Fragment>
                   : <EmptyState />
-                }
+                } */}
               </div>
 
               <div className={styles.footer}>
-                <div>{addedVariables.length + modifiedVariables.length + removedVariables.length} changes</div>
+                <div>{added.length + modified.length + removed.length} changes</div>
                 <Button disabled={disabled} onClick={() => setOpen(true)}>Commit</Button>
               </div>
             </div>

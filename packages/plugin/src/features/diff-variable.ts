@@ -11,6 +11,7 @@ export function isSameVariableValue(a?: VariableValue, b?: VariableValue): boole
 
         else {
             if (typeof b === 'object') {
+
                 // Compare variable aliases
                 if ('type' in b && 'type' in a) {
                     return a.id === b.id
@@ -33,6 +34,7 @@ export function isSameVariableValue(a?: VariableValue, b?: VariableValue): boole
                     return true
                 }
             }
+
             else {
                 return false
             }
@@ -66,16 +68,15 @@ export function diffVariables(a: Variable, b: Variable) {
     const valuesByMode = Object.fromEntries(
         Object
             .entries(a.valuesByMode)
-            .map(([modeId, value]) => {
-                if (!a.valuesByMode[modeId]) {
+            .map(([modeId]) => {
+                if (a.valuesByMode[modeId] === undefined) {
                     return [modeId, [undefined, b.valuesByMode[modeId]]]
                 }
-                else if (!b.valuesByMode[modeId]) {
+                else if (b.valuesByMode[modeId] === undefined) {
                     return [modeId, [a.valuesByMode[modeId], undefined]]
                 }
                 else {
                     if (!isSameVariableValue(a.valuesByMode[modeId], b.valuesByMode[modeId])) {
-
                         return [modeId, [a.valuesByMode[modeId], b.valuesByMode[modeId]]]
                     } else {
                         return [modeId, []]
@@ -85,9 +86,9 @@ export function diffVariables(a: Variable, b: Variable) {
             .filter(([, value]) => value.length > 0)
     )
 
-
     if (Object.keys(valuesByMode).length > 0) {
         diff.valuesByMode = valuesByMode
     }
+
     return diff
 }

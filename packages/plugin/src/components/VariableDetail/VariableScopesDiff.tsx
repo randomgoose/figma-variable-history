@@ -17,6 +17,26 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev:
     let scopes: { label: string; sub?: boolean; scopes: VariableScope[] }[] = [];
 
     switch (current.resolvedType) {
+        case "STRING":
+            scopes = [
+                { label: 'Show in all supported properties', scopes: ["ALL_SCOPES"] },
+                { label: 'Text content', scopes: ['ALL_SCOPES', 'TEXT_CONTENT'] },
+                // @ts-ignore
+                { label: 'Font family', scopes: ['ALL_SCOPES', 'FONT_FAMILY'] },
+                // @ts-ignore
+                { label: 'Font style', scopes: ['ALL_SCOPES', 'FONT_STYLE'] }
+            ]
+            break
+        case "BOOLEAN":
+            scopes = [
+                { label: '', scopes: ['ALL_SCOPES'] }
+            ]
+            break
+        case "FLOAT":
+            scopes = [
+
+            ]
+            break
         default:
             scopes = [
                 { label: 'Show in all supported properties', scopes: ['ALL_SCOPES'] },
@@ -27,12 +47,14 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev:
                 { label: 'Stroke', scopes: ['ALL_SCOPES', 'STROKE_COLOR'] },
                 { label: 'Effect', scopes: ['ALL_SCOPES', 'EFFECT_COLOR'] },
             ]
+            break
     }
 
-    return difference(current.scopes, prev.scopes).length === 0
-        ? null
-        : <div className={styles.variableDetail__section} >
-            <h3 className={styles.variableDetail__sectionTitle}>Color Scoping</h3>
+    const hasChangedScopes = (difference(current.scopes, prev.scopes).length !== 0) || (difference(current.scopes, prev.scopes).length === 0 && current.scopes.length !== prev.scopes.length)
+
+    return hasChangedScopes
+        ? <div className={styles.variableDetail__section} >
+            <h3 className={styles.variableDetail__sectionTitle}>{current.resolvedType.toLowerCase()} Scoping</h3>
             <div style={{ display: 'grid', gridTemplateColumns: "minmax(0, 1fr) 40px minmax(0, 1fr)" }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                     {
@@ -54,6 +76,7 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev:
                     }
                 </div>
             </div>
-        </div >
+        </div>
+        : null
 
 }

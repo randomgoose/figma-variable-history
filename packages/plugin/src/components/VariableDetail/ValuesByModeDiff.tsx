@@ -13,16 +13,22 @@ export function ValuesByModeDiff({ current, prev, variables }: { current: Variab
     const hasNewModes = Object.entries(current?.valuesByMode).some(([modeId]) => !prev.valuesByMode[modeId])
     const hasRemovedModes = Object.entries(prev?.valuesByMode).some(([modeId]) => !current.valuesByMode[modeId])
 
-    console.log(current.name, hasChangedValues, hasNewModes, hasRemovedModes)
-
     return (hasChangedValues || hasNewModes || hasRemovedModes)
         ? <div className={styles.variableDetail__section} >
             <div style={{ display: 'flex', alignItems: 'center' }}>
                 <h3 className={styles.variableDetail__sectionTitle} style={{ margin: 0, width: '100%' }}>Values</h3>
-                <Dropdown
-                    value={colorFormat}
-                    onChange={(e) => { setColorFormat(e.currentTarget.value === 'RGB' ? 'RGB' : 'HEX') }}
-                    options={[{ value: 'RGB' }, { value: 'HEX' }]} style={{ marginLeft: 'auto', width: 64 }} />
+                {
+                    current.resolvedType === 'COLOR'
+                        ? (
+                            <Dropdown
+                                value={colorFormat}
+                                onChange={(e) => { setColorFormat(e.currentTarget.value === 'RGB' ? 'RGB' : 'HEX') }}
+                                options={[{ value: 'RGB' }, { value: 'HEX' }]}
+                                style={{ marginLeft: 'auto', width: 64 }}
+                            />
+                        )
+                        : null
+                }
             </div>
 
             {

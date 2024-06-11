@@ -15,7 +15,7 @@ export async function convertVariablesToCss(commit: ICommit) {
                     switch (typeof value) {
                         case "object":
                             if ('type' in value) {
-                                cssValue = `var(--${(await figma.variables.getVariableByIdAsync(value.id))?.name || ''})`
+                                cssValue = `var(--${(await figma.variables.getVariableByIdAsync(value.id))?.name.replaceAll("/", "-") || ''})`
                             }
 
                             else if ('r' in value) {

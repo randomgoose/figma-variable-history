@@ -16,7 +16,7 @@
   "devDependencies": {
     "@create-figma-plugin/build": "^3.2.0",
     "@create-figma-plugin/tsconfig": "^3.2.0",
-    "@figma/plugin-typings": "1.90.0",
+    "@figma/plugin-typings": "1.94.0",
     "@figma/widget-typings": "^1.9.1",
     "@types/diff": "^5.2.1",
     "@types/lodash-es": "^4.17.12",

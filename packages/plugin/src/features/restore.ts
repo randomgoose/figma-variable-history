@@ -29,7 +29,7 @@ export async function restore(commit: ICommit) {
                 const newVariable = figma.variables.createVariable(v.name, collection, v.resolvedType)
             } else {
                 const _c = collections.find(c => c.id === v.variableCollectionId)
-                
+
                 const newCollection = figma.variables.createVariableCollection(_c?.name || "Untitled Collection")
             }
         }
