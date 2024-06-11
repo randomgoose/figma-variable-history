@@ -13,6 +13,9 @@ build/
 # JetBrain
 .idea
 
+#VSCode
+.vscode
+
 # Yarn
 .yarn/
 .yarnrc.yml
@@ -20,3 +23,5 @@ build/
 # ESlint
 .eslintcache
 packages/home/html.js
+
+*storybook.log

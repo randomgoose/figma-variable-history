@@ -1,47 +1,61 @@
-import { ICommit } from "../types"
-import { convertFigmaRgbtoString } from "./convert-figma-rgb-to-string"
+import { ICommit } from '../types';
+import { convertFigmaRGBtoString } from './convert-figma-rgb-to-string';
 
 export async function convertVariablesToCss(commit: ICommit) {
-    const { variables, collections } = commit
+  const { variables, collections } = commit;
+  const modes = [];
 
-    return (await Promise.all(collections.map(async c => (await Promise.all(c.modes.map(async m => {
-        return `[data-theme="${m.name}"] {\n`
-            + (await Promise.all(variables
-                .filter(v => v.valuesByMode[m.modeId])
-                .map(async v => {
-                    const value = v.valuesByMode[m.modeId]
-                    let cssValue = ''
+  for (const collection of collections) {
+    for (const mode of collection.modes) {
+      modes.push(mode);
+    }
+  }
 
-                    switch (typeof value) {
-                        case "object":
-                            if ('type' in value) {
-                                cssValue = `var(--${(await figma.variables.getVariableByIdAsync(value.id))?.name.replaceAll("/", "-") || ''})`
-                            }
+  return (
+    await Promise.all(
+      modes.map(async ({ name: modeName, modeId }) => {
+        const variableCSSStatements = (
+          await Promise.all(
+            variables.map(async ({ name, valuesByMode }) => {
+              if (!valuesByMode[modeId]) return '';
 
-                            else if ('r' in value) {
-                                cssValue = convertFigmaRgbtoString(value)
-                            }
-                            break
-                        default:
-                            cssValue = ''
-                            break
-                    }
+              const value = valuesByMode[modeId];
+              let cssValue = '';
 
-                    return `  --${v.name.replaceAll("/", "-").toLowerCase()}: ${cssValue};`
-                })))
-                .join('\n')
-            + `\n}\n`
-    }))).join('\n'))))
-        .join('\n')
+              switch (typeof value) {
+                case 'object':
+                  if ('type' in value) {
+                    const alias = (await figma.variables.getVariableByIdAsync(value.id))?.name;
+                    alias && (cssValue = `var(--${alias})`);
+                  } else if ('r' in value) {
+                    cssValue = convertFigmaRGBtoString(value);
+                  }
+                  break;
+                default:
+                  break;
+              }
 
-    // const { modes, variableIds } = collection
+              return cssValue ? `  --${name.replaceAll('/', '-').toLowerCase()}: ${cssValue};` : '';
+            })
+          )
+        ).filter(Boolean);
 
-    // // const variables = await Promise.all(variableIds.map(async id => await figma.variables.getVariableByIdAsync(id)))
+        return `[data-theme="${modeName}"] {
+${variableCSSStatements.join('\n')}
+}
+`;
+      })
+    )
+  ).join('\n');
 
-    // return modes.map(mode => (
-    //     `[data-theme=${mode.name}] {`
-    //     + variables.map(v => v?.codeSyntax.WEB).join('\n')
-    //     + `}`
-    // ))
-    // // const str = variables.map(v => `${v?.codeSyntax.WEB}: ${v?.valuesByMode}`)
+  // const { modes, variableIds } = collection
+
+  // // const variables = await Promise.all(variableIds.map(async id => await figma.variables.getVariableByIdAsync(id)))
+
+  // return modes.map(mode => (
+  //     `[data-theme=${mode.name}] {`
+  //     + variables.map(v => v?.codeSyntax.WEB).join('\n')
+  //     + `}`
+  // ))
+  // // const str = variables.map(v => `${v?.codeSyntax.WEB}: ${v?.valuesByMode}`)
 }

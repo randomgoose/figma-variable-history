@@ -1,4 +1,10 @@
-export function convertFigmaRgbtoString(data: RGB | RGBA) {
-    const a = 'a' in data ? data.a : 1
-    return `rgba(${Math.round(data.r * 255)}, ${Math.round(data.g * 255)}, ${Math.round(data.b * 255)}, ${a})`
+/**
+ * Convert Figma RGB color to CSS RGB
+ */
+export function convertFigmaRGBtoString(data: RGB | RGBA) {
+  const hasAlpha = 'a' in data;
+  const alpha = hasAlpha ? data.a : 1;
+  const array: Array<string | number> = [data.r, data.g, data.b].map((v) => Math.round(v * 255));
+  if (hasAlpha) array.push(`${(alpha * 100).toFixed(0)}%`);
+  return `rgb${hasAlpha ? 'a' : ''}(${array.join(', ')})`;
 }

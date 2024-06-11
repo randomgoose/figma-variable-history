@@ -1,17 +1,26 @@
 {
+  "name": "figma-variable-history",
+  "version": "1.0.0",
+  "main": "./build/main.js",
+  "module": "./src",
+  "types": "./src",
+  "scripts": {
+    "build": "build-figma-plugin --typecheck --minify",
+    "watch": "build-figma-plugin --typecheck --watch"
+  },
   "dependencies": {
     "@create-figma-plugin/ui": "^3.2.0",
     "@create-figma-plugin/utilities": "^3.2.0",
     "@radix-ui/react-context-menu": "^2.1.5",
     "diff": "^5.2.0",
     "history": "^5.3.0",
+    "jsondiffpatch": "^0.6.0",
     "lodash-es": "^4.17.21",
     "nanoid": "^5.0.7",
     "preact": ">=10",
     "preact-router": "^4.1.2",
     "react-diff-viewer": "^3.1.1",
-    "react-syntax-highlighter": "^15.5.0",
-    "zustand": "^4.5.2"
+    "react-syntax-highlighter": "^15.5.0"
   },
   "devDependencies": {
     "@create-figma-plugin/build": "^3.2.0",
@@ -19,13 +28,7 @@
     "@figma/plugin-typings": "1.94.0",
     "@figma/widget-typings": "^1.9.1",
     "@types/diff": "^5.2.1",
-    "@types/lodash-es": "^4.17.12",
-    "@types/react-syntax-highlighter": "^15.5.13",
-    "typescript": ">=4"
-  },
-  "scripts": {
-    "build": "build-figma-plugin --typecheck --minify",
-    "watch": "build-figma-plugin --typecheck --watch"
+    "@types/react-syntax-highlighter": "^15.5.13"
   },
   "figma-plugin": {
     "editorType": [
