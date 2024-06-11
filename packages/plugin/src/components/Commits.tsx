@@ -3,10 +3,16 @@ import styles from '../styles.module.css';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
-import SyntaxHighlighter from 'react-syntax-highlighter';
 import { emit, on } from '@create-figma-plugin/utilities';
 import { Button, IconButton, IconStarFilled16, Modal } from '@create-figma-plugin/ui';
 import { Content, Item, Portal, Root, Trigger } from '@radix-ui/react-context-menu';
+
+// reduce bundle size
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import css from 'react-syntax-highlighter/dist/esm/languages/hljs/css';
+
+SyntaxHighlighter.registerLanguage('css', css);
 
 import {
   ConvertCommitVariablesToCssDoneHandler,
@@ -172,7 +178,11 @@ export function Commits({ commits }: { commits: ICommit[] }) {
             gap: 12,
           }}
         >
-          <SyntaxHighlighter customStyle={{ margin: 0, overflow: 'auto' }} language="CSS">
+          <SyntaxHighlighter
+            customStyle={{ margin: 0, overflow: 'auto' }}
+            language="css"
+            style={atomOneLight}
+          >
             {decodedContent}
           </SyntaxHighlighter>
           <Button style={{ width: '100%' }} secondary onClick={onExport}>
