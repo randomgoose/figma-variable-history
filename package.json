@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "watch": "pnpm --dir packages/ui -r --parallel watch",
-    "build": "pnpm --dir packages/ui -r build",
+    "watch": "pnpm --dir packages/plugin watch",
+    "build": "pnpm --dir packages/plugin build",
+    "storybook": "pnpm --dir packages/stories storybook",
     "prepare": "husky install",
     "format": "prettier --config --write \"packages/**/*.{js,jsx,ts,tsx}\"",
     "eslint": "eslint packages/ --fix --cache --quiet --ext .js,.jsx,.ts,.tsx"
