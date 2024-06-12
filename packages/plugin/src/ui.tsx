@@ -34,11 +34,12 @@ function Plugin() {
     prev: lastCommit ? lastCommit.variables : [],
     current: variables,
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const groupedChanges = getVariableChangesGroupedByCollection({
     prev: lastCommit ? lastCommit.variables : [],
     current: variables,
   });
-  console.log('G', groupedChanges);
+  // console.log('G', groupedChanges);
 
   // const addedVariables = variables.filter(v => !lastCommit?.variables.find(vc => vc.id === v.id)) || [];
   // const removedVariables = lastCommit?.variables.filter(v => !variables.find(vc => vc.id === v.id)) || []

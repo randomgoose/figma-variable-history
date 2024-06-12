@@ -117,6 +117,14 @@ export class CommitBridge {
     this.setLocalPluginData();
   }
 
+  compareCommits() {}
+
+  compareWithLocal() {}
+
+  revert() {}
+
+  reset() {}
+
   refresh() {
     this.getLocalPluginData();
   }

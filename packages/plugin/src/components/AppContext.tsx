@@ -71,7 +71,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   );
 
   on<SetVariableAliasHandler>('SET_VARIABLE_ALIAS', ({ id, name }) => {
-    setVariableAliases({ id, name });
+    setVariableAliases({ ...variableAliases, [id]: name });
   });
 
   const context = useMemo<AppContext>(() => {
@@ -84,7 +84,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       resolvedVariableValues,
       setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
     };
-  }, [colorFormat, variables, collections, commits, variables, resolvedVariableValues]);
+  }, [colorFormat, variables, collections, commits, variableAliases, resolvedVariableValues]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;
 }

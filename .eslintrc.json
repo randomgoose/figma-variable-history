@@ -33,6 +33,7 @@
     "linebreak-style": ["error", "unix"],
     "max-classes-per-file": 0,
     "no-case-declarations": 0,
+    "no-console": ["error", { "allow": ["info", "warn", "error"] }],
     "no-continue": 0,
     "no-empty": 0,
     "no-empty-function": 0,
@@ -43,8 +44,8 @@
     "no-underscore-dangle": 0,
     "no-useless-constructor": 0,
     "no-useless-escape": 0,
-    "no-use-before-define": ["error", {"functions": false, "classes": false}],
-    "no-unused-expressions": ["error", {"allowShortCircuit": true, "allowTernary": true}],
+    "no-use-before-define": ["error", { "functions": false, "classes": false }],
+    "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
     "no-plusplus": 0,
     "no-nested-ternary": 0,
     "one-var": 0,
@@ -69,6 +70,6 @@
     "@typescript-eslint/explicit-function-return-type": 0,
     "@typescript-eslint/explicit-module-boundary-types": 0,
     "@typescript-eslint/no-empty-function": 0,
-    "@typescript-eslint/no-unused-vars" : 2
+    "@typescript-eslint/no-unused-vars": 2
   }
 }

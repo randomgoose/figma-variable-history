@@ -36,7 +36,7 @@ export function ParsedValue({
   }
 
   if (value && typeof value === 'object') {
-    const isAlias = 'type' in value;
+    const isAlias = 'id' in value;
     const alias = isAlias ? variableAliases[value.id] : '';
     const resolvedValue = isAlias
       ? resolvedVariableValues[variable.id]?.valuesByMode[modeId].value
