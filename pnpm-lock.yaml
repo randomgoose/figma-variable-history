@@ -85,7 +85,7 @@ importers:
     devDependencies:
       '@create-figma-plugin/build':
         specifier: ^3.2.0
-        version: 3.2.0(@figma/plugin-typings@1.90.0)(typescript@4.9.5)
+        version: 3.2.0(@figma/plugin-typings@1.94.0)(typescript@4.9.5)
       '@create-figma-plugin/tsconfig':
         specifier: ^3.2.0
         version: 3.2.0
@@ -1728,7 +1728,7 @@ packages:
       chalk: 4.1.2
     dev: true
 
-  /@create-figma-plugin/build@3.2.0(@figma/plugin-typings@1.90.0)(typescript@4.9.5):
+  /@create-figma-plugin/build@3.2.0(@figma/plugin-typings@1.94.0)(typescript@4.9.5):
     resolution: {integrity: sha512-OX2XImYDhSMgtJ5Rqr077miQqautDUNEm2E3nLof8l4wxEo5QaMC4RBewnBe4yPt6pWIbJjuzhjyhLytH/aLiw==}
     engines: {node: '>=20'}
     hasBin: true
@@ -2103,8 +2103,8 @@ packages:
     resolution: {integrity: sha512-cEee/Z+I12mZcFJshKcCqC8tuX5hG3s+d+9nZ3LabqKF1vKdF41B92pJVCBggjAGORAeOzyyDDKrZwIkLffeOQ==}
     dev: true
 
-  /@figma/plugin-typings@1.90.0:
-    resolution: {integrity: sha512-RvZrSkuV0SABRaYuRFO/S30u9+RGKJm6+CPjSG7MaMo60p8S1sX5YOWT+zDWZC6mqNEaxLkrbXdiyqWXsfdHQg==}
+  /@figma/plugin-typings@1.94.0:
+    resolution: {integrity: sha512-1Qm3iXs/cvNx99Ge46jUnZtcJV7/VJP96yGVSFIfc+wIp+CGbwByksBVQdLX+sFt6a5dQVAHINbY3daBSitWkw==}
     dev: true
 
   /@figma/widget-typings@1.9.1(@figma/plugin-typings@1.94.0):
@@ -4499,7 +4499,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001627
-      electron-to-chromium: 1.4.788
+      electron-to-chromium: 1.4.783
       node-releases: 2.0.14
       update-browserslist-db: 1.0.16(browserslist@4.23.0)
     dev: true

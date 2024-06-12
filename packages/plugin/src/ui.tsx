@@ -9,7 +9,7 @@ import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 import { CommitHandler, RefreshHandler } from './types';
 import { VariableItem } from './components/VariableItem';
 import { VariableDetail } from './components/VariableDetail';
-import { diffVariables, getVariableChanges } from './features';
+import { getVariableChanges } from './features';
 import { Commits } from './components/Commits';
 import { EmptyState } from './components';
 import { AppContext, AppContextProvider } from './components/AppContext';
@@ -30,16 +30,22 @@ function Plugin() {
     addEventListener('focus', () => emit<RefreshHandler>('REFRESH'));
   }, []);
 
-  const { added, removed, modified } = getVariableChanges({ prev: lastCommit ? lastCommit.variables : [], current: variables })
-  const groupedChanges = getVariableChangesGroupedByCollection({ prev: lastCommit ? lastCommit.variables : [], current: variables })
-  console.log("G", groupedChanges)
+  const { added, removed, modified } = getVariableChanges({
+    prev: lastCommit ? lastCommit.variables : [],
+    current: variables,
+  });
+  const groupedChanges = getVariableChangesGroupedByCollection({
+    prev: lastCommit ? lastCommit.variables : [],
+    current: variables,
+  });
+  console.log('G', groupedChanges);
 
   // const addedVariables = variables.filter(v => !lastCommit?.variables.find(vc => vc.id === v.id)) || [];
   // const removedVariables = lastCommit?.variables.filter(v => !variables.find(vc => vc.id === v.id)) || []
   // const modifiedVariables = variables.filter(v => lastCommit?.variables.find(vc => vc.id === v.id && Object.keys(diffVariables(v, vc)).length > 0)) || []
-  const numOfChanges = added.length + modified.length + removed.length
+  const numOfChanges = added.length + modified.length + removed.length;
 
-  const disabled = added.length + modified.length + removed.length === 0
+  const disabled = added.length + modified.length + removed.length === 0;
 
   const handleClick = useCallback(() => {
     if (!summary) {
@@ -134,10 +140,7 @@ function Plugin() {
                 </div>
 
                 <div className={styles.footer}>
-                  <div>
-                    {added.length + modified.length + removed.length}{' '}
-                    changes
-                  </div>
+                  <div>{added.length + modified.length + removed.length} changes</div>
                   <Button disabled={disabled} onClick={() => setOpen(true)}>
                     Commit
                   </Button>

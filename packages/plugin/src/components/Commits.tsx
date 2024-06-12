@@ -9,7 +9,6 @@ import { Content, Item, Portal, Root, Trigger } from '@radix-ui/react-context-me
 
 // reduce bundle size
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import css from 'react-syntax-highlighter/dist/esm/languages/hljs/css';
 
 SyntaxHighlighter.registerLanguage('css', css);
@@ -158,19 +157,35 @@ export function Commits({ commits }: { commits: ICommit[] }) {
         </div>
       ) : null}
 
-        <Modal
-            open={exportModalOpen}
-            title="Export content"
-            style={{ height: '100%', maxHeight: 'calc(100vh - 80px)', maxWidth: 480, overflow: 'hidden' }}
-            onCloseButtonClick={() => setExportModalOpen(false)}
+      <Modal
+        open={exportModalOpen}
+        title="Export content"
+        style={{
+          height: '100%',
+          maxHeight: 'calc(100vh - 80px)',
+          maxWidth: 480,
+          overflow: 'hidden',
+        }}
+        onCloseButtonClick={() => setExportModalOpen(false)}
+      >
+        <div
+          style={{
+            padding: 16,
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'calc(100% - 41px)',
+            gap: 12,
+          }}
         >
-            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', height: 'calc(100% - 41px)', gap: 12 }}>
-                <SyntaxHighlighter customStyle={{ margin: 0, overflow: 'auto', }} language="CSS">{decodedContent}</SyntaxHighlighter>
-                {/* {decodeURIComponent(exportModalContent)} */}
-                <Button style={{ width: '100%' }} secondary onClick={onExport}>Export</Button>
-            </div>
-
-        </Modal>
+          <SyntaxHighlighter customStyle={{ margin: 0, overflow: 'auto' }} language="CSS">
+            {decodedContent}
+          </SyntaxHighlighter>
+          {/* {decodeURIComponent(exportModalContent)} */}
+          <Button style={{ width: '100%' }} secondary onClick={onExport}>
+            Export
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

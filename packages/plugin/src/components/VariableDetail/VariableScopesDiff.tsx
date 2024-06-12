@@ -31,30 +31,25 @@ function ScopeCheckbox({
 }
 
 export function VariableScopesDiff({ current, prev }: { current: Variable; prev: Variable }) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const renderScopeGroups = (scopesApplied: VariableScope[]) => {
     let scopeGroups: { label: string; sub?: boolean; scopes: VariableScope[] }[] = [];
 
     switch (current.resolvedType) {
-      case "STRING":
+      case 'STRING':
         scopeGroups = [
-          { label: 'Show in all supported properties', scopes: ["ALL_SCOPES"] },
+          { label: 'Show in all supported properties', scopes: ['ALL_SCOPES'] },
           { label: 'Text content', scopes: ['ALL_SCOPES', 'TEXT_CONTENT'] },
-          // @ts-ignore
           { label: 'Font family', scopes: ['ALL_SCOPES', 'FONT_FAMILY'] },
-          // @ts-ignore
-          { label: 'Font style', scopes: ['ALL_SCOPES', 'FONT_STYLE'] }
-        ]
-        break
-      case "BOOLEAN":
-        scopeGroups = [
-          { label: '', scopes: ['ALL_SCOPES'] }
-        ]
-        break
-      case "FLOAT":
-        scopeGroups = [
-
-        ]
-        break
+          { label: 'Font style', scopes: ['ALL_SCOPES', 'FONT_STYLE'] },
+        ];
+        break;
+      case 'BOOLEAN':
+        scopeGroups = [{ label: '', scopes: ['ALL_SCOPES'] }];
+        break;
+      case 'FLOAT':
+        scopeGroups = [];
+        break;
       default:
         scopeGroups = [
           { label: 'Show in all supported properties', scopes: ['ALL_SCOPES'] },
@@ -64,50 +59,51 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev:
           { label: 'Text', scopes: ['ALL_SCOPES', 'ALL_FILLS', 'TEXT_FILL'], sub: true },
           { label: 'Stroke', scopes: ['ALL_SCOPES', 'STROKE_COLOR'] },
           { label: 'Effect', scopes: ['ALL_SCOPES', 'EFFECT_COLOR'] },
-        ]
-        break
+        ];
+        break;
     }
 
-    const hasChangedScopes = (difference(current.scopes, prev.scopes).length !== 0) || (difference(current.scopes, prev.scopes).length === 0 && current.scopes.length !== prev.scopes.length)
+    const hasChangedScopes =
+      difference(current.scopes, prev.scopes).length !== 0 ||
+      (difference(current.scopes, prev.scopes).length === 0 &&
+        current.scopes.length !== prev.scopes.length);
 
-    return hasChangedScopes
-      ? <div className={styles.variableDetail__section} >
-        <h3 className={styles.variableDetail__sectionTitle}>{current.resolvedType.toLowerCase()} Scoping</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: "minmax(0, 1fr) 40px minmax(0, 1fr)" }}>
+    return hasChangedScopes ? (
+      <div className={styles.variableDetail__section}>
+        <h3 className={styles.variableDetail__sectionTitle}>
+          {current.resolvedType.toLowerCase()} Scoping
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 40px minmax(0, 1fr)' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {
-              scopeGroups.map(({ label, scopes, sub }) => {
-                const checked = intersection(scopes, prev.scopes).length > 0
-                return <ScopeCheckbox label={label} sub={sub || false} checked={checked} />
-              })
-            }
+            {scopeGroups.map(({ label, scopes, sub }) => {
+              const checked = intersection(scopes, prev.scopes).length > 0;
+              return <ScopeCheckbox label={label} sub={sub || false} checked={checked} />;
+            })}
           </div>
           <div className={styles.variableDetail__itemArrow}>
             <IconArrowRight16 />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {
-              scopeGroups.map(({ label, scopes, sub }) => {
-                const checked = intersection(scopes, current.scopes).length > 0
-                return <ScopeCheckbox label={label} sub={sub || false} checked={checked} />
-              })
-            }
+            {scopeGroups.map(({ label, scopes, sub }) => {
+              const checked = intersection(scopes, current.scopes).length > 0;
+              return <ScopeCheckbox label={label} sub={sub || false} checked={checked} />;
+            })}
           </div>
         </div>
       </div>
-      : null
+    ) : null;
 
     return difference(current.scopes, prev.scopes).length === 0 ? null : (
       <div className={styles.variableDetail__section}>
         <h3 className={styles.variableDetail__sectionTitle}>Color Scoping</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 40px minmax(0, 1fr)' }}>
-          {renderScopeGroups(prev.scopes)}
+          {renderScopeGroups()}
           <div className={styles.variableDetail__itemArrow}>
             <IconArrowRight16 />
           </div>
-          {renderScopeGroups(current.scopes)}
+          {renderScopeGroups()}
         </div>
       </div>
     );
-  }
+  };
 }
