@@ -5,15 +5,14 @@ import { h } from 'preact';
 import { Button, render, TextboxMultiline, Tabs, Textbox, Modal } from '@create-figma-plugin/ui';
 import { emit } from '@create-figma-plugin/utilities';
 import { Fragment } from 'preact';
-import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks';
 import { CommitHandler, RefreshHandler } from './types';
 import { VariableItem } from './components/VariableItem';
 import { VariableDetail } from './components/VariableDetail';
-import { getVariableChanges } from './features';
+import { getVariableChanges } from './utils/variable';
 import { Commits } from './components/Commits';
 import { EmptyState } from './components';
 import { AppContext, AppContextProvider } from './components/AppContext';
-import { getVariableChangesGroupedByCollection } from './features/get-variable-changes-grouped-by-collection';
 
 function Plugin() {
   const { variables, collections, commits } = useContext(AppContext);
@@ -30,22 +29,24 @@ function Plugin() {
     addEventListener('focus', () => emit<RefreshHandler>('REFRESH'));
   }, []);
 
-  const { added, removed, modified } = getVariableChanges({
-    prev: lastCommit ? lastCommit.variables : [],
-    current: variables,
-  });
+  const { added, removed, modified } = useMemo(() => {
+    return getVariableChanges({
+      prev: lastCommit ? lastCommit.variables : [],
+      current: variables,
+    });
+  }, [lastCommit, variables]);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const groupedChanges = getVariableChangesGroupedByCollection({
-    prev: lastCommit ? lastCommit.variables : [],
-    current: variables,
-  });
+  // const groupedChanges = getVariableChangesGroupedByCollection({
+  //   prev: lastCommit ? lastCommit.variables : [],
+  //   current: variables,
+  // });
   // console.log('G', groupedChanges);
 
   // const addedVariables = variables.filter(v => !lastCommit?.variables.find(vc => vc.id === v.id)) || [];
   // const removedVariables = lastCommit?.variables.filter(v => !variables.find(vc => vc.id === v.id)) || []
   // const modifiedVariables = variables.filter(v => lastCommit?.variables.find(vc => vc.id === v.id && Object.keys(diffVariables(v, vc)).length > 0)) || []
   const numOfChanges = added.length + modified.length + removed.length;
-
   const disabled = added.length + modified.length + removed.length === 0;
 
   const handleClick = useCallback(() => {
@@ -74,12 +75,7 @@ function Plugin() {
         {
           value: 'Changes',
           children: (
-            <div
-              className={styles.container}
-              onClick={() => {
-                emit('RESTORE_COMMIT');
-              }}
-            >
+            <div className={styles.container}>
               <div
                 style={{
                   width: '100%',
@@ -114,26 +110,18 @@ function Plugin() {
                 <div style={{ height: '100%', overflow: 'auto' }}>
                   {numOfChanges > 0 ? (
                     <Fragment>
-                      {added.map((v) => (
-                        <VariableItem
-                          onClick={(id) => {
-                            setSelected(id);
-                          }}
-                          variable={v}
-                          key={v.id}
-                          type="Added"
-                        />
-                      ))}
-                      {modified.map((v) => (
-                        <VariableItem
-                          onClick={(id) => {
-                            setSelected(id);
-                          }}
-                          variable={v}
-                          key={v.id}
-                          type="Modified"
-                        />
-                      ))}
+                      {Object.entries({ Added: added, Removed: removed, Modified: modified })
+                        .map(([type, array]) => {
+                          return array.map((v) => (
+                            <VariableItem
+                              key={v.id}
+                              variable={v}
+                              type={type as any}
+                              onClick={(id) => setSelected(id)}
+                            />
+                          ));
+                        })
+                        .flat()}
                     </Fragment>
                   ) : (
                     <EmptyState />

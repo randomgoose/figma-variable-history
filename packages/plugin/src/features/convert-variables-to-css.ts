@@ -1,5 +1,6 @@
 import { ICommit } from '../types';
-import { convertFigmaRGBtoString } from './convert-figma-rgb-to-string';
+import { convertFigmaRGBtoString } from '../utils/color';
+import { figmaHelper } from '../utils/figma-helper';
 
 export async function convertVariablesToCss(commit: ICommit) {
   const { variables, collections } = commit;
@@ -25,7 +26,7 @@ export async function convertVariablesToCss(commit: ICommit) {
               switch (typeof value) {
                 case 'object':
                   if ('type' in value) {
-                    const alias = (await figma.variables.getVariableByIdAsync(value.id))?.name;
+                    const alias = (await figmaHelper.getVariableByIdAsync(value.id))?.name;
                     alias && (cssValue = `var(--${alias})`);
                   } else if ('r' in value) {
                     cssValue = convertFigmaRGBtoString(value);

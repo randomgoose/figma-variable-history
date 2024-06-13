@@ -5,8 +5,8 @@ import { h } from 'preact';
 import { useContext } from 'preact/hooks';
 import { ParsedValue } from '../ParsedValue';
 import { Dropdown, IconArrowRight16 } from '@create-figma-plugin/ui';
-import { isSameVariableValue } from '../../features';
 import { AppContext } from '../AppContext';
+import { isSameVariableValue } from '../../utils/variable';
 
 export function ValuesByModeDiff({ current, prev }: { current: Variable; prev: Variable }) {
   const { collections, colorFormat, setColorFormat } = useContext(AppContext);

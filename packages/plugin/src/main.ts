@@ -1,4 +1,4 @@
-import { cloneObject, emit, on, showUI } from '@create-figma-plugin/utilities';
+import { emit, on, showUI } from '@create-figma-plugin/utilities';
 import type {
   CommitHandler,
   ConvertCommitVariablesToCssDoneHandler,
@@ -8,21 +8,20 @@ import type {
   ImportLocalCommitsHandler,
   ImportVariablesHandler,
   RefreshHandler,
+  ResetCommitHandler,
   ResolveVariableValueHandler,
-  RestoreCommitHandler,
+  RevertCommitHandler,
   SetResolvedVariableValueHandler,
   SetVariableAliasHandler,
 } from './types';
 import { generateChangeLog } from './features/generate-change-log';
-import { CommitBridge, convertVariablesToCss } from './features';
-
-const commitBridge = CommitBridge.create();
+import { convertVariablesToCss } from './features';
+import { commitBridge } from './features/CommitBridge';
+import { figmaHelper } from './utils/figma-helper';
 
 async function emitData() {
-  const variables = (await figma.variables.getLocalVariablesAsync()).map((v) => cloneObject(v));
-  const collections = (await figma.variables.getLocalVariableCollectionsAsync()).map((c) =>
-    cloneObject(c)
-  );
+  const variables = await figmaHelper.getLocalVariablesAsync();
+  const collections = await figmaHelper.getLocalVariableCollectionsAsync();
   const commits = commitBridge.getCommits();
 
   emit<ImportVariablesHandler>('IMPORT_VARIABLES', { variables, collections });
@@ -30,32 +29,21 @@ async function emitData() {
 }
 
 export default async function () {
-  on<RestoreCommitHandler>('RESTORE_COMMIT', () => {
-    // TODO
-  });
+  on<CommitHandler>('COMMIT', (commit) => commitBridge.commit(commit));
 
-  on<CommitHandler>('COMMIT', (commit) => {
-    commitBridge.commit(commit);
-  });
+  on<RevertCommitHandler>('REVERT_COMMIT', () => commitBridge.revert());
+
+  on<ResetCommitHandler>('RESET_COMMIT', (id) => commitBridge.reset(id).then(() => emitData()));
 
   on<RefreshHandler>('REFRESH', emitData);
 
   on<GenerateChangeLogHandler>('GENERATE_CHANGE_LOG', generateChangeLog);
 
-  on<ResolveVariableValueHandler>('RESOLVE_VARIABLE_VALUE', ({ variable, modeId }) => {
-    const v = figma.variables.getLocalVariables().find((_v) => _v.id === variable.id);
-    const c = figma.variables
-      .getLocalVariableCollections()
-      .find((_c) => _c.id === v?.variableCollectionId);
-
-    if (v && c) {
-      const consumer = figma.createFrame();
-      consumer.setExplicitVariableModeForCollection(c, modeId);
-      const resolvedVariableValue = v.resolveForConsumer(consumer);
-      consumer.remove();
-
+  on<ResolveVariableValueHandler>('RESOLVE_VARIABLE_VALUE', async ({ variable, modeId }) => {
+    const resolvedVariableValue = await figmaHelper.resolveVariableAlias(variable, modeId);
+    if (resolvedVariableValue) {
       emit<SetResolvedVariableValueHandler>('SET_RESOLVED_VARIABLE_VALUE', {
-        id: v.id,
+        id: variable.id,
         modeId,
         value: resolvedVariableValue.value,
         resolvedType: resolvedVariableValue.resolvedType,
@@ -64,8 +52,7 @@ export default async function () {
   });
 
   on<GetVariableByIdHandler>('GET_VARIABLE_BY_ID', async (id) => {
-    const variable = await figma.variables.getVariableByIdAsync(id);
-
+    const variable = await figmaHelper.getVariableByIdAsync(id);
     if (variable) {
       emit<SetVariableAliasHandler>('SET_VARIABLE_ALIAS', { id: variable.id, name: variable.name });
     }

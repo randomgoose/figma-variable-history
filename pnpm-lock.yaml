@@ -85,16 +85,16 @@ importers:
     devDependencies:
       '@create-figma-plugin/build':
         specifier: ^3.2.0
-        version: 3.2.0(@figma/plugin-typings@1.94.0)(typescript@4.9.5)
+        version: 3.2.0(@figma/plugin-typings@1.96.0)(typescript@4.9.5)
       '@create-figma-plugin/tsconfig':
         specifier: ^3.2.0
         version: 3.2.0
       '@figma/plugin-typings':
-        specifier: 1.94.0
-        version: 1.94.0
+        specifier: ^1.96.0
+        version: 1.96.0
       '@figma/widget-typings':
         specifier: ^1.9.1
-        version: 1.9.1(@figma/plugin-typings@1.94.0)
+        version: 1.9.1(@figma/plugin-typings@1.96.0)
       '@types/diff':
         specifier: ^5.2.1
         version: 5.2.1
@@ -1728,7 +1728,7 @@ packages:
       chalk: 4.1.2
     dev: true
 
-  /@create-figma-plugin/build@3.2.0(@figma/plugin-typings@1.94.0)(typescript@4.9.5):
+  /@create-figma-plugin/build@3.2.0(@figma/plugin-typings@1.96.0)(typescript@4.9.5):
     resolution: {integrity: sha512-OX2XImYDhSMgtJ5Rqr077miQqautDUNEm2E3nLof8l4wxEo5QaMC4RBewnBe4yPt6pWIbJjuzhjyhLytH/aLiw==}
     engines: {node: '>=20'}
     hasBin: true
@@ -1737,7 +1737,7 @@ packages:
       typescript: '>=4'
     dependencies:
       '@create-figma-plugin/common': 3.2.0
-      '@figma/plugin-typings': 1.94.0
+      '@figma/plugin-typings': 1.96.0
       chokidar: 3.6.0
       cssnano: 6.1.2(postcss@8.4.38)
       esbuild: 0.20.2
@@ -2103,16 +2103,16 @@ packages:
     resolution: {integrity: sha512-cEee/Z+I12mZcFJshKcCqC8tuX5hG3s+d+9nZ3LabqKF1vKdF41B92pJVCBggjAGORAeOzyyDDKrZwIkLffeOQ==}
     dev: true
 
-  /@figma/plugin-typings@1.94.0:
-    resolution: {integrity: sha512-1Qm3iXs/cvNx99Ge46jUnZtcJV7/VJP96yGVSFIfc+wIp+CGbwByksBVQdLX+sFt6a5dQVAHINbY3daBSitWkw==}
+  /@figma/plugin-typings@1.96.0:
+    resolution: {integrity: sha512-fk/izqv13KHh8SKQF0d3475j7K9RaQ1EhPQT9E3iuRJnf492qYwj68hy1rO1CdZjm++l6Lk6ayhSowPLARq7Zw==}
     dev: true
 
-  /@figma/widget-typings@1.9.1(@figma/plugin-typings@1.94.0):
+  /@figma/widget-typings@1.9.1(@figma/plugin-typings@1.96.0):
     resolution: {integrity: sha512-jmh/hsBxLP4aKgtbmxkJe84Ufk93S7TwOxpLD7L58R472boU5vyZ7qF5DKlhwiRjF0sgaryXJxSXuIjdR1GBXQ==}
     peerDependencies:
       '@figma/plugin-typings': 1.x
     dependencies:
-      '@figma/plugin-typings': 1.94.0
+      '@figma/plugin-typings': 1.96.0
     dev: true
 
   /@floating-ui/core@1.6.2:

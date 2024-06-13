@@ -40,8 +40,13 @@ export interface GenerateChangeLogHandler extends EventHandler {
   handler: () => void;
 }
 
-export interface RestoreCommitHandler extends EventHandler {
-  name: 'RESTORE_COMMIT';
+export interface RevertCommitHandler extends EventHandler {
+  name: 'REVERT_COMMIT';
+  handler: (id: string) => void;
+}
+
+export interface ResetCommitHandler extends EventHandler {
+  name: 'RESET_COMMIT';
   handler: (id: string) => void;
 }
 

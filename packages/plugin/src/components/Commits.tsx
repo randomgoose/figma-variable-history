@@ -2,7 +2,7 @@ import styles from '../styles.module.css';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { emit, on } from '@create-figma-plugin/utilities';
 import { Button, IconButton, IconStarFilled16, Modal } from '@create-figma-plugin/ui';
 import { Content, Item, Portal, Root, Trigger } from '@radix-ui/react-context-menu';
@@ -18,10 +18,11 @@ import {
   ConvertCommitVariablesToCssHandler,
   GenerateChangeLogHandler,
   ICommit,
-  RestoreCommitHandler,
+  ResetCommitHandler,
+  RevertCommitHandler,
 } from '../types';
-import { parseDate } from '../features';
-import { getVariableChanges } from '../features';
+import { parseDate } from '../utils/date';
+import { getVariableChanges } from '../utils/variable';
 import { VariableItem } from './VariableItem';
 
 export function Commits({ commits }: { commits: ICommit[] }) {
@@ -38,12 +39,16 @@ export function Commits({ commits }: { commits: ICommit[] }) {
   }, []);
 
   const decodedContent = decodeURIComponent(exportModalContent);
-  const index = commits.findIndex((c) => c.id === selected);
 
-  const { added, modified } = getVariableChanges({
-    current: commits[index]?.variables,
-    prev: commits[index + 1]?.variables,
-  });
+  const { added, modified, removed } = useMemo(() => {
+    const index = commits.findIndex((c) => c.id === selected);
+    return index > -1
+      ? getVariableChanges({
+          current: commits[index]?.variables,
+          prev: commits[index + 1]?.variables || [],
+        })
+      : { added: [], modified: [], removed: [] };
+  }, [commits, selected]);
 
   const onExport = useCallback(() => {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(decodedContent);
@@ -113,20 +118,24 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                     <Content className={styles.dropdown__content}>
                       <Item
                         className={styles.dropdown__item}
-                        onClick={() => {
-                          emit<RestoreCommitHandler>('RESTORE_COMMIT', commit.id);
-                        }}
+                        onClick={() => emit<RevertCommitHandler>('REVERT_COMMIT', commit.id)}
                       >
                         Restore this commit
                       </Item>
                       <Item
                         className={styles.dropdown__item}
-                        onClick={async () => {
+                        onClick={() => emit<ResetCommitHandler>('RESET_COMMIT', commit.id)}
+                      >
+                        Reset to this commit
+                      </Item>
+                      <Item
+                        className={styles.dropdown__item}
+                        onClick={async () =>
                           emit<ConvertCommitVariablesToCssHandler>(
                             'CONVERT_VARIABLES_TO_CSS',
                             commit.id
-                          );
-                        }}
+                          )
+                        }
                       >
                         Export variables
                       </Item>
@@ -150,6 +159,9 @@ export function Commits({ commits }: { commits: ICommit[] }) {
         >
           {added.map((v) => (
             <VariableItem variable={v} key={v.id} type="Added" />
+          ))}
+          {removed.map((v) => (
+            <VariableItem variable={v} key={v.id} type="Removed" />
           ))}
           {modified.map((v) => (
             <VariableItem variable={v} key={v.id} type="Modified" />

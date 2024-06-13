@@ -1,11 +1,11 @@
 import { ICommit } from '../types';
-import { CommitBridge, isSameVariableValue, parseDate } from '../features';
-import { ParsedValue } from '../widget-components/ParsedValue';
-import { getVariableChanges } from './get-variable-changes';
+import { parseDate } from '../utils/date';
+import { isSameVariableValue, getVariableChanges } from '../utils/variable';
+import { commitBridge } from './CommitBridge';
+import { ParsedValue } from '../widget-components';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { AutoLayout: AL, Text, Image, h } = figma.widget;
-const commitBridge = CommitBridge.create();
 
 const colors = {
   text: {

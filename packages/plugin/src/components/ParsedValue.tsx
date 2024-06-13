@@ -3,7 +3,8 @@ import styles from '../styles.module.css';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
 import { convertRgbColorToHexColor, emit } from '@create-figma-plugin/utilities';
-import { convertFigmaRGBtoString, copyText } from '../features';
+import { convertFigmaRGBtoString } from '../utils/color';
+import { copyText } from '../utils/text';
 import { useContext, useEffect } from 'preact/hooks';
 import { GetVariableByIdHandler, ResolveVariableValueHandler } from '../types';
 import { AppContext } from './AppContext';

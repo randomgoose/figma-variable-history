@@ -1,3 +1,5 @@
+import groupBy from 'lodash-es/groupBy';
+
 export function isSameVariableValue(a?: VariableValue, b?: VariableValue): boolean {
   if (typeof a === 'object' && typeof b === 'object') {
     // Compare variable aliases
@@ -24,6 +26,9 @@ export function isSameVariableValue(a?: VariableValue, b?: VariableValue): boole
   }
 }
 
+/**
+ * Diff value changes of two variables
+ */
 export function diffVariables(a: Variable, b: Variable) {
   const diff: any = {};
 
@@ -69,5 +74,72 @@ export function diffVariables(a: Variable, b: Variable) {
   if (Object.keys(valuesByMode).length > 0) {
     diff.valuesByMode = valuesByMode;
   }
+
   return diff;
+}
+
+/**
+ * Get variable list member changes (modify/add/remove)
+ */
+export function getVariableChanges({
+  prev = [],
+  current = [],
+}: {
+  prev?: Variable[];
+  current?: Variable[];
+}) {
+  // use copy of prev, will splice it below
+  prev = [...prev];
+
+  const result: { added: Variable[]; modified: Variable[]; removed: Variable[] } = {
+    added: [],
+    modified: [],
+    removed: [],
+  };
+
+  for (const currentItem of current) {
+    const { id: cId, name: cName, variableCollectionId: cCollectionId } = currentItem;
+    let hasSameVariableInPrev = false;
+
+    for (let i = 0; i < prev.length; i++) {
+      const prevItem = prev[i];
+      const { id: pId, name: pName, variableCollectionId: pCollectionId } = prevItem;
+      const isSameVariable = cId === pId || (cName === pName && cCollectionId === pCollectionId);
+
+      if (isSameVariable) {
+        const isDifferent = Object.keys(diffVariables(currentItem, prevItem)).length > 0;
+        isDifferent && result.modified.push(currentItem);
+        hasSameVariableInPrev = true;
+        prev.splice(i, 1);
+        i--;
+        break;
+      }
+    }
+
+    if (!hasSameVariableInPrev) {
+      result.added.push(currentItem);
+    }
+  }
+
+  result.removed.push(...prev);
+
+  return result;
+}
+
+export function getVariableChangesGroupedByCollection({
+  prev,
+  current,
+}: {
+  prev?: Variable[];
+  current?: Variable[];
+}) {
+  const groupedCurrent = groupBy(current, (d) => d.variableCollectionId);
+  const groupedPrev = groupBy(prev, (d) => d.variableCollectionId);
+
+  return Object.fromEntries(
+    Object.entries(groupedCurrent).map(([collectionId, variables]) => [
+      collectionId,
+      getVariableChanges({ prev: groupedPrev[collectionId] || [], current: variables }),
+    ])
+  );
 }
