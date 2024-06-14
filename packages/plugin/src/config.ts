@@ -1,1 +1,3 @@
+export const PLUGIN_DATA_KEY_PREFIX = '__VARIABLE_HISTORY__';
+
 export const DISABLE_VARIABLE_NAME_PREFIX = '__disable_';

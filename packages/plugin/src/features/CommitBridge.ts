@@ -12,8 +12,8 @@ import { jsonDiff, jsonPatch, jsonUnpatch } from '../utils/json-patch';
 import { figmaHelper } from '../utils/figma-helper';
 import { getVariableChanges } from '../utils/variable';
 import { updateObjectValues } from '../utils/object';
+import { PLUGIN_DATA_KEY_PREFIX } from '../config';
 
-const PLUGIN_DATA_KEY_PREFIX = '__VARIABLE_HISTORY__';
 const PLUGIN_DATA_KEY_HEAD = `${PLUGIN_DATA_KEY_PREFIX}HEAD`;
 const PLUGIN_DATA_KEY_COMMITS = `${PLUGIN_DATA_KEY_PREFIX}COMMITS`;
 
@@ -45,34 +45,16 @@ export class CommitBridge {
   }
 
   private getLocalPluginData() {
-    const [head, commits] = [
-      figma.root.getSharedPluginData(PLUGIN_DATA_KEY_PREFIX, PLUGIN_DATA_KEY_HEAD),
-      figma.root.getSharedPluginData(PLUGIN_DATA_KEY_PREFIX, PLUGIN_DATA_KEY_COMMITS),
-    ].map((dataStr) => {
-      if (!dataStr) return;
-      try {
-        return JSON.parse(dataStr);
-      } catch (err) {
-        console.warn('Plugin data is unable to parse\n', dataStr, `\nError:\n`, err);
-      }
-    });
+    const head = figmaHelper.getPluginData(PLUGIN_DATA_KEY_HEAD);
+    const commits = figmaHelper.getPluginData(PLUGIN_DATA_KEY_COMMITS);
     this.pluginData = { head: head || null, commits: commits || [] };
   }
 
   private setLocalPluginData(head: ICommit, commits: CommitInPluginData[]) {
     this.pluginData.head = head;
     this.pluginData.commits = commits;
-
-    figma.root.setSharedPluginData(
-      PLUGIN_DATA_KEY_PREFIX,
-      PLUGIN_DATA_KEY_HEAD,
-      JSON.stringify(this.pluginData.head)
-    );
-    figma.root.setSharedPluginData(
-      PLUGIN_DATA_KEY_PREFIX,
-      PLUGIN_DATA_KEY_COMMITS,
-      JSON.stringify(this.pluginData.commits)
-    );
+    figmaHelper.setPluginData(PLUGIN_DATA_KEY_HEAD, this.pluginData.head);
+    figmaHelper.setPluginData(PLUGIN_DATA_KEY_COMMITS, this.pluginData.commits);
   }
 
   private updateIdInLocalPluginData(idChangeMap: Record<string, string>) {

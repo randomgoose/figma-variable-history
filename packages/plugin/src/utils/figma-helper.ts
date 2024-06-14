@@ -1,8 +1,26 @@
 import { cloneObject } from '@create-figma-plugin/utilities';
-import { DISABLE_VARIABLE_NAME_PREFIX } from '../config';
+import { DISABLE_VARIABLE_NAME_PREFIX, PLUGIN_DATA_KEY_PREFIX } from '../config';
 import { isSameVariable } from './variable';
 
 export const figmaHelper = {
+  getPluginData(dataKey: string): any {
+    const dataStr = figma.root.getSharedPluginData(PLUGIN_DATA_KEY_PREFIX, dataKey);
+    try {
+      return dataStr ? JSON.parse(dataStr) : null;
+    } catch (err) {
+      console.warn('Plugin data is unable to parse\n', dataStr, `\nError:\n`, err);
+    }
+    return null;
+  },
+
+  setPluginData(key: string, data: any) {
+    try {
+      figma.root.setSharedPluginData(PLUGIN_DATA_KEY_PREFIX, key, JSON.stringify(data));
+    } catch (err) {
+      console.warn(`Plugin data [${key}] is unable to set\n`, data, `\nError:\n`, err);
+    }
+  },
+
   async getLocalVariablesAsync(
     options: {
       type?: VariableResolvedDataType;
