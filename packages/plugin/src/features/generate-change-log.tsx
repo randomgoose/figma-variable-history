@@ -66,6 +66,7 @@ export async function generateChangeLog() {
   Object.entries(nodeMapCache).map(([commitId, nodeId]) => {
     if (commitId !== 'root' && !commits.find(({ id }) => id === commitId)) {
       figma.getNodeById(nodeId)?.remove();
+      delete nodeMapCache[commitId];
     }
   });
 
