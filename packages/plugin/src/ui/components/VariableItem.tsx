@@ -8,7 +8,7 @@ import { String } from '../icons/String';
 import { Boolean } from '../icons/Boolean';
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-context-menu';
 import { emit } from '@create-figma-plugin/utilities';
-import { RevertVariableHandler, VariableChangeType } from '../types';
+import { RevertVariableHandler, VariableChangeType } from '../../types';
 
 export function VariableItem({
   variable,

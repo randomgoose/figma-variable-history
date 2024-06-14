@@ -41,7 +41,7 @@
     "id": "react-editor",
     "name": "Variable Version History",
     "main": "src/main.ts",
-    "ui": "src/ui.tsx",
+    "ui": "src/ui/index.tsx",
     "permissions": [
       "currentuser"
     ]

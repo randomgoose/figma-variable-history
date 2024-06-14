@@ -6,10 +6,10 @@ import { Button, render, TextboxMultiline, Tabs, Textbox, Modal } from '@create-
 import { emit } from '@create-figma-plugin/utilities';
 import { Fragment } from 'preact';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks';
-import { CommitHandler, RefreshHandler } from './types';
+import { CommitHandler, RefreshHandler } from '../types';
 import { VariableItem } from './components/VariableItem';
 import { VariableDetail } from './components/VariableDetail';
-import { getVariableChanges } from './utils/variable';
+import { getVariableChanges } from '../utils/variable';
 import { Commits } from './components/Commits';
 import { EmptyState } from './components';
 import { AppContext, AppContextProvider } from './components/AppContext';

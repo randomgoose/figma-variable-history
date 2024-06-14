@@ -20,9 +20,9 @@ import {
   ICommit,
   ResetCommitHandler,
   RevertCommitHandler,
-} from '../types';
-import { parseDate } from '../utils/date';
-import { getVariableChanges } from '../utils/variable';
+} from '../../types';
+import { parseDate } from '../../utils/date';
+import { getVariableChanges } from '../../utils/variable';
 import { VariableItem } from './VariableItem';
 
 export function Commits({ commits }: { commits: ICommit[] }) {

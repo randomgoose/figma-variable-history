@@ -8,7 +8,7 @@ import {
   ImportVariablesHandler,
   ResolveVariableValueDoneHandler,
   SetVariableAliasHandler,
-} from '../types';
+} from '../../types';
 import { on } from '@create-figma-plugin/utilities';
 
 interface AppContext {

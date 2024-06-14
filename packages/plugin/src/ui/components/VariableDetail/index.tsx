@@ -14,7 +14,7 @@ export function VariableDetail(props: any) {
   const { variables, commits } = useContext(AppContext);
 
   const current = variables.find((v) => v.id === id);
-  const prev: Variable | undefined = commits?.[0]?.variables.find((v) => v.id === id);
+  const prev: Variable | undefined = commits?.[0]?.variables.find((v: Variable) => v.id === id);
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
