@@ -158,13 +158,13 @@ export function Commits({ commits }: { commits: ICommit[] }) {
           }}
         >
           {added.map((v) => (
-            <VariableItem variable={v} key={v.id} type="Added" />
+            <VariableItem variable={v} key={v.id} type="added" />
           ))}
           {removed.map((v) => (
-            <VariableItem variable={v} key={v.id} type="Removed" />
+            <VariableItem variable={v} key={v.id} type="removed" />
           ))}
           {modified.map((v) => (
-            <VariableItem variable={v} key={v.id} type="Modified" />
+            <VariableItem variable={v} key={v.id} type="modified" />
           ))}
         </div>
       ) : null}

@@ -1,5 +1,9 @@
 import groupBy from 'lodash-es/groupBy';
 
+export function isSameVariable(a: Variable, b: Variable): boolean {
+  return a.id === b.id || (a.name === b.name && a.variableCollectionId === b.variableCollectionId);
+}
+
 export function isSameVariableValue(a?: VariableValue, b?: VariableValue): boolean {
   if (typeof a === 'object' && typeof b === 'object') {
     // Compare variable aliases
@@ -98,15 +102,13 @@ export function getVariableChanges({
   };
 
   for (const currentItem of current) {
-    const { id: cId, name: cName, variableCollectionId: cCollectionId } = currentItem;
     let hasSameVariableInPrev = false;
 
     for (let i = 0; i < prev.length; i++) {
       const prevItem = prev[i];
-      const { id: pId, name: pName, variableCollectionId: pCollectionId } = prevItem;
-      const isSameVariable = cId === pId || (cName === pName && cCollectionId === pCollectionId);
+      const isSameOne = isSameVariable(currentItem, prevItem);
 
-      if (isSameVariable) {
+      if (isSameOne) {
         const isDifferent = Object.keys(diffVariables(currentItem, prevItem)).length > 0;
         isDifferent && result.modified.push(currentItem);
         hasSameVariableInPrev = true;

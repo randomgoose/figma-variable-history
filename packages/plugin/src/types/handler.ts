@@ -1,14 +1,6 @@
+import type { ICommit } from './commit';
 import type { EventHandler } from '@create-figma-plugin/utilities';
-
-export type ICommit = {
-  id: string;
-  summary: string;
-  description?: string;
-  variables: Variable[];
-  collections: VariableCollection[];
-  date: number;
-  collaborators: User[];
-};
+import { VariableChangeType } from './index';
 
 export interface InsertCodeHandler extends EventHandler {
   name: 'INSERT_CODE';
@@ -40,6 +32,11 @@ export interface GenerateChangeLogHandler extends EventHandler {
   handler: () => void;
 }
 
+export interface RevertVariableHandler extends EventHandler {
+  name: 'REVERT_VARIABLE_VALUE';
+  handler: (variable: Variable, type: VariableChangeType) => void;
+}
+
 export interface RevertCommitHandler extends EventHandler {
   name: 'REVERT_COMMIT';
   handler: (id: string) => void;
@@ -55,8 +52,8 @@ export interface ResolveVariableValueHandler extends EventHandler {
   handler: (data: { variable: Variable; modeId: string }) => void;
 }
 
-export interface SetResolvedVariableValueHandler extends EventHandler {
-  name: 'SET_RESOLVED_VARIABLE_VALUE';
+export interface ResolveVariableValueDoneHandler extends EventHandler {
+  name: 'RESOLVE_VARIABLE_VALUE_DONE';
   handler: (data: { id: string; modeId: string; value: any; resolvedType: string }) => void;
 }
 

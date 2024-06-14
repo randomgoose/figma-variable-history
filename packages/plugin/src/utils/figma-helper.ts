@@ -1,33 +1,62 @@
 import { cloneObject } from '@create-figma-plugin/utilities';
 import { DISABLE_VARIABLE_NAME_PREFIX } from '../config';
+import { isSameVariable } from './variable';
 
 export const figmaHelper = {
-  async getLocalVariablesAsync(type?: VariableResolvedDataType): Promise<Variable[]> {
+  async getLocalVariablesAsync(
+    options: {
+      type?: VariableResolvedDataType;
+      clone?: boolean;
+    } = {}
+  ): Promise<Variable[]> {
+    options.clone = typeof options.clone === 'boolean' ? options.clone : true;
     try {
-      const variables = await figma.variables.getLocalVariablesAsync(type);
-      return variables
-        .filter(({ name }) => !name.startsWith(DISABLE_VARIABLE_NAME_PREFIX))
-        .map((v) => cloneObject(v));
+      const variables = (await figma.variables.getLocalVariablesAsync(options.type)).filter(
+        ({ name }) => !name.startsWith(DISABLE_VARIABLE_NAME_PREFIX)
+      );
+      return options.clone ? variables.map((v) => cloneObject(v)) : variables;
     } catch (err) {
       console.error(`Failed to get Figma local variables:\n`, err);
     }
     return [];
   },
 
-  async getLocalVariableCollectionsAsync(): Promise<VariableCollection[]> {
+  async getLocalVariableCollectionsAsync(
+    options: {
+      clone?: boolean;
+    } = {}
+  ): Promise<VariableCollection[]> {
+    options.clone = typeof options.clone === 'boolean' ? options.clone : true;
     try {
       const collections = await figma.variables.getLocalVariableCollectionsAsync();
-      return collections.map((c) => cloneObject(c));
+      return options.clone ? collections.map((c) => cloneObject(c)) : collections;
     } catch (err) {
       console.error(`Failed to get Figma local variable collections:\n`, err);
     }
     return [];
   },
 
-  async getVariableByIdAsync(id: Variable['id']): Promise<Variable | null> {
+  // avoid use figma.variables.getVariableById directly
+  // it not works correctly before reload Figma file if variables is removed manually
+  async getVariableByIdAsync(
+    id: Variable['id'],
+    options: {
+      clone?: boolean;
+      variableName?: Variable['name'];
+      variableCollectionId?: Variable['variableCollectionId'];
+    } = {}
+  ): Promise<Variable | null> {
+    options.clone = typeof options.clone === 'boolean' ? options.clone : true;
+
     try {
-      const variable = await figma.variables.getVariableByIdAsync(id);
-      return cloneObject(variable);
+      const variable = (await figma.variables.getLocalVariablesAsync()).find((v) =>
+        isSameVariable(v, {
+          id,
+          name: options.variableName,
+          variableCollectionId: options.variableCollectionId,
+        } as Variable)
+      );
+      return variable ? (options.clone ? cloneObject(variable) : variable) : null;
     } catch (err) {
       console.error(`Failed to get Figma variable with id ${id}\n`, err);
     }
@@ -41,9 +70,7 @@ export const figmaHelper = {
     data: Variable;
     createIfNotExists?: boolean;
   }) {
-    let variable = (await figma.variables.getLocalVariablesAsync()).find(
-      ({ id }) => id === data.id
-    ) as Variable;
+    let variable = (await this.getVariableByIdAsync(data.id, { clone: false })) as Variable;
 
     if (!variable && createIfNotExists) {
       const collection = await figma.variables.getVariableCollectionByIdAsync(
@@ -65,10 +92,17 @@ export const figmaHelper = {
         variable.setVariableCodeSyntax(platform as CodeSyntaxPlatform, syntax)
       );
     }
+
+    return variable;
   },
 
-  disableVariable(id: Variable['id']) {
-    const variable = figma.variables.getVariableById(id);
+  async disableVariable(data: Variable) {
+    const variable = await this.getVariableByIdAsync(data.id, {
+      clone: false,
+      variableName: data.name,
+      variableCollectionId: data.variableCollectionId,
+    });
+
     if (variable) {
       if (!variable.name.startsWith(DISABLE_VARIABLE_NAME_PREFIX)) {
         variable.name = `${DISABLE_VARIABLE_NAME_PREFIX}${variable.name}`;
@@ -77,7 +111,7 @@ export const figmaHelper = {
   },
 
   async resolveVariableAlias(variable: Variable, modeId: string) {
-    const v = (await figma.variables.getLocalVariablesAsync()).find(({ id }) => id === variable.id);
+    const v = await this.getVariableByIdAsync(variable.id, { clone: false });
     const c = v
       ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
           ({ id }) => id === v.variableCollectionId

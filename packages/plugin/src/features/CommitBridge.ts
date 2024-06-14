@@ -1,10 +1,17 @@
 import omit from 'lodash-es/omit';
 import type { Delta } from 'jsondiffpatch';
+import { emit } from '@create-figma-plugin/utilities';
 
-import type { ICommit } from '../types';
+import type {
+  ICommit,
+  ImportLocalCommitsHandler,
+  ImportVariablesHandler,
+  VariableChangeType,
+} from '../types';
 import { jsonDiff, jsonPatch, jsonUnpatch } from '../utils/json-patch';
 import { figmaHelper } from '../utils/figma-helper';
 import { getVariableChanges } from '../utils/variable';
+import { updateObjectValues } from '../utils/object';
 
 const PLUGIN_DATA_KEY_PREFIX = '__VARIABLE_HISTORY__';
 const PLUGIN_DATA_KEY_HEAD = `${PLUGIN_DATA_KEY_PREFIX}HEAD`;
@@ -68,6 +75,18 @@ export class CommitBridge {
     );
   }
 
+  private updateIdInLocalPluginData(idChangeMap: Record<string, string>) {
+    if (!this.pluginData.head) return;
+    if (Object.keys(idChangeMap).length) {
+      const head = updateObjectValues(this.pluginData.head, (value) => idChangeMap[value] || value);
+      const commits = updateObjectValues(
+        this.pluginData.commits,
+        (value) => idChangeMap[value] || value
+      );
+      this.setLocalPluginData(head, commits);
+    }
+  }
+
   private async syncLocalVariablesWithHead() {
     if (!this.pluginData.head) return;
     const { variables: headVariables } = this.pluginData.head;
@@ -77,11 +96,18 @@ export class CommitBridge {
       current: headVariables,
     });
 
+    const idChangeMap: Record<string, string> = {};
     await Promise.all([
-      ...added.map((data) => figmaHelper.updateVariable({ data, createIfNotExists: true })),
-      ...modified.map((data) => figmaHelper.updateVariable({ data, createIfNotExists: true })),
-      ...removed.map((data) => figmaHelper.disableVariable(data.id)),
+      ...added.concat(modified).map(async (data) => {
+        const variable = await figmaHelper.updateVariable({ data, createIfNotExists: true });
+        if (variable && variable.id !== data.id) {
+          idChangeMap[data.id] = variable.id;
+        }
+      }),
+      ...removed.map((data) => figmaHelper.disableVariable(data)),
     ]);
+
+    this.updateIdInLocalPluginData(idChangeMap);
   }
 
   private getCommitByIndex(
@@ -107,13 +133,26 @@ export class CommitBridge {
 
     return {
       ...omit(targetCommit, ['delta']),
-      get variables() {
-        return recoverJson('variables');
-      },
-      get collections() {
-        return recoverJson('collections');
-      },
+      variables: recoverJson('variables'),
+      collections: recoverJson('collections'),
+      // TODO use get() to save memory
+      // get variables() {
+      //   return recoverJson('variables');
+      // },
+      // get collections() {
+      //   return recoverJson('collections');
+      // },
     };
+  }
+
+  // provide data necessary for ui.tsx
+  async emitData() {
+    const variables = await figmaHelper.getLocalVariablesAsync();
+    const collections = await figmaHelper.getLocalVariableCollectionsAsync();
+    const commits = this.getCommits();
+
+    emit<ImportVariablesHandler>('IMPORT_VARIABLES', { variables, collections });
+    emit<ImportLocalCommitsHandler>('IMPORT_LOCAL_COMMITS', commits);
   }
 
   getCommitById(id: ICommit['id']): ICommit | null {
@@ -172,6 +211,24 @@ export class CommitBridge {
 
   async revert() {
     // this.syncLocalVariablesWithHead();
+    await this.emitData();
+  }
+
+  async revertVariable(variable: Variable, type: VariableChangeType) {
+    if (type === 'added') {
+      await figmaHelper.disableVariable(variable);
+    } else {
+      const idChangeMap: Record<string, string> = {};
+      const newVariable = await figmaHelper.updateVariable({
+        data: variable,
+        createIfNotExists: true,
+      });
+      if (newVariable && newVariable.id !== variable.id) {
+        idChangeMap[variable.id] = newVariable.id;
+      }
+      this.updateIdInLocalPluginData(idChangeMap);
+    }
+    await this.emitData();
   }
 
   async reset(commitId: string) {
@@ -179,7 +236,8 @@ export class CommitBridge {
     const targetCommit = this.getCommitByIndex(targetCommitIndex);
     if (!targetCommit) return;
     this.setLocalPluginData(targetCommit, this.pluginData.commits.slice(targetCommitIndex));
-    return this.syncLocalVariablesWithHead();
+    await this.syncLocalVariablesWithHead();
+    await this.emitData();
   }
 
   refresh() {

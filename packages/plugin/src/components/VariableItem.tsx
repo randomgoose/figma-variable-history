@@ -7,6 +7,8 @@ import { Number } from '../icons/Number';
 import { String } from '../icons/String';
 import { Boolean } from '../icons/Boolean';
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-context-menu';
+import { emit } from '@create-figma-plugin/utilities';
+import { RevertVariableHandler, VariableChangeType } from '../types';
 
 export function VariableItem({
   variable,
@@ -14,7 +16,7 @@ export function VariableItem({
   onClick,
 }: {
   variable: Variable;
-  type?: 'Added' | 'Removed' | 'Modified';
+  type: VariableChangeType;
   onClick?: (id: string) => void;
 }) {
   const { id, name, resolvedType } = variable;
@@ -41,7 +43,9 @@ export function VariableItem({
         <div className={styles.variableItem} onClick={() => onClick && onClick(id)}>
           {icon()}
           <div>{name}</div>
-          <div style={{ marginLeft: 'auto' }}>{type}</div>
+          <div style={{ marginLeft: 'auto' }}>
+            {type.replace(/^\w/, (match) => match.toUpperCase())}
+          </div>
         </div>
         {/* </Link> */}
       </Trigger>
@@ -49,9 +53,7 @@ export function VariableItem({
         <Content className={styles.dropdown__content} style={{ width: 200 }}>
           <Item
             className={styles.dropdown__item}
-            onClick={() => {
-              // revertVariable(variable.id,)
-            }}
+            onClick={() => emit<RevertVariableHandler>('REVERT_VARIABLE_VALUE', variable, type)}
           >
             Discard changes
           </Item>

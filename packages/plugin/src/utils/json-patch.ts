@@ -1,5 +1,6 @@
 import * as jsondiffpatch from 'jsondiffpatch';
 import type { Delta } from 'jsondiffpatch';
+import { VariableChangeType } from '../types';
 
 type JSON = Record<string, any>;
 
@@ -32,7 +33,7 @@ export function jsonUnpatch(json: unknown, delta: Delta | Delta[]) {
 export function formatDelta(
   delta: Delta,
   cb: (info: {
-    type: 'added' | 'deleted' | 'modified';
+    type: VariableChangeType;
     path: string;
     value?: unknown;
     oldValue?: unknown;
@@ -67,7 +68,7 @@ export function formatDelta(
           case 3:
             if (value[1] === 0 && value[2] === 0) {
               cb({
-                type: 'deleted',
+                type: 'removed',
                 path: currentPath,
                 oldValue: value[0],
               });

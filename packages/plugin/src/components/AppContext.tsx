@@ -6,7 +6,7 @@ import {
   ICommit,
   ImportLocalCommitsHandler,
   ImportVariablesHandler,
-  SetResolvedVariableValueHandler,
+  ResolveVariableValueDoneHandler,
   SetVariableAliasHandler,
 } from '../types';
 import { on } from '@create-figma-plugin/utilities';
@@ -55,8 +55,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     setCommits(commits);
   });
 
-  on<SetResolvedVariableValueHandler>(
-    'SET_RESOLVED_VARIABLE_VALUE',
+  on<ResolveVariableValueDoneHandler>(
+    'RESOLVE_VARIABLE_VALUE_DONE',
     ({ id, modeId, value, resolvedType }) => {
       setResolvedVariableValues({
         ...resolvedVariableValues,
