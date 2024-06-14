@@ -49,6 +49,12 @@ function Plugin() {
   const numOfChanges = added.length + modified.length + removed.length;
   const disabled = added.length + modified.length + removed.length === 0;
 
+  useEffect(() => {
+    if (disabled) {
+      setSelected('');
+    }
+  }, [disabled]);
+
   const handleClick = useCallback(() => {
     if (!summary) {
       alert('Please provide a summary');
@@ -64,7 +70,6 @@ function Plugin() {
         collaborators: [],
       });
       setOpen(false);
-      emit<RefreshHandler>('REFRESH');
     }
   }, [variables, collections, summary, description]);
 

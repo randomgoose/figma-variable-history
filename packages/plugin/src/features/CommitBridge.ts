@@ -87,13 +87,11 @@ export class CommitBridge {
     }
   }
 
-  private async syncLocalVariablesWithHead() {
-    if (!this.pluginData.head) return;
-    const { variables: headVariables } = this.pluginData.head;
+  private async setLocalVariables(targetVariables: Variable[]) {
     const localVariables = await figmaHelper.getLocalVariablesAsync();
     const { added, removed, modified } = getVariableChanges({
       prev: localVariables,
-      current: headVariables,
+      current: targetVariables,
     });
 
     const idChangeMap: Record<string, string> = {};
@@ -108,6 +106,12 @@ export class CommitBridge {
     ]);
 
     this.updateIdInLocalPluginData(idChangeMap);
+  }
+
+  private async setLocalVariablesToCommit(commitId?: ICommit['id']) {
+    const targetCommit = commitId ? this.getCommitById(commitId) : this.pluginData.head;
+    if (!targetCommit) return;
+    await this.setLocalVariables(targetCommit.variables);
   }
 
   private getCommitByIndex(
@@ -172,7 +176,7 @@ export class CommitBridge {
       .filter(Boolean) as [];
   }
 
-  commit(data: ICommit) {
+  async commit(data: ICommit) {
     const commitInPluginData: CommitInPluginData = {
       ...omit(data, ['variables', 'collections']),
       collaborators: figma.currentUser ? [figma.currentUser] : [],
@@ -186,6 +190,7 @@ export class CommitBridge {
 
     // save updated data to figma.root
     this.setLocalPluginData(data, [commitInPluginData, ...this.pluginData.commits]);
+    await this.emitData();
   }
 
   compareCommits(baseCommit: ICommit['id'], targetCommit: ICommit['id']): Delta | null {
@@ -209,8 +214,14 @@ export class CommitBridge {
     return null;
   }
 
-  async revert() {
-    // this.syncLocalVariablesWithHead();
+  async revert(commitId: string) {
+    const delta = this.pluginData.commits.find(({ id }) => id === commitId)?.delta;
+    if (!delta || !this.pluginData.head) return;
+
+    const localVariables = await figmaHelper.getLocalVariablesAsync();
+    const newVariables = jsonUnpatch(localVariables, delta.variables);
+
+    await this.setLocalVariables(newVariables);
     await this.emitData();
   }
 
@@ -236,7 +247,7 @@ export class CommitBridge {
     const targetCommit = this.getCommitByIndex(targetCommitIndex);
     if (!targetCommit) return;
     this.setLocalPluginData(targetCommit, this.pluginData.commits.slice(targetCommitIndex));
-    await this.syncLocalVariablesWithHead();
+    await this.setLocalVariablesToCommit();
     await this.emitData();
   }
 

@@ -21,7 +21,7 @@ import { figmaHelper } from './utils/figma-helper';
 export default async function () {
   on<CommitHandler>('COMMIT', (commit) => commitBridge.commit(commit));
 
-  on<RevertCommitHandler>('REVERT_COMMIT', () => commitBridge.revert());
+  on<RevertCommitHandler>('REVERT_COMMIT', (id) => commitBridge.revert(id));
 
   on<RevertVariableHandler>('REVERT_VARIABLE_VALUE', (variable, type) =>
     commitBridge.revertVariable(variable, type)
