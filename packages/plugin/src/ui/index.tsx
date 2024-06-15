@@ -13,6 +13,7 @@ import { getVariableChanges } from '../utils/variable';
 import { Commits } from './components/Commits';
 import { EmptyState } from './components';
 import { AppContext, AppContextProvider } from './components/AppContext';
+import { SyncGit } from './components/SyncGit';
 
 function Plugin() {
   const { variables, collections, commits } = useContext(AppContext);
@@ -148,6 +149,10 @@ function Plugin() {
         {
           value: 'Commits',
           children: <Commits commits={commits} />,
+        },
+        {
+          value: 'Sync Git',
+          children: <SyncGit />,
         },
       ]}
       value={tab}

@@ -2,16 +2,20 @@
 import { createContext, h } from 'preact';
 import { useMemo, useState } from 'preact/hooks';
 import { ReactNode } from 'preact/compat';
-import {
+import { on } from '@create-figma-plugin/utilities';
+
+import type {
   ICommit,
   ImportLocalCommitsHandler,
   ImportVariablesHandler,
+  PluginSetting,
+  PluginSettingHandler,
   ResolveVariableValueDoneHandler,
   SetVariableAliasHandler,
 } from '../../types';
-import { on } from '@create-figma-plugin/utilities';
 
 interface AppContext {
+  setting: PluginSetting;
   colorFormat: 'RGB' | 'HEX';
   variables: Variable[];
   collections: VariableCollection[];
@@ -27,6 +31,7 @@ interface AppContext {
 }
 
 export const AppContext = createContext<AppContext>({
+  setting: {},
   colorFormat: 'HEX',
   variables: [],
   collections: [],
@@ -37,6 +42,7 @@ export const AppContext = createContext<AppContext>({
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
+  const [setting, setSetting] = useState<PluginSetting>({});
   const [colorFormat, setColorFormat] = useState<AppContext['colorFormat']>('HEX');
   const [variables, setVariables] = useState<AppContext['variables']>([]);
   const [collections, setCollections] = useState<AppContext['collections']>([]);
@@ -74,8 +80,11 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     setVariableAliases({ ...variableAliases, [id]: name });
   });
 
+  on<PluginSettingHandler>('PLUGIN_SETTING', (data) => setSetting(data));
+
   const context = useMemo<AppContext>(() => {
     return {
+      setting,
       colorFormat,
       variables,
       collections,
@@ -84,7 +93,15 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       resolvedVariableValues,
       setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
     };
-  }, [colorFormat, variables, collections, commits, variableAliases, resolvedVariableValues]);
+  }, [
+    setting,
+    colorFormat,
+    variables,
+    collections,
+    commits,
+    variableAliases,
+    resolvedVariableValues,
+  ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;
 }

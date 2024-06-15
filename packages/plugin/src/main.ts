@@ -12,11 +12,14 @@ import type {
   ResolveVariableValueDoneHandler,
   SetVariableAliasHandler,
   RevertVariableHandler,
+  SetPluginSettingHandler,
+  PluginSettingHandler,
 } from './types';
 import { generateChangeLog } from './features/generate-change-log';
 import { convertVariablesToCss } from './features';
 import { commitBridge } from './features/CommitBridge';
 import { figmaHelper } from './utils/figma-helper';
+import { PLUGIN_DATA_KEY_SETTING } from './config';
 
 export default async function () {
   on<CommitHandler>('COMMIT', (commit) => commitBridge.commit(commit));
@@ -63,7 +66,13 @@ export default async function () {
     }
   });
 
+  on<SetPluginSettingHandler>('SET_PLUGIN_SETTING', (setting) => {
+    const prevSetting = figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING);
+    figmaHelper.setPluginData(PLUGIN_DATA_KEY_SETTING, { ...prevSetting, ...setting });
+  });
+
   showUI({ height: 480, width: 720 });
 
+  emit<PluginSettingHandler>('PLUGIN_SETTING', figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING));
   await commitBridge.emitData();
 }

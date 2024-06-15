@@ -1,6 +1,8 @@
 import type { ICommit } from './commit';
+import type { PluginSetting } from './setting';
 import type { EventHandler } from '@create-figma-plugin/utilities';
-import { VariableChangeType } from './index';
+
+export type VariableChangeType = 'added' | 'removed' | 'modified';
 
 export interface InsertCodeHandler extends EventHandler {
   name: 'INSERT_CODE';
@@ -79,5 +81,15 @@ export interface ConvertCommitVariablesToCssHandler extends EventHandler {
 
 export interface ConvertCommitVariablesToCssDoneHandler extends EventHandler {
   name: 'CONVERT_VARIABLES_TO_CSS_DONE';
-  handler: (commitId: string) => void;
+  handler: (css: string) => void;
+}
+
+export interface PluginSettingHandler extends EventHandler {
+  name: 'PLUGIN_SETTING';
+  handler: (setting: PluginSetting) => void;
+}
+
+export interface SetPluginSettingHandler extends EventHandler {
+  name: 'SET_PLUGIN_SETTING';
+  handler: (setting: PluginSetting) => void;
 }
