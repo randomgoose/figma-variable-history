@@ -23,7 +23,7 @@ import {
 } from '../../types';
 import { parseDate } from '../../utils/date';
 import { getVariableChanges } from '../../utils/variable';
-import { VariableItem } from './VariableItem';
+import { VariableItem } from '../components/VariableItem';
 
 export function Commits({ commits }: { commits: ICommit[] }) {
   const ref = useRef<HTMLAnchorElement>(null);

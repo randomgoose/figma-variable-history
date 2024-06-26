@@ -60,9 +60,9 @@ export function diffVariables(a: Variable, b: Variable) {
   const valuesByMode = Object.fromEntries(
     Object.entries(a.valuesByMode)
       .map(([modeId]) => {
-        if (!a.valuesByMode[modeId]) {
+        if (typeof a.valuesByMode[modeId] === 'undefined') {
           return [modeId, [undefined, b.valuesByMode[modeId]]];
-        } else if (!b.valuesByMode[modeId]) {
+        } else if (typeof b.valuesByMode[modeId] === 'undefined') {
           return [modeId, [a.valuesByMode[modeId], undefined]];
         } else {
           if (!isSameVariableValue(a.valuesByMode[modeId], b.valuesByMode[modeId])) {

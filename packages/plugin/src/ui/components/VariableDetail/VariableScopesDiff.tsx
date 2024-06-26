@@ -69,8 +69,8 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev:
         current.scopes.length !== prev.scopes.length);
 
     return hasChangedScopes ? (
-      <div className={styles.variableDetail__section}>
-        <h3 className={styles.variableDetail__sectionTitle}>
+      <div>
+        <h3 className={styles.variableDetail__sectionTitle} style={{ textTransform: 'capitalize' }}>
           {current.resolvedType.toLowerCase()} Scoping
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 40px minmax(0, 1fr)' }}>
@@ -95,15 +95,6 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev:
   };
 
   return difference(current.scopes, prev.scopes).length === 0 ? null : (
-    <div className={styles.variableDetail__section}>
-      <h3 className={styles.variableDetail__sectionTitle}>Color Scoping</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 40px minmax(0, 1fr)' }}>
-        {renderScopeGroups()}
-        <div className={styles.variableDetail__itemArrow}>
-          <IconArrowRight16 />
-        </div>
-        {renderScopeGroups()}
-      </div>
-    </div>
+    <div className={styles.variableDetail__section}>{renderScopeGroups()}</div>
   );
 }

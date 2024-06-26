@@ -5,7 +5,6 @@ body {
 /* Customize website's scrollbar like Mac OS
 Not supports in Firefox and IE */
 
-
 .commitMessage {
   position: relative;
 }
@@ -16,31 +15,65 @@ Not supports in Firefox and IE */
   width: 100%;
 }
 
+.collectionList {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  /* overflow: overlay; */
+}
+
+div:has(> .collectionList)::-webkit-scrollbar {
+  width: 0;
+}
+
+.collectionItem {
+  background-color: var(--figma-color-bg);
+  border-radius: 4px;
+}
+
+.collectionItem:not(:last-of-type) {
+  margin-bottom: 6px;
+  border-radius: 6px;
+}
+
+.collectionItem__trigger {
+  width: 100%;
+  padding: 8px 12px 8px 8px;
+  display: flex;
+  font-weight: 600;
+  font-size: 11px;
+  gap: 8px;
+}
+
 .variableItem {
   display: flex;
-  padding: 16px;
+  padding: 8px;
   cursor: default;
   text-decoration: none;
   color: var(--figma-color-text);
   gap: 8px;
-}
-
-.variableItem:not(:last-of-type) {
-  border-bottom: 1px solid var(--figma-color-border);
+  border-radius: 6px;
+  transition: all 0.1s;
+  max-width: 100%;
 }
 
 .variableItem:hover {
   background-color: var(--figma-color-bg-hover);
+  transform: scale(1.005);
+}
+
+.variableItem:active {
+  transform: scale(0.995);
 }
 
 .variableDetail__header {
-  padding: 4px;
   border-bottom: 1px solid var(--figma-color-border);
   display: flex;
   align-items: center;
   gap: 4px;
   font-weight: 600;
   padding: 4px 16px;
+  height: 41px;
 }
 
 .variableDetail__section {
@@ -146,7 +179,6 @@ Not supports in Firefox and IE */
 
 .commitForm {
   width: 240px;
-  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -177,6 +209,15 @@ Not supports in Firefox and IE */
   background-color: var(--figma-color-bg-secondary);
   height: 20px;
   line-height: 16px;
+}
+
+.variable__type {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
 }
 
 .dropdown__content {
@@ -226,4 +267,67 @@ Not supports in Firefox and IE */
 
 .parsedValue:active {
   transform: scale(0.95);
+}
+
+.switch__container-on {
+  width: 24px;
+  height: 12px;
+  padding: 1px;
+  background-color: var(--figma-color-bg-brand);
+  border-radius: 100px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.switch__container-off {
+  width: 24px;
+  height: 12px;
+  padding: 1px;
+  background-color: var(--figma-color-bg-disabled-secondary);
+  border-radius: 100px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.switch__nub {
+  width: 10px;
+  height: 10px;
+  border-radius: 100px;
+  background-color: white;
+}
+
+.settings__container {
+  padding: 16px;
+}
+
+.settings__heading {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--figma-color-text);
+}
+
+.settings__block {
+  border: 1px solid var(--figma-color-border);
+  padding: 16px 0px 16px 16px;
+  margin-top: 8px;
+  border-radius: 4px;
+}
+
+.settings__blockHeader {
+  display: flex;
+  align-items: center;
+  /* margin-bottom: 16px; */
+  gap: 8px;
+}
+
+.settings__blockTitle {
+  font-weight: 500;
+}
+
+.settings__blockDescription {
+  color: var(--figma-color-text-secondary);
+}
+
+.settings__blockContent {
+  padding-top: 16px;
 }

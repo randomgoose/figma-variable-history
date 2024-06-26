@@ -128,6 +128,7 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
               return (
                 <AL direction="vertical" width="fill-parent" spacing={4} key={v.id}>
                   <AL height={20} verticalAlignItems="center">
+                    {v.resolvedType}
                     <Text fontSize={11}>{v.name}</Text>
                   </AL>
 

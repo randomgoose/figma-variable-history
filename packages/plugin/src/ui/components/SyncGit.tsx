@@ -5,7 +5,7 @@ import { emit, once } from '@create-figma-plugin/utilities';
 import { Button, Textbox } from '@create-figma-plugin/ui';
 
 import { syncToGit, SyncToGitStage, SyncToGitResult } from '../../features/sync-to-git';
-import { AppContext } from './AppContext';
+import { AppContext } from '../../AppContext';
 import {
   ConvertCommitVariablesToCssHandler,
   ConvertCommitVariablesToCssDoneHandler,

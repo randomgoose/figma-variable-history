@@ -36,16 +36,84 @@ export function VariableItem({
     }
   };
 
+  const renderType = (type: VariableChangeType) => {
+    switch (type) {
+      case 'added':
+        return (
+          <div
+            className={styles.variable__type}
+            style={{
+              background: 'var(--figma-color-bg-success-tertiary)',
+              color: 'var(--figma-color-text-success)',
+            }}
+          >
+            <svg
+              width="8"
+              height="8"
+              viewBox="0 0 8 8"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M7.5 3.5H4.5V0.5H3.5V3.5H0.5V4.5H3.5V7.5H4.5V4.5H7.5V3.5Z" />
+            </svg>
+          </div>
+        );
+      case 'modified':
+        return (
+          <div
+            className={styles.variable__type}
+            style={{
+              background: 'var(--figma-color-bg-warning-tertiary)',
+              color: 'var(--figma-color-text-warning)',
+              fontSize: 10,
+              fontWeight: 500,
+            }}
+          >
+            M
+          </div>
+        );
+      case 'removed':
+        return (
+          <div
+            className={styles.variable__type}
+            style={{
+              background: 'var(--figma-color-bg-danger-tertiary)',
+              color: 'var(--figma-color-text-danger)',
+            }}
+          >
+            <svg
+              width="8"
+              height="2"
+              viewBox="0 0 8 2"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M0.5 0.5H7.5V1.5H0.5V0.5Z" />
+            </svg>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Root>
       <Trigger asChild>
         {/* <Link key={id} href={`/variable/${id}`} className={styles.variableItem}> */}
         <div className={styles.variableItem} onClick={() => onClick && onClick(id)}>
-          {icon()}
-          <div>{name}</div>
-          <div style={{ marginLeft: 'auto' }}>
-            {type.replace(/^\w/, (match) => match.toUpperCase())}
+          <div style={{ flexShrink: 0 }}>{icon()}</div>
+          <div
+            style={{
+              maxWidth: '100%',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+            }}
+          >
+            {name}
           </div>
+          <div style={{ marginLeft: 'auto' }}>{renderType(type)}</div>
         </div>
         {/* </Link> */}
       </Trigger>
@@ -53,7 +121,9 @@ export function VariableItem({
         <Content className={styles.dropdown__content} style={{ width: 200 }}>
           <Item
             className={styles.dropdown__item}
-            onClick={() => emit<RevertVariableHandler>('REVERT_VARIABLE_VALUE', variable, type)}
+            onClick={() => {
+              emit<RevertVariableHandler>('REVERT_VARIABLE_VALUE', variable, type);
+            }}
           >
             Discard changes
           </Item>

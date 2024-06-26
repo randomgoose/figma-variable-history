@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createContext, h } from 'preact';
-import { useMemo, useState } from 'preact/hooks';
+import { Dispatch, StateUpdater, useMemo, useState } from 'preact/hooks';
 import { ReactNode } from 'preact/compat';
 import { on } from '@create-figma-plugin/utilities';
 
@@ -12,7 +12,7 @@ import type {
   PluginSettingHandler,
   ResolveVariableValueDoneHandler,
   SetVariableAliasHandler,
-} from '../../types';
+} from './types';
 
 interface AppContext {
   setting: PluginSetting;
@@ -28,6 +28,8 @@ interface AppContext {
     }
   >;
   setColorFormat: (format: AppContext['colorFormat']) => void;
+  enableGitHubSync: boolean;
+  setEnableGitHubSync: Dispatch<StateUpdater<boolean>>;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -39,6 +41,8 @@ export const AppContext = createContext<AppContext>({
   variableAliases: {},
   resolvedVariableValues: {},
   setColorFormat: () => null,
+  enableGitHubSync: false,
+  setEnableGitHubSync: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -51,6 +55,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [resolvedVariableValues, setResolvedVariableValues] = useState<
     AppContext['resolvedVariableValues']
   >({});
+  const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
 
   on<ImportVariablesHandler>('IMPORT_VARIABLES', ({ variables, collections }) => {
     setVariables(variables);
@@ -92,6 +97,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       variableAliases,
       resolvedVariableValues,
       setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
+      enableGitHubSync,
+      setEnableGitHubSync,
     };
   }, [
     setting,
@@ -101,6 +108,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     commits,
     variableAliases,
     resolvedVariableValues,
+    enableGitHubSync,
+    setEnableGitHubSync,
+    setColorFormat,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

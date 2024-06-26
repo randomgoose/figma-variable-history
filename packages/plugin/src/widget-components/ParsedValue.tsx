@@ -1,7 +1,8 @@
 import { convertRgbColorToHexColor } from '@create-figma-plugin/utilities';
+// import { SVGs } from './svg-strings';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { Text, AutoLayout, Rectangle, h } = figma.widget;
+const { Text, AutoLayout, Rectangle, h, SVG } = figma.widget;
 
 export function ParsedValue({
   value,
@@ -41,6 +42,7 @@ export function ParsedValue({
             stroke="#e6e6e6"
             height={20}
           >
+            {/* <SVG src={SVGs.boolean}/> */}
             <Text fontSize={11} lineHeight="16px">
               {target.name}
             </Text>
