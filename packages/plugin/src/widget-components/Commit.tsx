@@ -2,9 +2,10 @@ import { parseDate } from '../utils/date';
 import { getVariableChanges, isSameVariableValue } from '../utils/variable';
 import { ParsedValue } from './ParsedValue';
 import { ICommit } from '../types';
+import { SVGs } from './svg-strings';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { AutoLayout: AL, Text, Image, h } = figma.widget;
+const { AutoLayout: AL, Text, Image, h, SVG } = figma.widget;
 
 const COLORS = {
   text: {
@@ -127,7 +128,8 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
 
               return (
                 <AL direction="vertical" width="fill-parent" spacing={4} key={v.id}>
-                  <AL height={20} verticalAlignItems="center">
+                  <AL height={20} verticalAlignItems="center" spacing={4}>
+                    <SVG src={SVGs[v['resolvedType']]} />
                     <Text fontSize={11}>{v.name}</Text>
                   </AL>
 

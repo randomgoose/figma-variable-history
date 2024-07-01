@@ -3,9 +3,15 @@ import { h } from 'preact';
 
 export function String() {
   return (
-    <svg class="svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+    <svg
+      class="svg"
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      style={{ fill: 'var(--figma-color-text)' }}
+    >
       <path
-        fill="#000"
         fill-opacity=".5"
         fill-rule="evenodd"
         stroke="none"

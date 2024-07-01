@@ -12,7 +12,7 @@ import type {
   PluginSettingHandler,
   ResolveVariableValueDoneHandler,
   SetVariableAliasHandler,
-} from '../../types';
+} from './types';
 
 interface AppContext {
   setting: PluginSetting;
@@ -51,6 +51,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [resolvedVariableValues, setResolvedVariableValues] = useState<
     AppContext['resolvedVariableValues']
   >({});
+  const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
 
   on<ImportVariablesHandler>('IMPORT_VARIABLES', ({ variables, collections }) => {
     setVariables(variables);
@@ -101,6 +102,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     commits,
     variableAliases,
     resolvedVariableValues,
+    enableGitHubSync,
+    setEnableGitHubSync,
+    setColorFormat,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

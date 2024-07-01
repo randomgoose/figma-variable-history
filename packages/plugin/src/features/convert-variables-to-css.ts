@@ -26,7 +26,9 @@ export async function convertVariablesToCss(commit: ICommit) {
               switch (typeof value) {
                 case 'object':
                   if ('type' in value) {
-                    const alias = (await figmaHelper.getVariableByIdAsync(value.id))?.name;
+                    const alias = (
+                      await figmaHelper.getVariableByIdAsync(value.id)
+                    )?.name.replaceAll('/', '-');
                     alias && (cssValue = `var(--${alias})`);
                   } else if ('r' in value) {
                     cssValue = convertFigmaRGBtoString(value);

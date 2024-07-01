@@ -1,4 +1,7 @@
 declare const styles: {
+  readonly "collectionItem": string;
+  readonly "collectionItem__trigger": string;
+  readonly "collectionList": string;
   readonly "commitForm": string;
   readonly "commitItem": string;
   readonly "commitItem__avatar": string;
@@ -12,7 +15,17 @@ declare const styles: {
   readonly "dropdown__item": string;
   readonly "footer": string;
   readonly "parsedValue": string;
+  readonly "settings__block": string;
+  readonly "settings__blockContent": string;
+  readonly "settings__blockDescription": string;
+  readonly "settings__blockHeader": string;
+  readonly "settings__blockTitle": string;
+  readonly "settings__container": string;
+  readonly "settings__heading": string;
   readonly "swatch": string;
+  readonly "switch__container-off": string;
+  readonly "switch__container-on": string;
+  readonly "switch__nub": string;
   readonly "title": string;
   readonly "variableDetail__header": string;
   readonly "variableDetail__item": string;
@@ -21,6 +34,7 @@ declare const styles: {
   readonly "variableDetail__sectionTitle": string;
   readonly "variableItem": string;
   readonly "variable__pill": string;
+  readonly "variable__type": string;
 };
 export = styles;
 

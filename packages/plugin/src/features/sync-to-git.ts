@@ -1,6 +1,6 @@
 import { request } from '../utils/request';
 
-export type SyncToGitStage = 'fetch-repo-info' | 'create_branch' | 'update_file' | 'create_pr';
+export type SyncToGitStage = 'fetch_repo_info' | 'create_branch' | 'update_file' | 'create_pr';
 export type SyncToGitResult = { success: boolean; message?: string; prURL?: string };
 
 export async function syncToGit({
@@ -86,7 +86,10 @@ export async function syncToGit({
         method: 'PUT',
         data: {
           message: commitMessage,
-          content: btoa(decodeURIComponent(encodeURIComponent(content))),
+          // Added a replacement to remove non Latin-1 characters
+          content: btoa(
+            decodeURIComponent(encodeURIComponent(content)).replaceAll(/[\u0250-\ue007]/g, '')
+          ),
           branch,
           sha: response?.sha,
         },
@@ -122,7 +125,7 @@ export async function syncToGit({
   }
 
   try {
-    onStageChange('fetch-repo-info');
+    onStageChange('fetch_repo_info');
     const { defaultBranch } = await checkoutNewBranch();
     onStageChange('create_branch');
     await commitToBranch();
