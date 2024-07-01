@@ -6,8 +6,8 @@ import { Color } from '../icons/Color';
 import { Number } from '../icons/Number';
 import { String } from '../icons/String';
 import { Boolean } from '../icons/Boolean';
-import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-context-menu';
 import { emit } from '@create-figma-plugin/utilities';
+import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-context-menu';
 import { RevertVariableHandler, VariableChangeType } from '../../types';
 
 export function VariableItem({
@@ -129,6 +129,10 @@ export function VariableItem({
           </Item>
         </Content>
       </Portal>
+
+      {/* <Modal onEscapeKeyDown={handleEscapeKeyDown} open={revertConfirmModalOpen}>
+        <div>foo</div>
+      </Modal> */}
     </Root>
   );
 }

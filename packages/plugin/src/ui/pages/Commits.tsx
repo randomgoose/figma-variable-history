@@ -22,12 +22,14 @@ import {
   RevertCommitHandler,
 } from '../../types';
 import { parseDate } from '../../utils/date';
-import { getVariableChanges } from '../../utils/variable';
-import { VariableItem } from '../components/VariableItem';
+import { getVariableChangesGroupedByCollection } from '../../utils/variable';
+import { GroupedChanges } from '../components/GroupedChanges';
+import { VariableDetail } from '../components/VariableDetail';
 
 export function Commits({ commits }: { commits: ICommit[] }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [selected, setSelected] = useState('');
+  const [selectedVariableId, setSelectedVariableId] = useState('');
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportModalContent, setExportModalContent] = useState('');
 
@@ -38,16 +40,20 @@ export function Commits({ commits }: { commits: ICommit[] }) {
     });
   }, []);
 
+  useEffect(() => {
+    setSelectedVariableId('');
+  }, [selected]);
+
   const decodedContent = decodeURIComponent(exportModalContent);
 
-  const { added, modified, removed } = useMemo(() => {
+  const groupedChanges = useMemo(() => {
     const index = commits.findIndex((c) => c.id === selected);
     return index > -1
-      ? getVariableChanges({
+      ? getVariableChangesGroupedByCollection({
           current: commits[index]?.variables,
           prev: commits[index + 1]?.variables || [],
         })
-      : { added: [], modified: [], removed: [] };
+      : {};
   }, [commits, selected]);
 
   const onExport = useCallback(() => {
@@ -120,7 +126,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                         className={styles.dropdown__item}
                         onClick={() => emit<RevertCommitHandler>('REVERT_COMMIT', commit.id)}
                       >
-                        Restore this commit
+                        Revert this commit
                       </Item>
                       <Item
                         className={styles.dropdown__item}
@@ -151,21 +157,50 @@ export function Commits({ commits }: { commits: ICommit[] }) {
       {selected ? (
         <div
           style={{
+            position: 'relative',
             borderLeft: '1px solid var(--figma-color-border)',
             width: 400,
             flexShrink: 0,
-            overflow: 'auto',
           }}
         >
-          {added.map((v) => (
-            <VariableItem variable={v} key={v.id} type="added" />
-          ))}
-          {removed.map((v) => (
-            <VariableItem variable={v} key={v.id} type="removed" />
-          ))}
-          {modified.map((v) => (
-            <VariableItem variable={v} key={v.id} type="modified" />
-          ))}
+          <div
+            style={{
+              overflow: 'auto',
+              background: 'var(--figma-color-bg-secondary)',
+              padding: 8,
+              height: '100%',
+            }}
+          >
+            <GroupedChanges
+              groupedChanges={groupedChanges}
+              onClickVariableItem={(id) => {
+                setSelectedVariableId(id);
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: 'var(--figma-color-bg)',
+              borderTop: '1px solid var(--figma-color-border)',
+            }}
+          >
+            {selectedVariableId ? (
+              <VariableDetail
+                id={selectedVariableId}
+                current={commits
+                  .find((c) => c.id === selected)
+                  ?.variables.find((v) => v.id === selectedVariableId)}
+                prev={commits[commits.findIndex((c) => c.id === selected) + 1]?.variables.find(
+                  (v) => v.id === selectedVariableId
+                )}
+              />
+            ) : null}
+          </div>
         </div>
       ) : null}
 

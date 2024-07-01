@@ -30,7 +30,7 @@ function ScopeCheckbox({
   );
 }
 
-export function VariableScopesDiff({ current, prev }: { current: Variable; prev: Variable }) {
+export function VariableScopesDiff({ current, prev }: { current: Variable; prev?: Variable }) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const renderScopeGroups = () => {
     let scopeGroups: { label: string; sub?: boolean; scopes: VariableScope[] }[] = [];
@@ -63,12 +63,13 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev:
         break;
     }
 
-    const hasChangedScopes =
-      difference(current.scopes, prev.scopes).length !== 0 ||
-      (difference(current.scopes, prev.scopes).length === 0 &&
-        current.scopes.length !== prev.scopes.length);
+    const hasChangedScopes = prev
+      ? difference(current.scopes, prev.scopes).length !== 0 ||
+        (difference(current.scopes, prev.scopes).length === 0 &&
+          current.scopes.length !== prev.scopes.length)
+      : false;
 
-    return hasChangedScopes ? (
+    return prev && hasChangedScopes ? (
       <div>
         <h3 className={styles.variableDetail__sectionTitle} style={{ textTransform: 'capitalize' }}>
           {current.resolvedType.toLowerCase()} Scoping
@@ -94,7 +95,9 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev:
     ) : null;
   };
 
-  return difference(current.scopes, prev.scopes).length === 0 ? null : (
-    <div className={styles.variableDetail__section}>{renderScopeGroups()}</div>
-  );
+  return prev ? (
+    difference(current.scopes, prev.scopes).length === 0 ? null : (
+      <div className={styles.variableDetail__section}>{renderScopeGroups()}</div>
+    )
+  ) : null;
 }

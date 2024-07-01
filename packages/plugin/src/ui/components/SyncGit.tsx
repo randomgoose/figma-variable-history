@@ -2,14 +2,13 @@
 import { h } from 'preact';
 import { useContext, useEffect, useMemo, useState } from 'preact/hooks';
 import { emit, once } from '@create-figma-plugin/utilities';
-import { Button, Textbox } from '@create-figma-plugin/ui';
+import { Textbox } from '@create-figma-plugin/ui';
 
 import { syncToGit, SyncToGitStage, SyncToGitResult } from '../../features/sync-to-git';
 import { AppContext } from '../../AppContext';
 import {
   ConvertCommitVariablesToCssHandler,
   ConvertCommitVariablesToCssDoneHandler,
-  SetPluginSettingHandler,
 } from '../../types';
 import styles from '../styles.module.css';
 
@@ -24,6 +23,13 @@ export function SyncGit() {
     token: '',
     filePath: '',
   });
+
+  const placeholder: Record<string, string> = {
+    token: 'GitHub User Token',
+    repository: 'Repository Name',
+    owner: 'Repository Owner Username',
+    filePath: 'CSS Variable File Path',
+  };
 
   const commitId = useMemo(() => {
     return commits[0]?.id;
@@ -48,11 +54,12 @@ export function SyncGit() {
     if (setting?.git) {
       setGitInfo({
         ...gitInfo,
-        ...setting.git,
+        ...setting?.git,
       });
     }
   }, [setting?.git]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const sync = async (commitId = commits[0]?.id) => {
     if (disabled) return;
 
@@ -78,14 +85,8 @@ export function SyncGit() {
 
   return (
     <div>
-      <div className={styles.commitForm}>
+      <div className={styles.commitForm} style={{ padding: 0 }}>
         {Object.entries(gitInfo).map(([key, value]) => {
-          const placeholder: Record<string, string> = {
-            token: 'GitHub User Token',
-            repository: 'Repository Name',
-            owner: 'Repository Owner Username',
-            filePath: 'CSS Variable File Path',
-          };
           return (
             <Textbox
               width={240}
@@ -104,7 +105,7 @@ export function SyncGit() {
       </div>
 
       <div>
-        {stage === 'fetch-repo-info'
+        {stage === 'fetch_repo_info'
           ? 'Fetching repository info'
           : stage === 'create_branch'
           ? 'New branch created'
@@ -117,7 +118,7 @@ export function SyncGit() {
       </div>
 
       <div>
-        <Button
+        {/* <Button
           onClick={() => {
             emit<SetPluginSettingHandler>('SET_PLUGIN_SETTING', { git: gitInfo });
           }}
@@ -126,7 +127,7 @@ export function SyncGit() {
         </Button>
         <Button style={{ marginLeft: 20 }} disabled={disabled} onClick={() => sync()}>
           Confirm
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

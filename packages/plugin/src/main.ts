@@ -26,9 +26,9 @@ export default async function () {
 
   on<RevertCommitHandler>('REVERT_COMMIT', (id) => commitBridge.revert(id));
 
-  on<RevertVariableHandler>('REVERT_VARIABLE_VALUE', (variable, type) =>
-    commitBridge.revertVariable(variable, type)
-  );
+  on<RevertVariableHandler>('REVERT_VARIABLE_VALUE', (variable, type) => {
+    commitBridge.revertVariable(variable, type);
+  });
 
   on<ResetCommitHandler>('RESET_COMMIT', (id) => commitBridge.reset(id));
 
@@ -69,6 +69,10 @@ export default async function () {
   on<SetPluginSettingHandler>('SET_PLUGIN_SETTING', (setting) => {
     const prevSetting = figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING);
     figmaHelper.setPluginData(PLUGIN_DATA_KEY_SETTING, { ...prevSetting, ...setting });
+    emit<PluginSettingHandler>(
+      'PLUGIN_SETTING',
+      figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING)
+    );
   });
 
   showUI({ height: 480, width: 720 });

@@ -1,5 +1,6 @@
 body {
   overflow: hidden;
+  height: 100%;
 }
 
 /* Customize website's scrollbar like Mac OS
@@ -84,9 +85,11 @@ div:has(> .collectionList)::-webkit-scrollbar {
 .variableDetail__item {
   min-height: 32px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px minmax(0, 1fr);
+  grid-template-columns: min-content 1fr 40px min-content;
   justify-content: space-between;
   gap: 0;
+  text-wrap: nowrap;
+  gap: 8px;
 }
 
 .variableDetail__item>div {
@@ -97,6 +100,7 @@ div:has(> .collectionList)::-webkit-scrollbar {
 
 .variableDetail__item>div:not(:first-of-type) {
   text-align: right;
+  justify-content: flex-end;
   /* justify-content: center; */
 }
 
@@ -178,10 +182,11 @@ div:has(> .collectionList)::-webkit-scrollbar {
 }
 
 .commitForm {
-  width: 240px;
+  width: 320px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 16px;
 }
 
 .footer {

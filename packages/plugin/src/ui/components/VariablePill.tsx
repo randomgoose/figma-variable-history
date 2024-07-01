@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
+import { Number } from '../icons/Number';
+import { String } from '../icons/String';
 
 interface VariablePillProps {
   type: Variable['resolvedType'] | 'TRUE' | 'FALSE';
@@ -62,41 +64,9 @@ export function VariablePill(props: VariablePillProps) {
           </svg>
         );
       case 'STRING':
-        return (
-          <svg
-            class="svg"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-          >
-            <path
-              fill="#000"
-              fill-opacity=".5"
-              fill-rule="evenodd"
-              stroke="none"
-              d="M3 3h10v3h-1V4H8.5v8H10v1H6v-1h1.5V4H4v2H3V3z"
-            ></path>
-          </svg>
-        );
+        return <String />;
       case 'FLOAT':
-        return (
-          <svg
-            class="svg"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-          >
-            <path
-              fill="#000"
-              fill-opacity=".5"
-              fill-rule="evenodd"
-              stroke="none"
-              d="M6.276 3.002c.275.025.473.267.443.542l-.213 1.913h3.438l.223-2.003c.03-.274.278-.477.553-.452.275.025.473.267.443.542l-.213 1.913h1.55c.276 0 .5.224.5.5 0 .276-.224.5-.5.5h-1.66l-.334 3H12.5c.276 0 .5.224.5.5 0 .276-.224.5-.5.5h-2.105l-.233 2.093c-.03.274-.278.477-.553.452-.275-.025-.473-.267-.443-.542l.223-2.003H5.95l-.232 2.093c-.03.274-.278.477-.553.452-.275-.025-.474-.267-.443-.542l.222-2.003H3.5c-.276 0-.5-.224-.5-.5 0-.276.224-.5.5-.5h1.556l.333-3H3.5c-.276 0-.5-.224-.5-.5 0-.276.224-.5.5-.5h2l.223-2.003c.03-.274.278-.477.553-.452zM9.5 9.457l.333-3H6.395l-.334 3H9.5z"
-            ></path>
-          </svg>
-        );
+        return <Number />;
       default:
         return null;
     }

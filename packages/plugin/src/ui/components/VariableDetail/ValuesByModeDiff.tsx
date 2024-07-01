@@ -33,20 +33,24 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
   const showValuesByMode =
     (prev && (changedValues.length || hasNewModes || hasRemovedModes)) || !prev;
 
+  const showColorFormatPicker = current.resolvedType === 'COLOR';
+
   return showValuesByMode ? (
     <div className={styles.variableDetail__section}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <h3 className={styles.variableDetail__sectionTitle} style={{ margin: 0 }}>
           Values
         </h3>
-        <Dropdown
-          value={colorFormat}
-          onChange={(e) => {
-            setColorFormat(e.currentTarget.value === 'RGB' ? 'RGB' : 'HEX');
-          }}
-          options={[{ value: 'RGB' }, { value: 'HEX' }]}
-          style={{ marginLeft: 'auto', width: 64 }}
-        />
+        {showColorFormatPicker ? (
+          <Dropdown
+            value={colorFormat}
+            onChange={(e) => {
+              setColorFormat(e.currentTarget.value === 'RGB' ? 'RGB' : 'HEX');
+            }}
+            options={[{ value: 'RGB' }, { value: 'HEX' }]}
+            style={{ marginLeft: 'auto', width: 64 }}
+          />
+        ) : null}
       </div>
 
       {prev

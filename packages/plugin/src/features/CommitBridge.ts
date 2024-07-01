@@ -229,6 +229,19 @@ export class CommitBridge {
     const targetCommit = this.getCommitByIndex(targetCommitIndex);
     if (!targetCommit) return;
     this.setLocalPluginData(targetCommit, this.pluginData.commits.slice(targetCommitIndex));
+    this.commit(targetCommit);
+
+    // TODO
+    // const timestamp = +new Date()
+
+    // const newCommit: ICommit = {
+    //   ...targetCommit,
+    //   id: `${timestamp}`,
+    //   summary: `[Restore] ${targetCommit.summary}`,
+    //   description: '',
+    //   date: timestamp
+    // }
+
     await this.setLocalVariablesToCommit();
     await this.emitData();
   }

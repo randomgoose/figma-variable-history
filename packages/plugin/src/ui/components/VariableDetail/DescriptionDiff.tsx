@@ -36,7 +36,9 @@ export function DescriptionDiff({ current, prev }: { current: Variable; prev?: V
             marginTop: 8,
           }}
         >
-          {content}
+          {content || (
+            <span style={{ color: 'var(--figma-color-text-tertiary)' }}>No description</span>
+          )}
         </div>
       </div>
     </div>

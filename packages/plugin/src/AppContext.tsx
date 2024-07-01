@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createContext, h } from 'preact';
-import { Dispatch, StateUpdater, useMemo, useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import { ReactNode } from 'preact/compat';
 import { on } from '@create-figma-plugin/utilities';
 
@@ -28,8 +28,6 @@ interface AppContext {
     }
   >;
   setColorFormat: (format: AppContext['colorFormat']) => void;
-  enableGitHubSync: boolean;
-  setEnableGitHubSync: Dispatch<StateUpdater<boolean>>;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -41,8 +39,6 @@ export const AppContext = createContext<AppContext>({
   variableAliases: {},
   resolvedVariableValues: {},
   setColorFormat: () => null,
-  enableGitHubSync: false,
-  setEnableGitHubSync: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -97,8 +93,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       variableAliases,
       resolvedVariableValues,
       setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
-      enableGitHubSync,
-      setEnableGitHubSync,
     };
   }, [
     setting,

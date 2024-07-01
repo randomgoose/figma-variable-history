@@ -5,22 +5,18 @@ import { GitHubLogo } from '../icons/GitHubLogo';
 import styles from '../styles.module.css';
 import { useContext } from 'preact/hooks';
 import { AppContext } from '../../AppContext';
-import { SyncGit } from '../components/SyncGit';
+import { GitSettings } from '../components/forms/GitSettings';
+import { emit } from '@create-figma-plugin/utilities';
 
 export function Settings() {
-  const { enableGitHubSync, setEnableGitHubSync } = useContext(AppContext);
+  const { setting } = useContext(AppContext);
 
   return (
     <div className={styles.settings__container}>
       <h3 className={styles.settings__heading}>Settings</h3>
 
       <div className={styles.settings__block}>
-        <div
-          className={styles.settings__blockHeader}
-          onClick={() => {
-            setEnableGitHubSync((prev) => !prev);
-          }}
-        >
+        <div className={styles.settings__blockHeader}>
           <GitHubLogo />
           <div>
             <div className={styles.settings__blockTitle}>Sync to GitHub Repository</div>
@@ -30,17 +26,21 @@ export function Settings() {
           </div>
           <div style={{ marginLeft: 'auto' }}>
             <Toggle
-              value={enableGitHubSync}
-              onChange={(e) => setEnableGitHubSync(e.currentTarget.checked)}
+              value={setting?.git?.enabled || false}
+              onChange={(e) =>
+                emit('SET_PLUGIN_SETTING', {
+                  git: { ...setting?.git, enabled: e.currentTarget.checked },
+                })
+              }
             >
               <Text style={{ opacity: 0 }}>On</Text>
             </Toggle>
           </div>
         </div>
 
-        {enableGitHubSync ? (
+        {setting?.git?.enabled ? (
           <div className={styles.settings__blockContent}>
-            <SyncGit />
+            <GitSettings />
           </div>
         ) : null}
       </div>

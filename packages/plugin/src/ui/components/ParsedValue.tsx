@@ -3,7 +3,7 @@ import styles from '../styles.module.css';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h } from 'preact';
 import { convertRgbColorToHexColor, emit } from '@create-figma-plugin/utilities';
-import { convertFigmaRGBtoString } from '../../utils/color';
+import { convertFigmaRGBtoString, formatPercentage } from '../../utils/color';
 import { copyText } from '../../utils/text';
 import { useContext, useEffect } from 'preact/hooks';
 import { GetVariableByIdHandler, ResolveVariableValueHandler } from '../../types';
@@ -81,7 +81,7 @@ export function ParsedValue({
     const isAlias = 'id' in value;
     const alias = isAlias ? variableAliases[value.id] : '';
     const resolvedValue = isAlias
-      ? resolvedVariableValues[variable.id]?.valuesByMode[modeId].value
+      ? resolvedVariableValues[variable.id]?.valuesByMode[modeId]?.value
       : value;
 
     switch (variable.resolvedType) {
@@ -101,13 +101,18 @@ export function ParsedValue({
             format === 'RGB'
               ? convertFigmaRGBtoString(resolvedValue)
               : 'a' in resolvedValue
-              ? `#${convertRgbColorToHexColor(resolvedValue)}`
+              ? `#${convertRgbColorToHexColor(resolvedValue)} ${
+                  resolvedValue.a === 1 ? '' : parseFloat(formatPercentage(resolvedValue.a)) + '%'
+                }`
               : `#${convertRgbColorToHexColor(resolvedValue)}`;
 
           return (
             <CopyTextWrapper text={parsedValue}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div className={styles.swatch} style={{ background: parsedValue }} />
+                <div
+                  className={styles.swatch}
+                  style={{ background: convertFigmaRGBtoString(resolvedValue) }}
+                />
                 <div
                   className={isAlias ? styles.variable__pill : undefined}
                   style={{ textWrap: 'nowrap' }}
