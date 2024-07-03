@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Helvetica, Arial, sans-serif;
+  font-display: optional;
+}
+
+body {
+  background-color: var(--figma-color-bg);
+  color: var(--figma-color-text);
+  font-size: 11px;
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-[14px] py-2 rounded-md bg-[color:var(--figma-color-bg-brand)] text-white font-medium;
+  }
+
+  .btn-outline {
+    @apply px-[14px] py-2 rounded-md border border-[color:var(--figma-color-border-strong)] font-medium shrink-0;
+  }
+
+  .dialog-overlay {
+    @apply fixed inset-0 bg-black/70;
+  }
+
+  .dialog-content {
+    @apply bg-white max-w-[480px] h-full overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-sm data-[state=open]:animate-contentShow;
+  }
+}
