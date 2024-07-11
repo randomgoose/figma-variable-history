@@ -15,7 +15,7 @@ export function GroupedChanges({
   onClickVariableItem: (id: string) => void;
 }) {
   const [collectionList, setCollectionList] = useState<VariableCollection['id'][]>([]);
-  const { collections } = useContext(AppContext);
+  const { collections, commits } = useContext(AppContext);
 
   const toggleCollectionList = (id: string) => {
     if (collectionList.includes(id)) {
@@ -28,6 +28,23 @@ export function GroupedChanges({
   useEffect(() => {
     setCollectionList(collections.map((c) => c.id));
   }, [collections]);
+
+  // Find collection name from history commits
+  const findCollectionName = (collectionId: string) => {
+    const existingCollection = collections.find((c) => c.id === collectionId);
+
+    if (existingCollection) {
+      return existingCollection.name;
+    } else {
+      const commit = commits.find((commit) =>
+        commit.collections.findIndex((collection) => collection.id === collectionId)
+      );
+      return (
+        commit?.collections.find((collection) => collection.id === collectionId)?.name ||
+        collectionId
+      );
+    }
+  };
 
   return (
     <Root type="multiple" value={collectionList}>
@@ -52,7 +69,7 @@ export function GroupedChanges({
                   <ChevronRight size={11} />
                 </div>
                 <div className="overflow-hidden text-ellipsis whitespace-nowrap">
-                  {collections.find((c) => c.id === collectionId)?.name || collectionId}
+                  {findCollectionName(collectionId) || collectionId}
                 </div>
 
                 <div

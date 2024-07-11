@@ -2,13 +2,14 @@
 import { h } from 'preact';
 import { useContext, useEffect, useMemo, useState } from 'preact/hooks';
 import { emit, once } from '@create-figma-plugin/utilities';
-import { Textbox } from '@create-figma-plugin/ui';
+import { Button, Textbox } from '@create-figma-plugin/ui';
 
 import { syncToGit, SyncToGitStage, SyncToGitResult } from '../../features/sync-to-git';
 import { AppContext } from '../../AppContext';
 import {
   ConvertCommitVariablesToCssHandler,
   ConvertCommitVariablesToCssDoneHandler,
+  SetPluginSettingHandler,
 } from '../../types';
 import styles from '../styles.module.css';
 
@@ -118,7 +119,7 @@ export function SyncGit() {
       </div>
 
       <div>
-        {/* <Button
+        <Button
           onClick={() => {
             emit<SetPluginSettingHandler>('SET_PLUGIN_SETTING', { git: gitInfo });
           }}
@@ -127,7 +128,7 @@ export function SyncGit() {
         </Button>
         <Button style={{ marginLeft: 20 }} disabled={disabled} onClick={() => sync()}>
           Confirm
-        </Button> */}
+        </Button>
       </div>
     </div>
   );

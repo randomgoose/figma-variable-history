@@ -147,6 +147,7 @@ div:has(> .collectionList)::-webkit-scrollbar {
   display: flex;
   align-items: center;
   gap: 4px;
+  margin-top: 8px;
 }
 
 .commitItem__avatar {
@@ -309,4 +310,8 @@ div:has(> .collectionList)::-webkit-scrollbar {
 
 .settings__blockContent {
   padding-top: 16px;
+}
+
+.red {
+  background-color: red;
 }

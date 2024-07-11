@@ -24,7 +24,7 @@ Not supports in Firefox and IE */
 }
 
 div:has(> .collectionList)::-webkit-scrollbar {
-  width: 0;
+  width: 1px;
 }
 
 .collectionItem {

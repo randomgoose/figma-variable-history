@@ -25,10 +25,11 @@ export async function generateChangeLog() {
   }
   if (!container) {
     container = figma.createFrame();
-    container.layoutMode = 'VERTICAL';
+    container.layoutMode = 'HORIZONTAL';
+    container.fills = [];
     container.layoutSizingHorizontal = 'HUG';
-    container.verticalPadding = 24;
-    container.horizontalPadding = 24;
+    container.layoutSizingVertical = 'HUG';
+    container.itemSpacing = 96;
     container.cornerRadius = 16;
     container.name = 'Container';
     nodeMapCache.root = container.id;

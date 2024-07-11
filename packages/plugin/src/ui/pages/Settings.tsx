@@ -5,8 +5,8 @@ import { GitHubLogo } from '../icons/GitHubLogo';
 import styles from '../styles.module.css';
 import { useContext } from 'preact/hooks';
 import { AppContext } from '../../AppContext';
-import { GitSettings } from '../components/forms/GitSettings';
 import { emit } from '@create-figma-plugin/utilities';
+import { SyncGit } from '../components/SyncGit';
 
 export function Settings() {
   const { setting } = useContext(AppContext);
@@ -40,7 +40,8 @@ export function Settings() {
 
         {setting?.git?.enabled ? (
           <div className={styles.settings__blockContent}>
-            <GitSettings />
+            <SyncGit />
+            {/* <GitSettings /> */}
           </div>
         ) : null}
       </div>

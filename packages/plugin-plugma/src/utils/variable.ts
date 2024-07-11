@@ -137,7 +137,7 @@ export function getVariableChangesGroupedByCollection({
 }) {
   const groupedCurrent = groupBy(current, (d) => d.variableCollectionId);
   const groupedPrev = groupBy(prev, (d) => d.variableCollectionId);
-
+  // TODO: Removed collection will not be shown
   return Object.fromEntries(
     Object.entries(groupedCurrent).map(([collectionId, variables]) => [
       collectionId,

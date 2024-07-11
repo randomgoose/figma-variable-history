@@ -10,17 +10,9 @@ export function VariablePill(props: VariablePillProps) {
   const { type, value } = props;
 
   const styles = {
-    width: 'fit-content',
-    height: 20,
     backgroundColor: 'var(--figma-color-bg-secondary)',
     color: 'var(--figma-color-text-primary)',
     border: '1px solid var(--figma-color-border)',
-    borderRadius: 4,
-    display: 'flex',
-    alignItems: 'center',
-    paddingLeft: 3,
-    paddingRight: 5,
-    gap: 3,
   };
 
   const renderIcon = () => {
@@ -59,8 +51,11 @@ export function VariablePill(props: VariablePillProps) {
   };
 
   return (
-    <div style={{ ...styles }}>
-      {renderIcon()}
+    <div
+      className="w-fit max-w-full overflow-hidden whitespace-nowrap text-ellipsis h-5 border rounded-[4px] items-center pl-[3px] pr-[5px] gap-[3px]"
+      style={{ ...styles }}
+    >
+      <span className="[&>*]:inline-block">{renderIcon()}</span>
       {value}
     </div>
   );

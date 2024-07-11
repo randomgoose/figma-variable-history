@@ -5,14 +5,27 @@ import { useContext, useEffect, ReactNode } from 'react';
 import { AppContext } from '../../AppContext';
 import { VariablePill } from './VariablePill';
 import { toast } from 'sonner';
+import clsx from 'clsx';
 
-function CopyTextWrapper({ children, text }: { children: ReactNode; text: string }) {
+function CopyTextWrapper({
+  children,
+  text,
+  allowCopy,
+}: {
+  children: ReactNode;
+  text: string;
+  allowCopy?: boolean;
+}) {
   return (
     <div
-      className={'py-1 px-1.5 rounded-[4px] transition-all duration-200'}
+      className={
+        'max-w-full text-ellipsis whitespace-nowrap overflow-hidden py-1 px-1.5 rounded-[4px] transition-all duration-200 hover:bg-[color:var(--figma-color-bg-secondary)] cursor-pointer active:scale-95'
+      }
       onClick={() => {
-        copyText(text);
-        toast(`Copied ${text}!`, { duration: 1000 });
+        if (allowCopy) {
+          copyText(text);
+          toast(`Copied ${text}!`, { duration: 1000 });
+        }
       }}
     >
       {children}
@@ -23,11 +36,15 @@ function CopyTextWrapper({ children, text }: { children: ReactNode; text: string
 export function ParsedValue({
   variable,
   modeId,
-  format,
+  option = { format: 'HEX', showLabel: true, allowCopy: true },
 }: {
   variable: Variable;
   modeId: string;
-  format?: 'RGB' | 'HEX';
+  option?: {
+    format?: 'RGB' | 'HEX';
+    showLabel?: boolean;
+    allowCopy?: boolean;
+  };
 }) {
   const value = variable.valuesByMode[modeId];
   const { resolvedVariableValues, variableAliases } = useContext(AppContext);
@@ -43,11 +60,12 @@ export function ParsedValue({
         '*'
       );
       parent.postMessage(
-        { pluginMessage: { type: 'GET_VARIABLE_BY_ID', payload: value.id }, pluginId: '*' },
+        {
+          pluginMessage: { type: 'GET_VARIABLE_BY_ID', payload: value.id },
+          pluginId: '*',
+        },
         '*'
       );
-      // emit<ResolveVariableValueHandler>('RESOLVE_VARIABLE_VALUE', { variable, modeId });
-      // emit<GetVariableByIdHandler>('GET_VARIABLE_BY_ID', value.id);
     }
   }, [value, variable]);
 
@@ -100,18 +118,16 @@ export function ParsedValue({
     switch (variable.resolvedType) {
       case 'BOOLEAN':
         return resolvedValue === true ? (
-          <VariablePill type="TRUE" value={variableAliases[(value as VariableAlias).id]} />
+          <VariablePill type="TRUE" value={alias} />
         ) : (
-          <VariablePill type="FALSE" value={variableAliases[(value as VariableAlias).id]} />
+          <VariablePill type="FALSE" value={alias} />
         );
       case 'STRING':
-        return (
-          <VariablePill type={'STRING'} value={variableAliases[(value as VariableAlias).id]} />
-        );
+        return <VariablePill type={'STRING'} value={alias} />;
       case 'COLOR':
         if (typeof resolvedValue === 'object' && 'r' in resolvedValue) {
           const parsedValue =
-            format === 'RGB'
+            option?.format === 'RGB'
               ? convertFigmaRGBtoString(resolvedValue)
               : 'a' in resolvedValue
               ? `#${convertRgbColorToHexColor(resolvedValue)} ${
@@ -123,19 +139,23 @@ export function ParsedValue({
             <CopyTextWrapper text={parsedValue}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div
-                  className={'w-4 h-4 rounded-[1px] border border-black/10 shrink-0'}
+                  className={
+                    'w-4 h-4 rounded-[1px] border border-black/10 shrink-0 flex items-center'
+                  }
                   style={{ background: convertFigmaRGBtoString(resolvedValue) }}
                 />
-                <div
-                  className={
-                    isAlias
-                      ? 'block px-[5px] py-0 rounded-[4px] bg-[color:var(--figma-color-bg-secondary) h-5 leading-4]'
-                      : undefined
-                  }
-                  style={{ textWrap: 'nowrap' }}
-                >
-                  {alias || parsedValue}
-                </div>
+                {option?.showLabel ? (
+                  <div
+                    className={clsx(
+                      'max-w-full truncate',
+                      isAlias
+                        ? 'hover:max-w-fit px-[5px] py-0 rounded-[4px] bg-[color:var(--figma-color-bg-secondary)] border border-[color:var(--figma-color-border)] h-5 leading-4'
+                        : undefined
+                    )}
+                  >
+                    {alias || parsedValue}
+                  </div>
+                ) : null}
               </div>
             </CopyTextWrapper>
           );
@@ -144,8 +164,8 @@ export function ParsedValue({
         }
       case 'FLOAT':
         return (
-          <CopyTextWrapper text={resolvedValue + ''}>
-            <VariablePill value={resolvedValue as any} type="FLOAT" />
+          <CopyTextWrapper allowCopy={option.allowCopy} text={resolvedValue + ''}>
+            <VariablePill value={alias} type="FLOAT" />
           </CopyTextWrapper>
         );
       default:

@@ -11,6 +11,10 @@ export default async function () {
     switch (msg.type) {
       case 'INIT':
         await commitBridge.emitData();
+        figma.ui.postMessage({
+          type: 'PLUGIN_SETTING',
+          payload: figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING),
+        });
         break;
       case 'COMMIT':
         await commitBridge.commit(msg.payload);
@@ -145,6 +149,4 @@ export default async function () {
   // 		figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING)
   // 	);
   // });
-
-  // emit<PluginSettingHandler>('PLUGIN_SETTING', figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING));
 }

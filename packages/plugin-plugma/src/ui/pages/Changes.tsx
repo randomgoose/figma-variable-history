@@ -4,6 +4,9 @@ import { AppContext } from '../../AppContext';
 import { getVariableChangesGroupedByCollection } from '../../utils/variable';
 import { GroupedChanges } from '../components/GroupedChanges';
 import { CommitModal } from '../components/CommitModal';
+import { Search } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { EmptyState } from '../components';
 
 export function Changes() {
   const [, setCollectionList] = useState<VariableCollection['id'][]>([]);
@@ -25,25 +28,40 @@ export function Changes() {
     (acc, { added, modified, removed }) => acc + added.length + modified.length + removed.length,
     0
   );
+
+  useEffect(() => {
+    setSelected('');
+  }, [numOfChanges]);
+
   const disabled = numOfChanges === 0;
 
   return (
-    <div className="w-full flex" style={{ height: 'calc(100vh - 41px)' }}>
-      <div className={'flex flex-col border-r shrink-0'} style={{ width: selected ? 240 : '100%' }}>
+    <div className="w-full flex" style={{ height: 'calc(100vh - 40px)' }}>
+      <div className={'flex flex-col border-r shrink-0 w-60'}>
         <div style={{ height: 'calc(100% - 57px)', background: 'var(--figma-color-bg-secondary)' }}>
-          <input
-            placeholder="Search variables"
-            className="h-[41px] w-full flex-shrink-0 rounded-none border-b outline-none px-4"
-          />
+          <div className="relative">
+            <Search
+              className="absolute text-[color:var(--figma-color-icon-tertiary)] top-1/2 left-3 -translate-y-1/2"
+              size={13}
+            />
+            <input
+              placeholder="Search variables"
+              className="h-10 w-full flex-shrink-0 rounded-none border-b outline-none px-4 pl-8"
+            />
+          </div>
           <div
             className="[&::-webkit-scrollbar]:w-0"
-            style={{ padding: 6, height: 'calc(100% - 41px)', overflow: 'auto' }}
+            style={{ padding: 6, height: 'calc(100% - 40px)', overflow: 'auto' }}
           >
-            <div className="flex flex-col overflow-auto">
-              <GroupedChanges
-                groupedChanges={groupedChanges}
-                onClickVariableItem={(id) => setSelected(id)}
-              />
+            <div className="flex flex-col overflow-auto h-full">
+              {numOfChanges > 0 ? (
+                <GroupedChanges
+                  groupedChanges={groupedChanges}
+                  onClickVariableItem={(id) => setSelected((prev) => (prev === id ? '' : id))}
+                />
+              ) : (
+                <EmptyState />
+              )}
             </div>
           </div>
         </div>
@@ -57,7 +75,7 @@ export function Changes() {
         </div>
       </div>
 
-      {selected ? <VariableDetail id={selected} /> : null}
+      <AnimatePresence>{selected ? <VariableDetail id={selected} /> : null}</AnimatePresence>
     </div>
   );
 }

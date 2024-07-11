@@ -5,6 +5,7 @@ import { Changes } from './ui/pages/Changes';
 import { Settings } from './ui/pages/Settings';
 import { Root, List, Trigger, Content } from '@radix-ui/react-tabs';
 import { Toaster } from 'sonner';
+import { Settings2 } from 'lucide-react';
 
 function Plugin() {
   const { commits } = useContext(AppContext);
@@ -27,10 +28,6 @@ function Plugin() {
       value: 'commits',
       children: <Commits commits={commits} />,
     },
-    {
-      value: 'settings',
-      children: <Settings />,
-    },
   ];
 
   return (
@@ -45,12 +42,23 @@ function Plugin() {
             {value}
           </Trigger>
         ))}
+
+        <Trigger
+          value="settings"
+          className="ml-auto w-7 h-7 flex items-center justify-center rounded-sm hover:bg-[color:var(--figma-color-bg-secondary)] data-[state=active]:bg-[color:var(--figma-color-bg-secondary)]"
+        >
+          <Settings2 size={14} />
+        </Trigger>
       </List>
       {tabs.map(({ value, children }) => (
         <Content value={value} key={value}>
           {children}
         </Content>
       ))}
+
+      <Content value="settings">
+        <Settings />
+      </Content>
     </Root>
     // <Tabs
     //   onValueChange={(value) => setTab(value)}

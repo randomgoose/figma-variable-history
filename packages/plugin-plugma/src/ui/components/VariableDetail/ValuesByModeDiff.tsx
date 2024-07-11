@@ -1,15 +1,13 @@
-import styles from '../../styles.module.css';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useContext } from 'react';
 import { ParsedValue } from '../ParsedValue';
 
 import { AppContext } from '../../../AppContext';
 import { isSameVariableValue } from '../../../utils/variable';
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-dropdown-menu';
+import { ArrowRight } from 'lucide-react';
 
 export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: Variable }) {
-  const { collections, colorFormat } = useContext(AppContext);
+  const { collections, colorFormat, setColorFormat } = useContext(AppContext);
   const collection = collections.find((c) => c.id === current?.variableCollectionId);
 
   const changedValues = prev
@@ -36,18 +34,32 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
   const showColorFormatPicker = current.resolvedType === 'COLOR';
 
   return showValuesByMode ? (
-    <div className={styles.variableDetail__section}>
+    <div className={'variableDetail-section'}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <h3 className={styles.variableDetail__sectionTitle} style={{ margin: 0 }}>
+        <h3 className={'variableDetail-sectionTitle'} style={{ margin: 0 }}>
           Values
         </h3>
         {showColorFormatPicker ? (
           <Root>
-            <Trigger>{colorFormat}</Trigger>
+            <Trigger className="ml-auto">{colorFormat}</Trigger>
             <Portal>
-              <Content>
-                <Item>RGB</Item>
-                <Item>HEX</Item>
+              <Content className="dropdown-content">
+                <Item
+                  className="dropdown-item"
+                  onClick={() => {
+                    setColorFormat('RGB');
+                  }}
+                >
+                  RGB
+                </Item>
+                <Item
+                  className="dropdown-item"
+                  onClick={() => {
+                    setColorFormat('HEX');
+                  }}
+                >
+                  HEX
+                </Item>
               </Content>
             </Portal>
           </Root>
@@ -64,26 +76,45 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
 
       {prev
         ? changedValues.map(([modeId]) => (
-            <div className={styles.variableDetail__item} key={modeId}>
-              <div>{collection?.modes.find((mode) => mode.modeId === modeId)?.name}</div>
+            <div className={'variableDetail-item'} key={modeId}>
               <div>
-                <ParsedValue variable={prev} modeId={modeId} format={colorFormat} />
+                {collection?.modes.find((mode) => mode.modeId === modeId)?.name || 'Removed mode'}
               </div>
-              <div className={styles.variableDetail__itemArrow}>{/* <IconArrowRight16 /> */}</div>
               <div>
-                <ParsedValue variable={current} modeId={modeId} format={colorFormat} />
+                <ParsedValue
+                  variable={prev}
+                  modeId={modeId}
+                  option={{ format: colorFormat, showLabel: true }}
+                />
+              </div>
+              <div className={'variableDetail-itemArrow'}>
+                <ArrowRight className="text-[color:var(--figma-color-icon-tertiary)]" size={14} />
+                {/* <IconArrowRight16 /> */}
+              </div>
+              <div>
+                <ParsedValue
+                  variable={current}
+                  modeId={modeId}
+                  option={{ format: colorFormat, showLabel: true }}
+                />
               </div>
             </div>
           ))
         : Object.entries(current?.valuesByMode).map(([modeId]) => (
             <div
-              className={styles.variableDetail__item}
+              className={'variableDetail-item'}
               style={{ display: 'flex', alignItems: 'center' }}
               key={modeId}
             >
-              <div>{collection?.modes.find((mode) => mode.modeId === modeId)?.name}</div>
               <div>
-                <ParsedValue variable={current} modeId={modeId} format={colorFormat} />
+                {collection?.modes.find((mode) => mode.modeId === modeId)?.name || 'Removed mode'}
+              </div>
+              <div>
+                <ParsedValue
+                  variable={current}
+                  modeId={modeId}
+                  option={{ format: colorFormat, showLabel: true }}
+                />
               </div>
             </div>
           ))}

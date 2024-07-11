@@ -55,7 +55,7 @@ export async function syncToGit({
     }
 
     try {
-      return await request({
+      await request({
         url: `${baseUrl}/git/refs`,
         method: 'POST',
         headers,
@@ -102,7 +102,7 @@ export async function syncToGit({
 
   async function createPullRequest(baseBranch: string) {
     try {
-      const { url } = await request({
+      const { html_url } = await request({
         url: `${baseUrl}/pulls`,
         method: 'POST',
         headers,
@@ -113,7 +113,7 @@ export async function syncToGit({
           base: baseBranch,
         },
       });
-      response.prURL = url;
+      response.prURL = html_url;
     } catch (error: any) {
       // status 422: branch already exists
       if (error.status === 422) {

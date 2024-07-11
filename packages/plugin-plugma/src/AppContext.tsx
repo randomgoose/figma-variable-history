@@ -54,18 +54,18 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
           setCommits(payload);
           break;
         case 'RESOLVE_VARIABLE_VALUE_DONE':
-          setResolvedVariableValues({
-            ...resolvedVariableValues,
+          setResolvedVariableValues((prev) => ({
+            ...prev,
             [payload.id]: {
               valuesByMode: {
-                ...resolvedVariableValues[payload.id]?.valuesByMode,
+                ...prev[payload.id]?.valuesByMode,
                 [payload.modeId]: { value: payload.value, resolvedType: payload.resolvedType },
               },
             },
-          });
+          }));
           break;
         case 'SET_VARIABLE_ALIAS':
-          setVariableAliases({ ...variableAliases, [payload.id]: payload.name });
+          setVariableAliases((prev) => ({ ...prev, [payload.id]: payload.name }));
           break;
         case 'PLUGIN_SETTING':
           setSetting(payload);

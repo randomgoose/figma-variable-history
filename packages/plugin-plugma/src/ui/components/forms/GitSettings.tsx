@@ -62,7 +62,7 @@ export function GitSettings() {
                 {key}
               </div>
               <input
-                width={240}
+                className="input w-60"
                 value={value}
                 placeholder={placeholder[key] || key}
                 onChange={(e) =>
@@ -77,6 +77,7 @@ export function GitSettings() {
         })}
 
       <button
+        className="btn-outline w-60"
         onClick={() => {
           parent.postMessage(
             {

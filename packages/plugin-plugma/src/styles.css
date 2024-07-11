@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -18,6 +20,10 @@ body {
     @apply px-[14px] py-2 rounded-md bg-[color:var(--figma-color-bg-brand)] text-white font-medium;
   }
 
+  .btn-primary:disabled {
+    @apply bg-[color:var(--figma-color-bg-disabled)];
+  }
+
   .btn-outline {
     @apply px-[14px] py-2 rounded-md border border-[color:var(--figma-color-border-strong)] font-medium shrink-0;
   }
@@ -28,5 +34,45 @@ body {
 
   .dialog-content {
     @apply bg-white max-w-[480px] h-full overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-sm data-[state=open]:animate-contentShow;
+  }
+
+  .input {
+    @apply h-7 p-2 border border-[color:var(--figma-color-border)] rounded-sm text-[color:var(--figma-color-text)];
+  }
+
+  .dropdown-content {
+    @apply bg-[color:#1e1e1e] rounded-sm py-2 shadow-sm;
+  }
+
+  .dropdown-item {
+    @apply h-6 flex items-center text-[color:var(--figma-color-text-oncomponent)] px-4;
+  }
+
+  .dropdown-item:hover {
+    @apply bg-[color:var(--figma-color-bg-brand)];
+  }
+
+  .variableItem {
+    @apply flex p-2 cursor-default text-[color:var(--figma-color-text)] rounded-md transition-all max-w-full;
+  }
+
+  .variableDetail-section {
+    @apply px-4 py-2 border-b border-[color:var(--figma-color-border)];
+  }
+
+  .variableDetail-item {
+    @apply min-h-8 grid grid-cols-[minmax(0,_1fr)_minmax(0,_1fr)_40px_minmax(0,_1fr)] justify-between text-nowrap gap-2;
+  }
+
+  .variableDetail-item>div {
+    @apply flex items-center h-full grow-0 overflow-hidden;
+  }
+
+  .variableDetail-itemArrow {
+    @apply flex items-center justify-center text-[color:var(--figma-color-icon-secondary)];
+  }
+
+  .variableDetail-sectionTitle {
+    @apply h-8 leading-8 text-[11px] font-semibold;
   }
 }
