@@ -73,4 +73,6 @@ export async function generateChangeLog() {
 
   // update changelog node map
   figmaHelper.setPluginData(PLUGIN_DATA_KEY_CHANGELOG_NODES, nodeMapCache);
+
+  return container;
 }

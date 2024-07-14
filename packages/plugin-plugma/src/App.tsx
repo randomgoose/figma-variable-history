@@ -60,24 +60,6 @@ function Plugin() {
         <Settings />
       </Content>
     </Root>
-    // <Tabs
-    //   onValueChange={(value) => setTab(value)}
-    //   options={[
-    //     {
-    //       value: 'Changes',
-    //       children: <Changes />,
-    //     },
-    //     {
-    //       value: 'Commits',
-    //       children: <Commits commits={commits} />,
-    //     },
-    //     {
-    //       value: 'Sync Git',
-    //       children: <Settings />,
-    //     },
-    //   ]}
-    //   value={tab}
-    // />
   );
 }
 

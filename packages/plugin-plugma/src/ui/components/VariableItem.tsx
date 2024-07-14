@@ -3,16 +3,24 @@ import { String } from '../icons/String';
 import { Boolean } from '../icons/Boolean';
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-context-menu';
 import { VariableChangeType } from '../../types';
-import { ParsedValue } from './ParsedValue';
+import { motion } from 'framer-motion';
+import clsx from 'clsx';
+import { Color } from '../icons/Color';
+
+const MotionTrigger = motion(Trigger);
 
 export function VariableItem({
   variable,
   type,
   onClick,
+  selected,
+  custom,
 }: {
   variable: Variable;
   type: VariableChangeType;
   onClick?: (id: string) => void;
+  selected?: boolean;
+  custom: number;
 }) {
   const { id, name, resolvedType } = variable;
 
@@ -20,13 +28,14 @@ export function VariableItem({
     switch (resolvedType) {
       case 'COLOR':
         return (
-          <div className="[&>*]:p-0 [&>div]:rounded-none">
-            <ParsedValue
-              variable={variable}
-              modeId={Object.keys(variable.valuesByMode)[0]}
-              option={{ showLabel: false, allowCopy: false }}
-            />
-          </div>
+          <Color />
+          // <div className="[&>*]:p-0 [&>div]:rounded-none">
+          //   <ParsedValue
+          //     variable={variable}
+          //     modeId={Object.keys(variable.valuesByMode)[0]}
+          //     option={{ showLabel: false, allowCopy: false }}
+          //   />
+          // </div>
         );
       case 'FLOAT':
         return <Number />;
@@ -98,12 +107,20 @@ export function VariableItem({
 
   return (
     <Root>
-      <Trigger asChild>
+      <MotionTrigger
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        asChild
+        // transition={{ duration: 0.4, delay: custom * 0.01, ease: ['linear'] }}
+        custom={custom}
+      >
         {/* <Link key={id} href={`/variable/${id}`} className={styles.variableItem}> */}
         <div
-          className={
-            'flex h-8 p-2 cursor-default text-[color:var(--figma-color-text)] gap-2 rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)] hover:scale-[1.005] active:scale-[0.995]'
-          }
+          className={clsx(
+            'flex h-8 p-2 cursor-default text-[color:var(--figma-color-text)] gap-2 rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)] hover:scale-[1.005] active:scale-[0.995]',
+            selected ? 'bg-[color:var(--figma-color-bg-brand-tertiary)]' : 'bg-none'
+          )}
           onClick={() => onClick && onClick(id)}
         >
           <div style={{ flexShrink: 0 }}>{icon()}</div>
@@ -111,7 +128,7 @@ export function VariableItem({
           <div className="ml-auto">{renderType(type)}</div>
         </div>
         {/* </Link> */}
-      </Trigger>
+      </MotionTrigger>
       <Portal>
         <Content className={'dropdown-content'} style={{ width: 200 }}>
           <Item

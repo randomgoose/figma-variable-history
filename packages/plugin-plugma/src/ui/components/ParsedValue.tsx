@@ -10,7 +10,7 @@ import clsx from 'clsx';
 function CopyTextWrapper({
   children,
   text,
-  allowCopy,
+  allowCopy = true,
 }: {
   children: ReactNode;
   text: string;

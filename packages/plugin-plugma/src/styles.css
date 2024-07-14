@@ -17,7 +17,7 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply px-[14px] py-2 rounded-md bg-[color:var(--figma-color-bg-brand)] text-white font-medium;
+    @apply flex justify-center items-center px-[14px] py-2 rounded-md bg-[color:var(--figma-color-bg-brand)] text-white font-medium;
   }
 
   .btn-primary:disabled {
@@ -25,7 +25,7 @@ body {
   }
 
   .btn-outline {
-    @apply px-[14px] py-2 rounded-md border border-[color:var(--figma-color-border-strong)] font-medium shrink-0;
+    @apply flex justify-center items-center px-[14px] py-2 max-h-8 rounded-md border border-[color:var(--figma-color-border-strong)] font-medium shrink-0;
   }
 
   .dialog-overlay {
@@ -38,6 +38,14 @@ body {
 
   .input {
     @apply h-7 p-2 border border-[color:var(--figma-color-border)] rounded-sm text-[color:var(--figma-color-text)];
+  }
+
+  .switch-root {
+    @apply w-6 h-3 p-px flex rounded-full data-[state=checked]:justify-end data-[state=checked]:bg-[color:var(--figma-color-bg-inverse)] justify-start bg-[color:var(--figma-color-bg-disabled-secondary)];
+  }
+
+  .switch-thumb {
+    @apply w-2.5 h-2.5 rounded-full bg-white;
   }
 
   .dropdown-content {

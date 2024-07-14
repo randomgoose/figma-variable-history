@@ -42,7 +42,8 @@ export default async function () {
         }
         break;
       case 'GENERATE_CHANGE_LOG':
-        await generateChangeLog();
+        const container = await generateChangeLog();
+        figma.viewport.center = { x: container.x, y: container.y };
         break;
       case 'RESOLVE_VARIABLE_VALUE':
         const resolvedVariableValue = await figmaHelper.resolveVariableAlias(

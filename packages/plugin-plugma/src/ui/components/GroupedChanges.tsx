@@ -3,16 +3,19 @@ import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../AppContext';
 import { VariableItem } from './VariableItem';
 import { ChevronRight } from 'lucide-react';
+import { VariableChangeType } from '../../types';
 
 export function GroupedChanges({
   groupedChanges,
   onClickVariableItem,
+  selected,
 }: {
   groupedChanges: {
     [key: string]: { added: Variable[]; modified: Variable[]; removed: Variable[] };
   };
   // onClickCollectionItem: (id: string) => void;
   onClickVariableItem: (id: string) => void;
+  selected?: string;
 }) {
   const [collectionList, setCollectionList] = useState<VariableCollection['id'][]>([]);
   const { collections, commits } = useContext(AppContext);
@@ -50,7 +53,6 @@ export function GroupedChanges({
     <Root type="multiple" value={collectionList}>
       {Object.entries(groupedChanges).map(([collectionId, { added, modified, removed }]) => {
         const hasChanges = added.length + modified.length + removed.length > 0;
-
         return hasChanges ? (
           <Item
             style={{ background: 'var(--figma-color-bg)' }}
@@ -85,30 +87,23 @@ export function GroupedChanges({
             </Header>
             <Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp overflow-hidden">
               <div className="p-1">
-                {added.map((v) => (
+                {/* <AnimatePresence> */}
+                {/* TODO: Fix this */}
+                {[
+                  ...added.map((v) => ({ v, type: 'added' })),
+                  ...modified.map((v) => ({ v, type: 'modified' })),
+                  ...removed.map((v) => ({ v, type: 'removed' })),
+                ].map(({ v, type }, index) => (
                   <VariableItem
                     key={v.id}
                     variable={v}
-                    type={'added'}
+                    type={type as VariableChangeType}
+                    selected={v.id === selected}
                     onClick={(id) => onClickVariableItem(id)}
+                    custom={index}
                   />
                 ))}
-                {modified.map((v) => (
-                  <VariableItem
-                    key={v.id}
-                    variable={v}
-                    type={'modified'}
-                    onClick={(id) => onClickVariableItem(id)}
-                  />
-                ))}
-                {removed.map((v: Variable) => (
-                  <VariableItem
-                    key={v.id}
-                    variable={v}
-                    type={'removed'}
-                    onClick={(id) => onClickVariableItem(id)}
-                  />
-                ))}
+                {/* </AnimatePresence> */}
               </div>
             </Content>
           </Item>

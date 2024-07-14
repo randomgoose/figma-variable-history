@@ -4,11 +4,25 @@ export function copyText(text: string) {
     input.style.opacity = '0';
     input.style.pointerEvents = 'none';
     input.value = text;
-    document.body.appendChild(input);
+
+    // Find the modal element and append the input to it
+    const modal = document.querySelector('.dialog-content');
+    if (modal) {
+      modal.appendChild(input);
+    } else {
+      document.body.appendChild(input);
+    }
+
     input.select();
     input.setSelectionRange(0, 99999);
     document.execCommand('copy');
-    document.body.removeChild(input);
+
+    // Remove the input from the modal or document body
+    if (modal) {
+      modal.removeChild(input);
+    } else {
+      document.body.removeChild(input);
+    }
   } catch (e) {
     console.error(e);
   }

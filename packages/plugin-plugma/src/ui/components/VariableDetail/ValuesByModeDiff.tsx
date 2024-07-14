@@ -4,7 +4,7 @@ import { ParsedValue } from '../ParsedValue';
 import { AppContext } from '../../../AppContext';
 import { isSameVariableValue } from '../../../utils/variable';
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-dropdown-menu';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 
 export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: Variable }) {
   const { collections, colorFormat, setColorFormat } = useContext(AppContext);
@@ -41,7 +41,10 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
         </h3>
         {showColorFormatPicker ? (
           <Root>
-            <Trigger className="ml-auto">{colorFormat}</Trigger>
+            <Trigger className="ml-auto flex items-center gap-1">
+              {colorFormat}
+              <ChevronDown size={12} style={{ color: 'var(--figma-color-text-tertiary)' }} />
+            </Trigger>
             <Portal>
               <Content className="dropdown-content">
                 <Item

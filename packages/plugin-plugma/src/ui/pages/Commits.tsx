@@ -2,13 +2,13 @@ import styles from '../styles.module.css';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Content, Item, Portal, Root, Trigger } from '@radix-ui/react-context-menu';
 import { HistoryIcon, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 
 // reduce bundle size
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import css from 'react-syntax-highlighter/dist/esm/languages/hljs/css';
+import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 SyntaxHighlighter.registerLanguage('css', css);
 
@@ -19,6 +19,7 @@ import { GroupedChanges } from '../components/GroupedChanges';
 import { VariableDetail } from '../components/VariableDetail';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
+import { copyText } from '../../utils/text';
 
 export function Commits({ commits }: { commits: ICommit[] }) {
   const ref = useRef<HTMLAnchorElement>(null);
@@ -67,15 +68,15 @@ export function Commits({ commits }: { commits: ICommit[] }) {
     );
   }, []);
 
-  const revertCommit = useCallback((commit: ICommit) => {
-    parent.postMessage(
-      {
-        pluginMessage: { type: 'REVERT_COMMIT', payload: commit.id },
-        pluginId: '*',
-      },
-      '*'
-    );
-  }, []);
+  // const revertCommit = useCallback((commit: ICommit) => {
+  //   parent.postMessage(
+  //     {
+  //       pluginMessage: { type: 'REVERT_COMMIT', payload: commit.id },
+  //       pluginId: '*',
+  //     },
+  //     '*'
+  //   );
+  // }, []);
 
   const decodedContent = decodeURIComponent(exportModalContent);
 
@@ -90,8 +91,21 @@ export function Commits({ commits }: { commits: ICommit[] }) {
   }, [commits, selected]);
 
   useEffect(() => {
-    setSelectedVariableId('');
-  }, [selected]);
+    // setSelected('');
+    const firstCollection = Object.values(groupedChanges)?.[0];
+
+    if (firstCollection) {
+      const firstChange = [
+        ...firstCollection.added,
+        ...firstCollection.modified,
+        ...firstCollection.removed,
+      ][0];
+
+      if (firstChange) {
+        setSelectedVariableId(firstChange.id);
+      }
+    }
+  }, [groupedChanges, setSelectedVariableId]);
 
   useEffect(() => {
     if (commits) {
@@ -120,9 +134,14 @@ export function Commits({ commits }: { commits: ICommit[] }) {
           'flex flex-col w-[38px] hover:w-60 transition-all duration-300 border-r border-[color:var(--figma-color-border)]'
         }
       >
-        <div className={'flex items-center pr-4 justify-between'}>
-          <h3 className={'font-semibold leading-4 px-3 py-4'}>
-            <HistoryIcon size={16} className="text-[color:var(--figma-color-text-tertiary)]" />
+        <div className={'flex items-center pr-4 justify-between overflow-hidden'}>
+          <h3 className={'font-medium leading-4 px-3 py-4 flex gap-3 whitespace-nowrap'}>
+            <HistoryIcon
+              size={16}
+              className="text-[color:var(--figma-color-text-tertiary)] shrink-0"
+            />
+            Commit History
+            {/* <div onClick={generateChangelog}>Print Changelog</div> */}
             {/* <FileInput size={14} /> */}
           </h3>
         </div>
@@ -135,57 +154,36 @@ export function Commits({ commits }: { commits: ICommit[] }) {
               const collaborator = commit.collaborators[0];
 
               return (
-                <Root key={commit.id}>
-                  <Trigger asChild>
-                    <div
-                      className={clsx(styles.commitItem, 'shrink-0')}
-                      onClick={() => setSelected(commit.id)}
-                      style={{
-                        background: commit.id === selected ? 'var(--figma-color-bg-selected)' : '',
-                      }}
-                    >
-                      <div className={clsx(styles.commitItem__icon, 'shrink-0')} />
-
-                      <div className={clsx(styles.commitItem__content, 'w-fit')}>
-                        <div className="whitespace-nowrap" style={{ fontWeight: 500 }}>
-                          {commit.summary || 'Untitled commit'}
-                        </div>
-                        {collaborator ? (
-                          <div className={clsx(styles.commitItem__user, 'whitespace-nowrap')}>
-                            <img
-                              className={styles.commitItem__avatar}
-                              src={commit.collaborators[0]?.photoUrl || ''}
-                            />
-                            {commit.collaborators[0]?.name}
-                          </div>
-                        ) : null}
-                        <div
-                          className="mt-2 w-fit whitespace-nowrap"
-                          style={{ color: 'var(--figma-color-text-secondary)' }}
-                        >
-                          {parseDate(commit.date)}
-                        </div>
-                      </div>
+                <div
+                  key={commit.id}
+                  className={clsx(styles.commitItem, 'shrink-0')}
+                  onClick={() => setSelected(commit.id)}
+                  style={{
+                    background: commit.id === selected ? 'var(--figma-color-bg-selected)' : '',
+                  }}
+                >
+                  <div className={clsx(styles.commitItem__icon, 'shrink-0')} />
+                  <div className={clsx(styles.commitItem__content, 'w-fit')}>
+                    <div className="whitespace-nowrap" style={{ fontWeight: 500 }}>
+                      {commit.summary || 'Untitled commit'}
                     </div>
-                  </Trigger>
-
-                  <Portal>
-                    <Content className={styles.dropdown__content}>
-                      <Item className={styles.dropdown__item} onClick={() => revertCommit(commit)}>
-                        Revert this commit
-                      </Item>
-                      <Item className={styles.dropdown__item} onClick={() => resetCommit(commit)}>
-                        Reset to this commit
-                      </Item>
-                      <Item
-                        className={styles.dropdown__item}
-                        onClick={() => convertCommitVariablesToCss(commit)}
-                      >
-                        Export variables
-                      </Item>
-                    </Content>
-                  </Portal>
-                </Root>
+                    {collaborator ? (
+                      <div className={clsx(styles.commitItem__user, 'whitespace-nowrap')}>
+                        <img
+                          className={styles.commitItem__avatar}
+                          src={commit.collaborators[0]?.photoUrl || ''}
+                        />
+                        {commit.collaborators[0]?.name}
+                      </div>
+                    ) : null}
+                    <div
+                      className="mt-2 w-fit whitespace-nowrap"
+                      style={{ color: 'var(--figma-color-text-secondary)' }}
+                    >
+                      {parseDate(commit.date)}
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -194,17 +192,31 @@ export function Commits({ commits }: { commits: ICommit[] }) {
 
       {selectedCommit ? (
         <div className="w-full h-full flex flex-col">
-          <div className="border-b px-4 py-4 flex">
+          <div className="border-b px-4 py-4 flex items-center">
             <div>
-              <div className="font-semibold">{selectedCommit?.summary || 'Untitled commit'}</div>
-              <div style={{ color: 'var(--figma-color-text-secondary)' }}>
-                {selectedCommit?.description || 'No description'}
+              <div className="font-semibold text-xs">
+                {selectedCommit?.summary || 'Untitled commit'}
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className={'flex items-center gap-1 whitespace-nowrap'}>
+                  <img
+                    className={styles.commitItem__avatar}
+                    src={selectedCommit?.collaborators[0]?.photoUrl || ''}
+                  />
+                  {selectedCommit?.collaborators[0]?.name}
+                </div>
+                <div style={{ color: 'var(--figma-color-text-secondary)' }}>
+                  {selectedCommit?.description || 'No description'}
+                </div>
               </div>
             </div>
 
+            <button onClick={() => resetCommit(selectedCommit)} className="btn-outline ml-auto">
+              Restore
+            </button>
             <button
-              style={{ color: 'var(--figma-color-text-brand)' }}
-              className="ml-auto font-medium"
+              onClick={() => convertCommitVariablesToCss(selectedCommit)}
+              className="btn-primary ml-2"
             >
               Export
             </button>
@@ -216,6 +228,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                 style={{ background: 'var(--figma-color-bg-secondary)' }}
               >
                 <GroupedChanges
+                  selected={selectedVariableId}
                   groupedChanges={groupedChanges}
                   onClickVariableItem={(id) => {
                     setSelectedVariableId(id);
@@ -257,13 +270,27 @@ export function Commits({ commits }: { commits: ICommit[] }) {
               className="p-3 flex flex-col gap-3 overflow-auto"
               style={{ height: 'calc(100% - 40px)' }}
             >
-              <SyntaxHighlighter customStyle={{ margin: 0, overflow: 'auto' }} language="CSS">
+              <SyntaxHighlighter
+                style={docco}
+                customStyle={{ height: '100%', margin: 0, overflow: 'auto' }}
+                language="CSS"
+              >
                 {decodedContent}
               </SyntaxHighlighter>
               {/* {decodeURIComponent(exportModalContent)} */}
-              <button className="btn-outline w-full" onClick={onExport}>
-                Export
-              </button>
+              <div className="flex items-center gap-2 w-full">
+                <button
+                  className="btn-outline grow"
+                  onClick={() => {
+                    copyText(decodedContent);
+                  }}
+                >
+                  Copy
+                </button>
+                <button className="btn-primary grow" onClick={onExport}>
+                  Export
+                </button>
+              </div>
             </div>
           </Dialog.Content>
         </Dialog.Portal>

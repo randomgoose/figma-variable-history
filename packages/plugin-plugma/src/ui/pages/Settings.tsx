@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { AppContext } from '../../AppContext';
 import { GitSettings } from '../components/forms/GitSettings';
 import { motion, AnimatePresence } from 'framer-motion';
-import clsx from 'clsx';
+import * as Switch from '@radix-ui/react-switch';
 
 export function Settings() {
   const { setting } = useContext(AppContext);
@@ -22,11 +22,29 @@ export function Settings() {
             </div>
           </div>
           <div style={{ marginLeft: 'auto' }}>
-            <label
+            <Switch.Root
+              className="switch-root"
+              checked={setting.git?.enabled}
+              onCheckedChange={(checked) =>
+                parent.postMessage(
+                  {
+                    pluginMessage: {
+                      type: 'SET_PLUGIN_SETTING',
+                      payload: { git: { ...setting?.git, enabled: checked } },
+                    },
+                    pluginId: '*',
+                  },
+                  '*'
+                )
+              }
+            >
+              <Switch.Thumb className="switch-thumb" />
+            </Switch.Root>
+            {/* <label
               className={clsx(
                 'w-6 h-3 p-px flex rounded-full',
                 setting?.git?.enabled
-                  ? 'justify-end bg-[color:var(--figma-color-bg-brand)]'
+                  ? 'justify-end bg-[color:var(--figma-color-bg-inverse)]'
                   : 'justify-start bg-[color:var(--figma-color-bg-disabled-secondary)]'
               )}
               htmlFor="github"
@@ -50,8 +68,7 @@ export function Settings() {
                 );
               }}
               checked={setting?.git?.enabled}
-            />
-            <span className="slider"></span>
+            /> */}
           </div>
         </div>
 

@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { VariableDetail } from '../components/VariableDetail';
 import { AppContext } from '../../AppContext';
-import { getVariableChangesGroupedByCollection } from '../../utils/variable';
 import { GroupedChanges } from '../components/GroupedChanges';
 import { CommitModal } from '../components/CommitModal';
 import { Search } from 'lucide-react';
@@ -12,17 +11,11 @@ export function Changes() {
   const [, setCollectionList] = useState<VariableCollection['id'][]>([]);
   const [selected, setSelected] = useState<string>('');
 
-  const { variables, collections, commits } = useContext(AppContext);
-  const lastCommit = commits[0];
+  const { groupedChanges, collections, keyword, setKeyword } = useContext(AppContext);
 
   useEffect(() => {
     setCollectionList(collections.map((c) => c.id));
   }, [collections]);
-
-  const groupedChanges = getVariableChangesGroupedByCollection({
-    prev: lastCommit ? lastCommit.variables : [],
-    current: variables,
-  });
 
   const numOfChanges = Object.values(groupedChanges).reduce(
     (acc, { added, modified, removed }) => acc + added.length + modified.length + removed.length,
@@ -32,6 +25,22 @@ export function Changes() {
   useEffect(() => {
     setSelected('');
   }, [numOfChanges]);
+
+  useEffect(() => {
+    const firstCollection = Object.values(groupedChanges)?.[0];
+
+    if (firstCollection) {
+      const firstChange = [
+        ...firstCollection.added,
+        ...firstCollection.modified,
+        ...firstCollection.removed,
+      ][0];
+
+      if (firstChange) {
+        setSelected(firstChange.id);
+      }
+    }
+  }, [groupedChanges]);
 
   const disabled = numOfChanges === 0;
 
@@ -47,6 +56,8 @@ export function Changes() {
             <input
               placeholder="Search variables"
               className="h-10 w-full flex-shrink-0 rounded-none border-b outline-none px-4 pl-8"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
             />
           </div>
           <div
@@ -56,6 +67,7 @@ export function Changes() {
             <div className="flex flex-col overflow-auto h-full">
               {numOfChanges > 0 ? (
                 <GroupedChanges
+                  selected={selected}
                   groupedChanges={groupedChanges}
                   onClickVariableItem={(id) => setSelected((prev) => (prev === id ? '' : id))}
                 />
