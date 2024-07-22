@@ -9,13 +9,14 @@ export function GroupedChanges({
   groupedChanges,
   onClickVariableItem,
   selected,
+  disableInteraction = false,
 }: {
   groupedChanges: {
     [key: string]: { added: Variable[]; modified: Variable[]; removed: Variable[] };
   };
-  // onClickCollectionItem: (id: string) => void;
   onClickVariableItem: (id: string) => void;
   selected?: string;
+  disableInteraction?: boolean;
 }) {
   const [collectionList, setCollectionList] = useState<VariableCollection['id'][]>([]);
   const { collections, commits } = useContext(AppContext);
@@ -39,9 +40,11 @@ export function GroupedChanges({
     if (existingCollection) {
       return existingCollection.name;
     } else {
-      const commit = commits.find((commit) =>
-        commit.collections.findIndex((collection) => collection.id === collectionId)
+      const commit = commits.find(
+        (commit) =>
+          commit.collections.findIndex((collection) => collection.id === collectionId) >= 0
       );
+
       return (
         commit?.collections.find((collection) => collection.id === collectionId)?.name ||
         collectionId
@@ -53,6 +56,7 @@ export function GroupedChanges({
     <Root type="multiple" value={collectionList}>
       {Object.entries(groupedChanges).map(([collectionId, { added, modified, removed }]) => {
         const hasChanges = added.length + modified.length + removed.length > 0;
+
         return hasChanges ? (
           <Item
             style={{ background: 'var(--figma-color-bg)' }}
@@ -101,6 +105,7 @@ export function GroupedChanges({
                     selected={v.id === selected}
                     onClick={(id) => onClickVariableItem(id)}
                     custom={index}
+                    allowDiscard={!disableInteraction}
                   />
                 ))}
                 {/* </AnimatePresence> */}

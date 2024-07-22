@@ -387,6 +387,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                 style={{ background: 'var(--figma-color-bg-secondary)' }}
               >
                 <GroupedChanges
+                  disableInteraction
                   selected={selectedVariableId}
                   groupedChanges={groupedChanges}
                   onClickVariableItem={(id) => {

@@ -15,12 +15,14 @@ export function VariableItem({
   onClick,
   selected,
   custom,
+  allowDiscard = true,
 }: {
   variable: Variable;
   type: VariableChangeType;
   onClick?: (id: string) => void;
   selected?: boolean;
   custom: number;
+  allowDiscard?: boolean;
 }) {
   const { id, name, resolvedType } = variable;
 
@@ -108,6 +110,7 @@ export function VariableItem({
   return (
     <Root>
       <MotionTrigger
+        disabled={!allowDiscard}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

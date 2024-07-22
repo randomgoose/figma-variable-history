@@ -6,6 +6,7 @@ import { AppContext } from '../../AppContext';
 import { VariablePill } from './VariablePill';
 import { toast } from 'sonner';
 import clsx from 'clsx';
+import { sendMessage } from '../../utils/message';
 
 function CopyTextWrapper({
   children,
@@ -52,20 +53,8 @@ export function ParsedValue({
   // Resolve the value if it's an alias
   useEffect(() => {
     if (typeof value === 'object' && 'type' in value) {
-      parent.postMessage(
-        {
-          pluginMessage: { type: 'RESOLVE_VARIABLE_VALUE', payload: { variable, modeId } },
-          pluginId: '*',
-        },
-        '*'
-      );
-      parent.postMessage(
-        {
-          pluginMessage: { type: 'GET_VARIABLE_BY_ID', payload: value.id },
-          pluginId: '*',
-        },
-        '*'
-      );
+      sendMessage('RESOLVE_VARIABLE_VALUE', { variable, modeId });
+      sendMessage('GET_VARIABLE_BY_ID', value.id);
     }
   }, [value, variable]);
 
