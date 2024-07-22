@@ -24,7 +24,7 @@ export function Settings() {
           <div style={{ marginLeft: 'auto' }}>
             <Switch.Root
               className="switch-root"
-              checked={setting.git?.enabled}
+              checked={setting?.git?.enabled}
               onCheckedChange={(checked) =>
                 parent.postMessage(
                   {

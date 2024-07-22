@@ -59,7 +59,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
       const timestamp = +new Date();
 
       if (setting?.git?.enabled && cssContent) {
-        syncGit(timestamp + '', { ...setting.git }).then(() => {
+        syncGit(timestamp + '', { ...setting?.git }).then(() => {
           setShouldSyncGit(false);
         });
       }
@@ -176,12 +176,12 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                       className="truncate font-normal"
                       style={{ color: 'var(--figma-color-text-secondary)' }}
                     >
-                      {setting.git?.repository}
+                      {setting?.git?.repository}
                     </div>
                   </div>
                   <Switch.Root
                     className="switch-root ml-auto"
-                    checked={setting.git?.enabled}
+                    checked={setting?.git?.enabled}
                     onCheckedChange={(checked) =>
                       sendMessage('SET_PLUGIN_SETTING', {
                         git: { ...setting?.git, enabled: checked },
@@ -197,7 +197,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                   disabled={summary.length <= 0}
                   onClick={handleClick}
                 >
-                  {setting.git?.enabled ? 'Commit and sync' : 'Commit'}
+                  {setting?.git?.enabled ? 'Commit and sync' : 'Commit'}
                 </button>
               </>
             )}

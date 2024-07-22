@@ -6,6 +6,7 @@ import { CommitModal } from '../components/CommitModal';
 import { Search } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { EmptyState } from '../components';
+import { Preview } from '../components/Preview';
 
 export function Changes() {
   const [, setCollectionList] = useState<VariableCollection['id'][]>([]);
@@ -94,7 +95,9 @@ export function Changes() {
             current={variables.find((v) => v.id === selected)}
             prev={commits?.[0]?.variables.find((v: Variable) => v.id === selected)}
           />
-        ) : null}
+        ) : numOfChanges > 0 ? null : (
+          <Preview />
+        )}
       </AnimatePresence>
     </div>
   );

@@ -1,30 +1,4 @@
-# Node
-*.log
-*.log.*
-node_modules
-
-# Build
-dist/
-html/
-build/
-
-.DS_Store
-
-# JetBrain
-.idea
-
-#VSCode
-.vscode
-
-# Yarn
-.yarn/
-.yarnrc.yml
-
-# ESlint
-.eslintcache
-packages/home/html.js
-
-*storybook.log
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
@@ -36,13 +10,14 @@ packages/home/html.js
 /coverage
 
 # next.js
-*/.next/
-*/out/
+/.next/
+/out/
 
 # production
 /build
 
 # misc
+.DS_Store
 *.pem
 
 # debug
