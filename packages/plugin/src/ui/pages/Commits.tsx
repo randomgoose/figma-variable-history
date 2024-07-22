@@ -406,7 +406,6 @@ export function Commits({ commits }: { commits: ICommit[] }) {
               <div className="grow overflow-auto" style={{ background: 'var(--figma-color-bg)' }}>
                 {selectedVariableId ? (
                   <VariableDetail
-                    id={selectedVariableId}
                     current={commits
                       .find((c) => c.id === selected)
                       ?.variables.find((v) => v.id === selectedVariableId)}

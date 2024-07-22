@@ -11,7 +11,8 @@ export function Changes() {
   const [, setCollectionList] = useState<VariableCollection['id'][]>([]);
   const [selected, setSelected] = useState<string>('');
 
-  const { groupedChanges, collections, keyword, setKeyword } = useContext(AppContext);
+  const { groupedChanges, collections, keyword, setKeyword, variables, commits } =
+    useContext(AppContext);
 
   useEffect(() => {
     setCollectionList(collections.map((c) => c.id));
@@ -87,7 +88,14 @@ export function Changes() {
         </div>
       </div>
 
-      <AnimatePresence>{selected ? <VariableDetail id={selected} /> : null}</AnimatePresence>
+      <AnimatePresence>
+        {selected ? (
+          <VariableDetail
+            current={variables.find((v) => v.id === selected)}
+            prev={commits?.[0]?.variables.find((v: Variable) => v.id === selected)}
+          />
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
