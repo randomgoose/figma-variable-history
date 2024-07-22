@@ -14,10 +14,11 @@ export interface VariableDetailProps {
 
 export function VariableDetail(props: VariableDetailProps) {
   const { id } = props;
-  const { variables } = useContext(AppContext);
+  const { variables, commits } = useContext(AppContext);
 
   const current = props.current || variables.find((v) => v.id === id);
-  const prev: Variable | undefined = props.prev;
+  const prev: Variable | undefined =
+    props.prev || commits?.[0]?.variables.find((v: Variable) => v.id === id);
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
