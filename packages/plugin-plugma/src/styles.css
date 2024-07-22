@@ -28,12 +28,20 @@ body {
     @apply flex justify-center items-center px-[14px] py-2 max-h-8 rounded-md border border-[color:var(--figma-color-border-strong)] font-medium shrink-0;
   }
 
+  .btn-ghost {
+    @apply flex justify-center items-center rounded-md hover:bg-[color:var(--figma-color-bg-secondary)];
+  }
+
   .dialog-overlay {
     @apply fixed inset-0 bg-black/70;
   }
 
   .dialog-content {
-    @apply bg-white max-w-[480px] h-full overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-sm data-[state=open]:animate-contentShow;
+    @apply bg-white min-w-[280px] max-w-[480px] h-full max-h-[calc(100vh-80px)] overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-sm data-[state=open]:animate-contentShow;
+  }
+
+  .dialog-title {
+    @apply h-10 pl-3 flex items-center font-semibold border-b;
   }
 
   .input {
@@ -58,6 +66,10 @@ body {
 
   .dropdown-item:hover {
     @apply bg-[color:var(--figma-color-bg-brand)];
+  }
+
+  .tooltip-content {
+    @apply px-2 py-1 rounded-sm bg-[color:var(--figma-color-bg-inverse)] text-[color:var(--figma-color-text-oninverse)];
   }
 
   .variableItem {

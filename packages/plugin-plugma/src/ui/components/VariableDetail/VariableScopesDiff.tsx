@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import styles from '../../styles.module.css';
 import { difference, intersection } from 'lodash-es';
 import { ArrowRight } from 'lucide-react';
@@ -26,7 +27,7 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev?
     switch (current.resolvedType) {
       case 'STRING':
         scopeGroups = [
-          { label: 'Show in all supported properties', scopes: ['ALL_SCOPES'] },
+          { label: 'All', scopes: ['ALL_SCOPES'] },
           { label: 'Text content', scopes: ['ALL_SCOPES', 'TEXT_CONTENT'] },
           { label: 'Font family', scopes: ['ALL_SCOPES', 'FONT_FAMILY'] },
           { label: 'Font style', scopes: ['ALL_SCOPES', 'FONT_STYLE'] },
@@ -37,7 +38,7 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev?
         break;
       case 'FLOAT':
         scopeGroups = [
-          { label: 'Show in all supported properties', scopes: ['ALL_SCOPES'] },
+          { label: 'All', scopes: ['ALL_SCOPES'] },
           { label: 'Corner radius', scopes: ['ALL_SCOPES', 'CORNER_RADIUS'] },
           { label: 'Width and height', scopes: ['ALL_SCOPES', 'WIDTH_HEIGHT'] },
           { label: 'Gap', scopes: ['ALL_SCOPES', 'GAP'] },
@@ -55,7 +56,7 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev?
         break;
       default:
         scopeGroups = [
-          { label: 'Show in all supported properties', scopes: ['ALL_SCOPES'] },
+          { label: 'All', scopes: ['ALL_SCOPES'] },
           { label: 'Fill', scopes: ['ALL_SCOPES', 'ALL_FILLS'] },
           { label: 'Frame', scopes: ['ALL_SCOPES', 'ALL_FILLS', 'FRAME_FILL'], sub: true },
           { label: 'Shape', scopes: ['ALL_SCOPES', 'ALL_FILLS', 'SHAPE_FILL'], sub: true },
@@ -74,7 +75,7 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev?
 
     return (
       <div>
-        <h3 className={styles.variableDetail__sectionTitle} style={{ textTransform: 'capitalize' }}>
+        <h3 className={clsx(styles.variableDetail__sectionTitle, 'capitalize')}>
           {current.resolvedType.toLowerCase()} Scoping
         </h3>
         <div className="grid" style={{ gridTemplateColumns: 'minmax(0, 1fr) 40px minmax(0, 1fr)' }}>

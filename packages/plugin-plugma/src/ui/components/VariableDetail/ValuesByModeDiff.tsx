@@ -66,15 +66,7 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
               </Content>
             </Portal>
           </Root>
-        ) : // <Dropdown
-        //   value={colorFormat}
-        //   onChange={(e) => {
-        //     setColorFormat(e.currentTarget.value === 'RGB' ? 'RGB' : 'HEX');
-        //   }}
-        //   options={[{ value: 'RGB' }, { value: 'HEX' }]}
-        //   style={{ marginLeft: 'auto', width: 64 }}
-        // />
-        null}
+        ) : null}
       </div>
 
       {prev

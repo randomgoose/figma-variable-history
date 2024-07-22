@@ -69,7 +69,7 @@ export function Changes() {
                 <GroupedChanges
                   selected={selected}
                   groupedChanges={groupedChanges}
-                  onClickVariableItem={(id) => setSelected((prev) => (prev === id ? '' : id))}
+                  onClickVariableItem={(id) => setSelected(id)}
                 />
               ) : (
                 <EmptyState />

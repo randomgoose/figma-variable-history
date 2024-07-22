@@ -6,6 +6,7 @@ import { Settings } from './ui/pages/Settings';
 import { Root, List, Trigger, Content } from '@radix-ui/react-tabs';
 import { Toaster } from 'sonner';
 import { Settings2 } from 'lucide-react';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 function Plugin() {
   const { commits } = useContext(AppContext);
@@ -66,8 +67,10 @@ function Plugin() {
 function App() {
   return (
     <AppContextProvider>
-      <Toaster />
-      <Plugin />
+      <Tooltip.Provider>
+        <Toaster />
+        <Plugin />
+      </Tooltip.Provider>
     </AppContextProvider>
   );
 }
