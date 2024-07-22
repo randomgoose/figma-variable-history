@@ -127,12 +127,14 @@ export function ParsedValue({
           return (
             <CopyTextWrapper text={parsedValue}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div
-                  className={
-                    'w-4 h-4 rounded-[1px] border border-black/10 shrink-0 flex items-center'
-                  }
-                  style={{ background: convertFigmaRGBtoString(resolvedValue) }}
-                />
+                {!alias ? (
+                  <div
+                    className={
+                      'w-4 h-4 rounded-[1px] border border-black/10 shrink-0 flex items-center'
+                    }
+                    style={{ background: convertFigmaRGBtoString(resolvedValue) }}
+                  />
+                ) : null}
                 {option?.showLabel ? (
                   <div
                     className={clsx(

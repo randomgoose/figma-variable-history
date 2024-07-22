@@ -24,6 +24,7 @@ import { copyText } from '../../utils/text';
 
 export function Commits({ commits }: { commits: ICommit[] }) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const commitListRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState('');
   const [selectedVariableId, setSelectedVariableId] = useState('');
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -43,6 +44,11 @@ export function Commits({ commits }: { commits: ICommit[] }) {
       }
     });
   }, []);
+
+  useEffect(() => {
+    const selectedCommitDiv = document.getElementById(selected + '');
+    commitListRef.current?.scrollTo(0, selectedCommitDiv?.offsetTop || 0);
+  }, [selected]);
 
   const generateChangelog = useCallback(() => {
     parent.postMessage({ pluginMessage: { type: 'GENERATE_CHANGE_LOG' }, pluginId: '*' }, '*');
@@ -278,8 +284,8 @@ export function Commits({ commits }: { commits: ICommit[] }) {
               </div>
             </div>
             <motion.div
-              className="[&::-webkit-scrollbar]:w-0"
-              style={{ height: '100%', overflow: 'auto' }}
+              className="[&::-webkit-scrollbar]:w-0 h-full overflow-auto"
+              ref={commitListRef}
             >
               <div>
                 {commits.map((commit) => {
@@ -289,6 +295,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                     <div
                       key={commit.id}
                       className={clsx(styles.commitItem, 'shrink-0')}
+                      id={commit.id}
                       onClick={() => setSelected(commit.id)}
                       style={{
                         background: commit.id === selected ? 'var(--figma-color-bg-selected)' : '',
