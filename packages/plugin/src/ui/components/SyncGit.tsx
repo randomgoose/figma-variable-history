@@ -1,23 +1,14 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { h } from 'preact';
-import { useContext, useEffect, useMemo, useState } from 'preact/hooks';
-import { emit, once } from '@create-figma-plugin/utilities';
-import { Button, Textbox } from '@create-figma-plugin/ui';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { syncToGit, SyncToGitStage, SyncToGitResult } from '../../features/sync-to-git';
 import { AppContext } from '../../AppContext';
-import {
-  ConvertCommitVariablesToCssHandler,
-  ConvertCommitVariablesToCssDoneHandler,
-  SetPluginSettingHandler,
-} from '../../types';
 import styles from '../styles.module.css';
 
 export function SyncGit() {
   const { setting, commits } = useContext(AppContext);
   const [stage, setStage] = useState<SyncToGitStage | ''>('');
   const [result, setResult] = useState<SyncToGitResult | null>(null);
-  const [cssContent, setCssContent] = useState<string | null>(null);
+  const [cssContent] = useState<string | null>(null);
   const [gitInfo, setGitInfo] = useState({
     repository: '',
     owner: '',
@@ -45,10 +36,14 @@ export function SyncGit() {
   }, [commitId, cssContent, gitInfo]);
 
   useEffect(() => {
-    emit<ConvertCommitVariablesToCssHandler>('CONVERT_VARIABLES_TO_CSS', commitId);
-    once<ConvertCommitVariablesToCssDoneHandler>('CONVERT_VARIABLES_TO_CSS_DONE', (css) =>
-      setCssContent(decodeURIComponent(css))
+    parent.postMessage(
+      { pluginMessage: { type: 'CONVERT_VARIABLES_TO_CSS', payload: commitId }, pluginId: '*' },
+      '*'
     );
+    // emit<ConvertCommitVariablesToCssHandler>('CONVERT_VARIABLES_TO_CSS', commitId);
+    // once<ConvertCommitVariablesToCssDoneHandler>('CONVERT_VARIABLES_TO_CSS_DONE', (css) =>
+    //   setCssContent(decodeURIComponent(css))
+    // );
   }, [commitId]);
 
   useEffect(() => {
@@ -89,9 +84,8 @@ export function SyncGit() {
       <div className={styles.commitForm} style={{ padding: 0 }}>
         {Object.entries(gitInfo).map(([key, value]) => {
           return (
-            <Textbox
+            <input
               width={240}
-              variant="border"
               value={value}
               placeholder={placeholder[key] || key}
               onChange={(e) =>
@@ -119,7 +113,7 @@ export function SyncGit() {
       </div>
 
       <div>
-        <Button
+        {/* <Button
           onClick={() => {
             emit<SetPluginSettingHandler>('SET_PLUGIN_SETTING', { git: gitInfo });
           }}
@@ -128,7 +122,7 @@ export function SyncGit() {
         </Button>
         <Button style={{ marginLeft: 20 }} disabled={disabled} onClick={() => sync()}>
           Confirm
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

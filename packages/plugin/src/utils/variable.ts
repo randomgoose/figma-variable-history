@@ -1,3 +1,4 @@
+import { difference, union } from 'lodash-es';
 import groupBy from 'lodash-es/groupBy';
 
 export function isSameVariable(a: Variable, b: Variable): boolean {
@@ -46,6 +47,14 @@ export function diffVariables(a: Variable, b: Variable) {
 
   if (a.resolvedType !== b.resolvedType) {
     diff.resolvedType = [a.resolvedType, b.resolvedType];
+  }
+
+  if (
+    difference(a.scopes, b.scopes).length > 0 ||
+    (a.scopes.length === 0 && b.scopes.length > 0) ||
+    (a.scopes.length > 0 && b.scopes.length === 0)
+  ) {
+    diff.scopes = [a.scopes, b.scopes];
   }
 
   if (
@@ -137,11 +146,15 @@ export function getVariableChangesGroupedByCollection({
 }) {
   const groupedCurrent = groupBy(current, (d) => d.variableCollectionId);
   const groupedPrev = groupBy(prev, (d) => d.variableCollectionId);
+  const unionedKeys = union(Object.keys(groupedCurrent), Object.keys(groupedPrev));
 
   return Object.fromEntries(
-    Object.entries(groupedCurrent).map(([collectionId, variables]) => [
+    unionedKeys.map((collectionId) => [
       collectionId,
-      getVariableChanges({ prev: groupedPrev[collectionId] || [], current: variables }),
+      getVariableChanges({
+        prev: groupedPrev[collectionId] || [],
+        current: groupedCurrent[collectionId] || [],
+      }),
     ])
   );
 }

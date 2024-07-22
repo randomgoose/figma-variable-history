@@ -16,34 +16,8 @@ Not supports in Firefox and IE */
   width: 100%;
 }
 
-.collectionList {
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-  /* overflow: overlay; */
-}
-
 div:has(> .collectionList)::-webkit-scrollbar {
-  width: 1px;
-}
-
-.collectionItem {
-  background-color: var(--figma-color-bg);
-  border-radius: 4px;
-}
-
-.collectionItem:not(:last-of-type) {
-  margin-bottom: 6px;
-  border-radius: 6px;
-}
-
-.collectionItem__trigger {
-  width: 100%;
-  padding: 8px 12px 8px 8px;
-  display: flex;
-  font-weight: 600;
-  font-size: 11px;
-  gap: 8px;
+  width: 0;
 }
 
 .variableItem {
@@ -173,6 +147,7 @@ div:has(> .collectionList)::-webkit-scrollbar {
   display: flex;
   align-items: center;
   gap: 4px;
+  margin-top: 8px;
 }
 
 .commitItem__avatar {
@@ -335,4 +310,8 @@ div:has(> .collectionList)::-webkit-scrollbar {
 
 .settings__blockContent {
   padding-top: 16px;
+}
+
+.red {
+  background-color: red;
 }

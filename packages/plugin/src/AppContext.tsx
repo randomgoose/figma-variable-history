@@ -1,18 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { createContext, h } from 'preact';
-import { useMemo, useState } from 'preact/hooks';
-import { ReactNode } from 'preact/compat';
-import { on } from '@create-figma-plugin/utilities';
+import { createContext, useMemo, useState, ReactNode, useEffect } from 'react';
 
-import type {
-  ICommit,
-  ImportLocalCommitsHandler,
-  ImportVariablesHandler,
-  PluginSetting,
-  PluginSettingHandler,
-  ResolveVariableValueDoneHandler,
-  SetVariableAliasHandler,
-} from './types';
+import type { ICommit, PluginSetting } from './types';
+import { getVariableChangesGroupedByCollection } from './utils/variable';
 
 interface AppContext {
   setting: PluginSetting;
@@ -27,7 +16,16 @@ interface AppContext {
       valuesByMode: Record<string, { value: VariableValue; resolvedType: string }>;
     }
   >;
+  keyword: string;
+  groupedChanges: {
+    [k: string]: {
+      added: Variable[];
+      modified: Variable[];
+      removed: Variable[];
+    };
+  };
   setColorFormat: (format: AppContext['colorFormat']) => void;
+  setKeyword: (value: string) => void;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -38,7 +36,10 @@ export const AppContext = createContext<AppContext>({
   commits: [],
   variableAliases: {},
   resolvedVariableValues: {},
+  keyword: '',
+  groupedChanges: {},
   setColorFormat: () => null,
+  setKeyword: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -52,36 +53,47 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     AppContext['resolvedVariableValues']
   >({});
   const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
+  const [keyword, setKeyword] = useState('');
 
-  on<ImportVariablesHandler>('IMPORT_VARIABLES', ({ variables, collections }) => {
-    setVariables(variables);
-    setCollections(collections);
-  });
+  const groupedChanges = useMemo(() => {
+    return getVariableChangesGroupedByCollection({
+      prev: commits[0] ? commits[0].variables : [],
+      current: variables,
+    });
+  }, [commits, variables]);
 
-  on<ImportLocalCommitsHandler>('IMPORT_LOCAL_COMMITS', (commits) => {
-    setCommits(commits);
-  });
+  useEffect(() => {
+    onmessage = async (e) => {
+      const { type, payload } = e.data.pluginMessage;
 
-  on<ResolveVariableValueDoneHandler>(
-    'RESOLVE_VARIABLE_VALUE_DONE',
-    ({ id, modeId, value, resolvedType }) => {
-      setResolvedVariableValues({
-        ...resolvedVariableValues,
-        [id]: {
-          valuesByMode: {
-            ...resolvedVariableValues[id]?.valuesByMode,
-            [modeId]: { value, resolvedType },
-          },
-        },
-      });
-    }
-  );
-
-  on<SetVariableAliasHandler>('SET_VARIABLE_ALIAS', ({ id, name }) => {
-    setVariableAliases({ ...variableAliases, [id]: name });
-  });
-
-  on<PluginSettingHandler>('PLUGIN_SETTING', (data) => setSetting(data));
+      switch (type) {
+        case 'IMPORT_VARIABLES':
+          setVariables(payload.variables);
+          setCollections(payload.collections);
+          break;
+        case 'IMPORT_LOCAL_COMMITS':
+          setCommits(payload);
+          break;
+        case 'RESOLVE_VARIABLE_VALUE_DONE':
+          setResolvedVariableValues((prev) => ({
+            ...prev,
+            [payload.id]: {
+              valuesByMode: {
+                ...prev[payload.id]?.valuesByMode,
+                [payload.modeId]: { value: payload.value, resolvedType: payload.resolvedType },
+              },
+            },
+          }));
+          break;
+        case 'SET_VARIABLE_ALIAS':
+          setVariableAliases((prev) => ({ ...prev, [payload.id]: payload.name }));
+          break;
+        case 'PLUGIN_SETTING':
+          setSetting(payload);
+          break;
+      }
+    };
+  }, []);
 
   const context = useMemo<AppContext>(() => {
     return {
@@ -93,6 +105,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       variableAliases,
       resolvedVariableValues,
       setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
+      keyword,
+      setKeyword,
+      groupedChanges,
     };
   }, [
     setting,
@@ -105,6 +120,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     enableGitHubSync,
     setEnableGitHubSync,
     setColorFormat,
+    keyword,
+    setKeyword,
+    groupedChanges,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

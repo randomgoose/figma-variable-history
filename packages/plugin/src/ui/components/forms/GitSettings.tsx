@@ -1,12 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { h } from 'preact';
-import { Button, Textbox } from '@create-figma-plugin/ui';
-import { useContext, useEffect, useMemo, useState } from 'preact/hooks';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import styles from '../../styles.module.css';
 import { AppContext } from '../../../AppContext';
 import { throttle } from 'lodash-es';
-import { emit } from '@create-figma-plugin/utilities';
-import { SetPluginSettingHandler } from '../../../types';
 
 export function GitSettings() {
   const { setting } = useContext(AppContext);
@@ -36,7 +31,11 @@ export function GitSettings() {
 
   useEffect(() => {
     throttle(() => {
-      emit<SetPluginSettingHandler>('SET_PLUGIN_SETTING', { git: gitInfo });
+      parent.postMessage(
+        { pluginMessage: { type: 'SET_PLUGIN_SETTING', payload: { git: gitInfo } }, pluginId: '*' },
+        '*'
+      );
+      // emit<SetPluginSettingHandler>('SET_PLUGIN_SETTING', { git: gitInfo });
     }, 100);
   }, [gitInfo]);
 
@@ -57,23 +56,19 @@ export function GitSettings() {
           return (
             <div key={key}>
               <div
-                style={{
-                  textTransform: 'capitalize',
-                  marginBottom: 4,
-                  color: 'var(--figma-color-text-secondary)',
-                }}
+                className="capitalize mb-1"
+                style={{ color: 'var(--figma-color-text-secondary)' }}
               >
                 {key}
               </div>
-              <Textbox
-                width={240}
-                variant="border"
+              <input
+                className="input w-60"
                 value={value}
                 placeholder={placeholder[key] || key}
                 onChange={(e) =>
                   setGitInfo({
                     ...gitInfo,
-                    [key]: e.currentTarget.value,
+                    [key]: e.target.value,
                   })
                 }
               />
@@ -81,16 +76,24 @@ export function GitSettings() {
           );
         })}
 
-      <Button
+      <button
+        className="btn-outline w-60"
         onClick={() => {
-          emit<SetPluginSettingHandler>('SET_PLUGIN_SETTING', {
-            git: { enabled: setting?.git?.enabled, ...gitInfo },
-          });
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: 'SET_PLUGIN_SETTING',
+                payload: { git: { enabled: setting?.git?.enabled, ...gitInfo } },
+              },
+              pluginId: '*',
+            },
+            '*'
+          );
         }}
         disabled={!isSettingsChanged}
       >
         Save configuration
-      </Button>
+      </button>
     </div>
   );
 }

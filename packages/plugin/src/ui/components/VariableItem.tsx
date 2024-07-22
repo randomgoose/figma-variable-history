@@ -1,30 +1,44 @@
-import styles from '../styles.module.css';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { h } from 'preact';
-import { Color } from '../icons/Color';
 import { Number } from '../icons/Number';
 import { String } from '../icons/String';
 import { Boolean } from '../icons/Boolean';
-import { emit } from '@create-figma-plugin/utilities';
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-context-menu';
-import { RevertVariableHandler, VariableChangeType } from '../../types';
+import { VariableChangeType } from '../../types';
+import { motion } from 'framer-motion';
+import clsx from 'clsx';
+import { Color } from '../icons/Color';
+
+const MotionTrigger = motion(Trigger);
 
 export function VariableItem({
   variable,
   type,
   onClick,
+  selected,
+  custom,
+  allowDiscard = true,
 }: {
   variable: Variable;
   type: VariableChangeType;
   onClick?: (id: string) => void;
+  selected?: boolean;
+  custom: number;
+  allowDiscard?: boolean;
 }) {
   const { id, name, resolvedType } = variable;
 
   const icon = () => {
     switch (resolvedType) {
       case 'COLOR':
-        return <Color />;
+        return (
+          <Color />
+          // <div className="[&>*]:p-0 [&>div]:rounded-none">
+          //   <ParsedValue
+          //     variable={variable}
+          //     modeId={Object.keys(variable.valuesByMode)[0]}
+          //     option={{ showLabel: false, allowCopy: false }}
+          //   />
+          // </div>
+        );
       case 'FLOAT':
         return <Number />;
       case 'BOOLEAN':
@@ -41,11 +55,9 @@ export function VariableItem({
       case 'added':
         return (
           <div
-            className={styles.variable__type}
-            style={{
-              background: 'var(--figma-color-bg-success-tertiary)',
-              color: 'var(--figma-color-text-success)',
-            }}
+            className={
+              'w-4 h-4 flex items-center justify-center rounded-sm text-[color:var(--figma-color-text-success)] bg-[#F0FDF4]'
+            }
           >
             <svg
               width="8"
@@ -61,9 +73,8 @@ export function VariableItem({
       case 'modified':
         return (
           <div
-            className={styles.variable__type}
+            className={'w-4 h-4 flex items-center justify-center rounded-sm bg-[#FEFCE8]'}
             style={{
-              background: 'var(--figma-color-bg-warning-tertiary)',
               color: 'var(--figma-color-text-warning)',
               fontSize: 10,
               fontWeight: 500,
@@ -75,9 +86,8 @@ export function VariableItem({
       case 'removed':
         return (
           <div
-            className={styles.variable__type}
+            className={'w-4 h-4 flex items-center justify-center rounded-sm bg-[#FEF2F2]'}
             style={{
-              background: 'var(--figma-color-bg-danger-tertiary)',
               color: 'var(--figma-color-text-danger)',
             }}
           >
@@ -99,30 +109,42 @@ export function VariableItem({
 
   return (
     <Root>
-      <Trigger asChild>
+      <MotionTrigger
+        disabled={!allowDiscard}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        asChild
+        // transition={{ duration: 0.4, delay: custom * 0.01, ease: ['linear'] }}
+        custom={custom}
+      >
         {/* <Link key={id} href={`/variable/${id}`} className={styles.variableItem}> */}
-        <div className={styles.variableItem} onClick={() => onClick && onClick(id)}>
+        <div
+          className={clsx(
+            'flex h-8 p-2 cursor-default text-[color:var(--figma-color-text)] gap-2 rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)] hover:scale-[1.005] active:scale-[0.995]',
+            selected ? 'bg-[color:var(--figma-color-bg-brand-tertiary)]' : 'bg-none'
+          )}
+          onClick={() => onClick && onClick(id)}
+        >
           <div style={{ flexShrink: 0 }}>{icon()}</div>
-          <div
-            style={{
-              maxWidth: '100%',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-            }}
-          >
-            {name}
-          </div>
-          <div style={{ marginLeft: 'auto' }}>{renderType(type)}</div>
+          <div className="max-w-full text-ellipsis whitespace-nowrap overflow-hidden">{name}</div>
+          <div className="ml-auto">{renderType(type)}</div>
         </div>
         {/* </Link> */}
-      </Trigger>
+      </MotionTrigger>
       <Portal>
-        <Content className={styles.dropdown__content} style={{ width: 200 }}>
+        <Content className={'dropdown-content'} style={{ width: 200 }}>
           <Item
-            className={styles.dropdown__item}
+            className={'dropdown-item'}
             onClick={() => {
-              emit<RevertVariableHandler>('REVERT_VARIABLE_VALUE', variable, type);
+              parent.postMessage(
+                {
+                  pluginMessage: { type: 'REVERT_VARIABLE_VALUE', payload: { variable, type } },
+                  pluginId: '*',
+                },
+                '*'
+              );
+              // emit<RevertVariableHandler>('REVERT_VARIABLE_VALUE', variable, type);
             }}
           >
             Discard changes

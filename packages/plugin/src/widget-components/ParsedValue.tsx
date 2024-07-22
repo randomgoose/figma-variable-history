@@ -26,7 +26,7 @@ export function ParsedValue({
       break;
     case 'undefined':
       return (
-        <Text fill="#00000080" fontSize={11}>
+        <Text fill="#00000080" fontSize={11} width={'fill-parent'}>
           Not defined
         </Text>
       );
@@ -34,18 +34,21 @@ export function ParsedValue({
       if ('type' in value) {
         const target = figma.variables.getVariableById(value.id);
         return (v = target ? (
-          <AutoLayout
-            verticalAlignItems="center"
-            fill="#f5f5f5"
-            padding={{ vertical: 0, horizontal: 5 }}
-            cornerRadius={4}
-            stroke="#e6e6e6"
-            height={20}
-          >
-            {/* <SVG src={SVGs.boolean}/> */}
-            <Text fontSize={11} lineHeight="16px">
-              {target.name}
-            </Text>
+          <AutoLayout width={'fill-parent'}>
+            <AutoLayout
+              verticalAlignItems="center"
+              fill="#f5f5f5"
+              padding={{ vertical: 0, horizontal: 5 }}
+              cornerRadius={4}
+              stroke="#e6e6e6"
+              height={20}
+              width={'hug-contents'}
+            >
+              {/* <SVG src={SVGs.boolean}/> */}
+              <Text fontSize={11} lineHeight="16px">
+                {target.name}
+              </Text>
+            </AutoLayout>
           </AutoLayout>
         ) : (
           <Text>undefined</Text>
@@ -61,7 +64,7 @@ export function ParsedValue({
               : `#${convertRgbColorToHexColor({ r: value.r, g: value.g, b: value.b })}`;
 
           return (
-            <AutoLayout verticalAlignItems="center" spacing={8}>
+            <AutoLayout verticalAlignItems="center" spacing={8} width={'fill-parent'}>
               <Rectangle
                 cornerRadius={1}
                 width={16}
@@ -86,7 +89,7 @@ export function ParsedValue({
   }
 
   return (
-    <Text fontSize={11} fill="#000000e5">
+    <Text fontSize={11} fill="#000000e5" width={'fill-parent'}>
       {v}
     </Text>
   );

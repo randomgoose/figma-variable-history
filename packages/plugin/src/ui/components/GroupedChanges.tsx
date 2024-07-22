@@ -1,24 +1,25 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { h } from 'preact';
 import { Root, Item, Header, Trigger, Content } from '@radix-ui/react-accordion';
-import { IconCaretRight16 } from '@create-figma-plugin/ui';
-import { useContext, useEffect, useState } from 'preact/hooks';
+import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../AppContext';
-import styles from '../styles.module.css';
 import { VariableItem } from './VariableItem';
+import { ChevronRight } from 'lucide-react';
+import { VariableChangeType } from '../../types';
 
 export function GroupedChanges({
   groupedChanges,
   onClickVariableItem,
+  selected,
+  disableInteraction = false,
 }: {
   groupedChanges: {
     [key: string]: { added: Variable[]; modified: Variable[]; removed: Variable[] };
   };
-  // onClickCollectionItem: (id: string) => void;
   onClickVariableItem: (id: string) => void;
+  selected?: string;
+  disableInteraction?: boolean;
 }) {
   const [collectionList, setCollectionList] = useState<VariableCollection['id'][]>([]);
-  const { collections } = useContext(AppContext);
+  const { collections, commits } = useContext(AppContext);
 
   const toggleCollectionList = (id: string) => {
     if (collectionList.includes(id)) {
@@ -32,69 +33,83 @@ export function GroupedChanges({
     setCollectionList(collections.map((c) => c.id));
   }, [collections]);
 
+  // Find collection name from history commits
+  const findCollectionName = (collectionId: string) => {
+    const existingCollection = collections.find((c) => c.id === collectionId);
+
+    if (existingCollection) {
+      return existingCollection.name;
+    } else {
+      const commit = commits.find(
+        (commit) =>
+          commit.collections.findIndex((collection) => collection.id === collectionId) >= 0
+      );
+
+      return (
+        commit?.collections.find((collection) => collection.id === collectionId)?.name ||
+        collectionId
+      );
+    }
+  };
+
   return (
     <Root type="multiple" value={collectionList}>
       {Object.entries(groupedChanges).map(([collectionId, { added, modified, removed }]) => {
         const hasChanges = added.length + modified.length + removed.length > 0;
 
         return hasChanges ? (
-          <Item value={collectionId} className={styles.collectionItem}>
+          <Item
+            style={{ background: 'var(--figma-color-bg)' }}
+            value={collectionId}
+            className={
+              'rounded-[4px] [&:not(:last-of-type)]:rounded-md [&:not(:last-of-type)]:mb-1.5'
+            }
+            key={collectionId}
+          >
             <Header>
               <Trigger
-                className={styles.collectionItem__trigger}
+                className={'w-full p-2 pr-3 flex items-center font-semibold gap-2 group'}
                 onClick={() => toggleCollectionList(collectionId)}
               >
-                <div style={{ flexShrink: 0 }}>
-                  <IconCaretRight16 />
+                <div className="shrink-0 group-data-[state=open]:rotate-90 transition-all">
+                  <ChevronRight size={11} />
                 </div>
-                <div
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {collections.find((c) => c.id === collectionId)?.name || collectionId}
+                <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+                  {findCollectionName(collectionId) || collectionId}
                 </div>
 
                 <div
+                  className="ml-auto px-1 rounded-sm"
                   style={{
-                    marginLeft: 'auto',
                     color: 'var(--figma-color-text-secondary)',
-                    padding: '0px 4px',
                     background: 'var(--figma-color-bg-secondary)',
-                    borderRadius: 2,
                   }}
                 >
                   {added.length + modified.length + removed.length}
                 </div>
               </Trigger>
             </Header>
-            <Content style={{ padding: 4 }}>
-              {added.map((v) => (
-                <VariableItem
-                  key={v.id}
-                  variable={v}
-                  type={'added'}
-                  onClick={(id) => onClickVariableItem(id)}
-                />
-              ))}
-              {modified.map((v) => (
-                <VariableItem
-                  key={v.id}
-                  variable={v}
-                  type={'modified'}
-                  onClick={(id) => onClickVariableItem(id)}
-                />
-              ))}
-              {removed.map((v: Variable) => (
-                <VariableItem
-                  key={v.id}
-                  variable={v}
-                  type={'removed'}
-                  onClick={(id) => onClickVariableItem(id)}
-                />
-              ))}
+            <Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp overflow-hidden">
+              <div className="p-1">
+                {/* <AnimatePresence> */}
+                {/* TODO: Fix this */}
+                {[
+                  ...added.map((v) => ({ v, type: 'added' })),
+                  ...modified.map((v) => ({ v, type: 'modified' })),
+                  ...removed.map((v) => ({ v, type: 'removed' })),
+                ].map(({ v, type }, index) => (
+                  <VariableItem
+                    key={v.id}
+                    variable={v}
+                    type={type as VariableChangeType}
+                    selected={v.id === selected}
+                    onClick={(id) => onClickVariableItem(id)}
+                    custom={index}
+                    allowDiscard={!disableInteraction}
+                  />
+                ))}
+                {/* </AnimatePresence> */}
+              </div>
             </Content>
           </Item>
         ) : null;

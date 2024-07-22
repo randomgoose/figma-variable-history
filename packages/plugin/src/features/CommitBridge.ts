@@ -1,13 +1,7 @@
 import omit from 'lodash-es/omit';
 import type { Delta } from 'jsondiffpatch';
-import { emit } from '@create-figma-plugin/utilities';
 
-import type {
-  ICommit,
-  ImportLocalCommitsHandler,
-  ImportVariablesHandler,
-  VariableChangeType,
-} from '../types';
+import type { ICommit, VariableChangeType } from '../types';
 import { jsonDiff, jsonPatch, jsonUnpatch } from '../utils/json-patch';
 import { figmaHelper } from '../utils/figma-helper';
 import { getVariableChanges } from '../utils/variable';
@@ -137,8 +131,10 @@ export class CommitBridge {
     const collections = await figmaHelper.getLocalVariableCollectionsAsync();
     const commits = this.getCommits();
 
-    emit<ImportVariablesHandler>('IMPORT_VARIABLES', { variables, collections });
-    emit<ImportLocalCommitsHandler>('IMPORT_LOCAL_COMMITS', commits);
+    figma.ui.postMessage({ type: 'IMPORT_VARIABLES', payload: { variables, collections } });
+    figma.ui.postMessage({ type: 'IMPORT_LOCAL_COMMITS', payload: commits });
+    // emit<ImportVariablesHandler>('IMPORT_VARIABLES', { variables, collections });
+    // emit<ImportLocalCommitsHandler>('IMPORT_LOCAL_COMMITS', commits);
   }
 
   getCommitById(id: ICommit['id']): ICommit | null {
@@ -208,8 +204,13 @@ export class CommitBridge {
   }
 
   async revertVariable(variable: Variable, type: VariableChangeType) {
+    //TODO: Fix this
     if (type === 'added') {
       await figmaHelper.disableVariable(variable);
+    } else if (type === 'modified') {
+      const lastCommit = this.getCommits()?.[0];
+      const v = lastCommit.variables.find((v) => v.id === variable.id);
+      if (v) figmaHelper.updateVariable({ data: v });
     } else {
       const idChangeMap: Record<string, string> = {};
       const newVariable = await figmaHelper.updateVariable({
@@ -227,9 +228,19 @@ export class CommitBridge {
   async reset(commitId: string) {
     const targetCommitIndex = this.pluginData.commits.findIndex(({ id }) => id === commitId);
     const targetCommit = this.getCommitByIndex(targetCommitIndex);
+
     if (!targetCommit) return;
-    this.setLocalPluginData(targetCommit, this.pluginData.commits.slice(targetCommitIndex));
-    this.commit(targetCommit);
+
+    const timestamp = +new Date();
+    // this.setLocalPluginData(targetCommit, [...this.pluginData.commits]);
+
+    this.commit({
+      ...targetCommit,
+      id: timestamp + '',
+      summary: `[Reset] ${targetCommit.summary}`,
+      collaborators: figma.currentUser ? [figma.currentUser] : targetCommit.collaborators,
+      date: timestamp,
+    });
 
     // TODO
     // const timestamp = +new Date()

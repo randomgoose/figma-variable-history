@@ -1,49 +1,84 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { h } from 'preact';
-import { Toggle, Text } from '@create-figma-plugin/ui';
 import { GitHubLogo } from '../icons/GitHubLogo';
-import styles from '../styles.module.css';
-import { useContext } from 'preact/hooks';
+import { useContext } from 'react';
 import { AppContext } from '../../AppContext';
-import { emit } from '@create-figma-plugin/utilities';
-import { SyncGit } from '../components/SyncGit';
+import { GitSettings } from '../components/forms/GitSettings';
+import { motion, AnimatePresence } from 'framer-motion';
+import * as Switch from '@radix-ui/react-switch';
 
 export function Settings() {
   const { setting } = useContext(AppContext);
 
   return (
-    <div className={styles.settings__container}>
-      <h3 className={styles.settings__heading}>Settings</h3>
+    <div className={'p-4'}>
+      <h3 className={'text-[13px] font-medium text-[color:var(--figma-color-text)]'}>Settings</h3>
 
-      <div className={styles.settings__block}>
-        <div className={styles.settings__blockHeader}>
+      <div className={'p-4 mt-2 rounded-[4px] border border-[color:var(--figma-color-border)]'}>
+        <div className={'flex items-center gap-2'}>
           <GitHubLogo />
           <div>
-            <div className={styles.settings__blockTitle}>Sync to GitHub Repository</div>
-            <div className={styles.settings__blockDescription}>
+            <div className={'font-medium'}>Sync to GitHub Repository</div>
+            <div className={'text-[color:var(--figma-color-text-secondary)]'}>
               Modify CSS files and create a pull request
             </div>
           </div>
           <div style={{ marginLeft: 'auto' }}>
-            <Toggle
-              value={setting?.git?.enabled || false}
-              onChange={(e) =>
-                emit('SET_PLUGIN_SETTING', {
-                  git: { ...setting?.git, enabled: e.currentTarget.checked },
-                })
+            <Switch.Root
+              className="switch-root"
+              checked={setting.git?.enabled}
+              onCheckedChange={(checked) =>
+                parent.postMessage(
+                  {
+                    pluginMessage: {
+                      type: 'SET_PLUGIN_SETTING',
+                      payload: { git: { ...setting?.git, enabled: checked } },
+                    },
+                    pluginId: '*',
+                  },
+                  '*'
+                )
               }
             >
-              <Text style={{ opacity: 0 }}>On</Text>
-            </Toggle>
+              <Switch.Thumb className="switch-thumb" />
+            </Switch.Root>
+            {/* <label
+              className={clsx(
+                'w-6 h-3 p-px flex rounded-full',
+                setting?.git?.enabled
+                  ? 'justify-end bg-[color:var(--figma-color-bg-inverse)]'
+                  : 'justify-start bg-[color:var(--figma-color-bg-disabled-secondary)]'
+              )}
+              htmlFor="github"
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+            </label>
+            <input
+              className="hidden"
+              id="github"
+              type="checkbox"
+              onChange={(e) => {
+                parent.postMessage(
+                  {
+                    pluginMessage: {
+                      type: 'SET_PLUGIN_SETTING',
+                      payload: { git: { ...setting?.git, enabled: e.target.checked } },
+                    },
+                    pluginId: '*',
+                  },
+                  '*'
+                );
+              }}
+              checked={setting?.git?.enabled}
+            /> */}
           </div>
         </div>
 
-        {setting?.git?.enabled ? (
-          <div className={styles.settings__blockContent}>
-            <SyncGit />
-            {/* <GitSettings /> */}
-          </div>
-        ) : null}
+        <AnimatePresence>
+          {setting?.git?.enabled ? (
+            <motion.div className={'p-4'}>
+              <GitSettings />
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
     </div>
   );

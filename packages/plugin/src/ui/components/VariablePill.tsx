@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { h } from 'preact';
 import { Number } from '../icons/Number';
 import { String } from '../icons/String';
 
@@ -12,30 +10,16 @@ export function VariablePill(props: VariablePillProps) {
   const { type, value } = props;
 
   const styles = {
-    width: 'fit-content',
-    height: 20,
     backgroundColor: 'var(--figma-color-bg-secondary)',
     color: 'var(--figma-color-text-primary)',
     border: '1px solid var(--figma-color-border)',
-    borderRadius: 4,
-    display: 'flex',
-    alignItems: 'center',
-    paddingLeft: 3,
-    paddingRight: 5,
-    gap: 3,
   };
 
   const renderIcon = () => {
     switch (type) {
       case 'TRUE':
         return (
-          <svg
-            class="svg"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="17"
-            viewBox="0 0 16 17"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17">
             <path
               fill="#000"
               fill-opacity=".5"
@@ -47,13 +31,7 @@ export function VariablePill(props: VariablePillProps) {
         );
       case 'FALSE':
         return (
-          <svg
-            class="svg"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="17"
-            viewBox="0 0 16 17"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17">
             <path
               fill="#000"
               fill-opacity=".5"
@@ -73,8 +51,11 @@ export function VariablePill(props: VariablePillProps) {
   };
 
   return (
-    <div style={{ ...styles }}>
-      {renderIcon()}
+    <div
+      className="w-fit max-w-full overflow-hidden whitespace-nowrap text-ellipsis h-5 border rounded-[4px] items-center pl-[3px] pr-[5px] gap-[3px]"
+      style={{ ...styles }}
+    >
+      <span className="[&>*]:inline-block">{renderIcon()}</span>
       {value}
     </div>
   );

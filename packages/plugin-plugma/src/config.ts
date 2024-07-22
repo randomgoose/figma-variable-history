@@ -1,5 +1,0 @@
-export const PLUGIN_DATA_KEY_PREFIX = '__VARIABLE_HISTORY__';
-
-export const PLUGIN_DATA_KEY_SETTING = `${PLUGIN_DATA_KEY_PREFIX}SETTING`;
-
-export const DISABLE_VARIABLE_NAME_PREFIX = '__disabled_';

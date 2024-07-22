@@ -1,16 +1,25 @@
-import { useContext, useState } from 'preact/hooks';
+import { useContext, useEffect, useState } from 'react';
 import { SyncToGitResult, SyncToGitStage, syncToGit } from '../features/sync-to-git';
 import { AppContext } from '../AppContext';
 
 export function useSync() {
   const { commits } = useContext(AppContext);
-  const [stage, setStage] = useState<SyncToGitStage | ''>('');
-  const [, setResult] = useState<SyncToGitResult | null>(null);
-  const [cssContent] = useState<string | null>(null);
+  const [stage, setStage] = useState<SyncToGitStage | 'compile' | ''>('');
+  const [result, setResult] = useState<SyncToGitResult | null>(null);
+  const [cssContent, setCssContent] = useState<string | null>(null);
 
   // const commitId = useMemo(() => {
   //   return commits[0]?.id;
   // }, [commits]);
+
+  useEffect(() => {
+    addEventListener('message', (e) => {
+      if (e.data.pluginMessage.type === 'CONVERT_VARIABLES_TO_CSS_DONE') {
+        setCssContent(decodeURIComponent(e.data.pluginMessage.payload));
+        setStage('');
+      }
+    });
+  }, []);
 
   const syncGit = async (commitId = commits[0]?.id, gitInfo: any) => {
     const disabled =
@@ -21,6 +30,7 @@ export function useSync() {
     if (disabled) return;
 
     setResult(null);
+
     const _result = await syncToGit({
       content: cssContent as string,
       path: gitInfo.filePath,
@@ -37,11 +47,15 @@ export function useSync() {
       },
       onStageChange: (stage) => setStage(stage),
     });
+
     setResult(_result);
   };
 
   return {
     syncGit,
     stage,
+    setStage,
+    cssContent,
+    result,
   };
 }

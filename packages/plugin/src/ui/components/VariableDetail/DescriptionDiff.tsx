@@ -1,20 +1,21 @@
-import styles from '../../styles.module.css';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { h } from 'preact';
 import * as Diff from 'diff';
 
 export function DescriptionDiff({ current, prev }: { current: Variable; prev?: Variable }) {
   const content = prev
-    ? Diff.diffChars(prev.description, current.description).map((part) =>
+    ? Diff.diffWords(prev.description, current.description).map((part, index) =>
         part.added ? (
-          <span style={{ color: 'var(--figma-color-text-success)' }}>{part.value}</span>
+          <span key={index} style={{ color: 'var(--figma-color-text-success)' }}>
+            {part.value}
+          </span>
         ) : part.removed ? (
-          <span style={{ color: 'var(--figma-color-text-danger)', textDecoration: 'line-through' }}>
+          <span
+            key={index}
+            style={{ color: 'var(--figma-color-text-danger)', textDecoration: 'line-through' }}
+          >
             {part.value}
           </span>
         ) : (
-          <span>{part.value}</span>
+          <span key={index}>{part.value}</span>
         )
       )
     : current.description;
@@ -22,18 +23,16 @@ export function DescriptionDiff({ current, prev }: { current: Variable; prev?: V
   // const diff = Diff.diffChars(prev.description, current.description)
 
   return prev?.description === current.description ? null : (
-    <div className={styles.variableDetail__section}>
+    <div className={'variableDetail-section'} style={{ paddingBottom: 12 }}>
       <div style={{ flexDirection: 'column' }}>
-        <h3 className={styles.variableDetail__sectionTitle} style={{ margin: 0, lineHeight: 1 }}>
-          Description
-        </h3>
+        <h3 className={'variableDetail-sectionTitle'}>Description</h3>
 
         <div
           style={{
             background: 'var(--figma-color-bg-secondary)',
             borderRadius: 6,
             padding: '8px 12px',
-            marginTop: 8,
+            marginTop: 4,
           }}
         >
           {content || (
