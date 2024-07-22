@@ -24,7 +24,6 @@ import { copyText } from '../../utils/text';
 
 export function Commits({ commits }: { commits: ICommit[] }) {
   const ref = useRef<HTMLAnchorElement>(null);
-  const commitListRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState('');
   const [selectedVariableId, setSelectedVariableId] = useState('');
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -47,7 +46,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
 
   useEffect(() => {
     const selectedCommitDiv = document.getElementById(selected + '');
-    commitListRef.current?.scrollTo(0, selectedCommitDiv?.offsetTop || 0);
+    selectedCommitDiv?.scrollIntoView();
   }, [selected]);
 
   const generateChangelog = useCallback(() => {
@@ -283,10 +282,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                 </Tooltip.Root>
               </div>
             </div>
-            <motion.div
-              className="[&::-webkit-scrollbar]:w-0 h-full overflow-auto"
-              ref={commitListRef}
-            >
+            <motion.div className="[&::-webkit-scrollbar]:w-0 h-full overflow-auto scroll-smooth">
               <div>
                 {commits.map((commit) => {
                   const collaborator = commit.collaborators[0];
