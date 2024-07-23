@@ -31,7 +31,7 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
 
   const groups = getVariableChangesGroupedByCollection({
     prev: lastCommit ? lastCommit.variables : [],
-    current: commit.variables,
+    current: commit.variables || [],
   });
 
   return (
@@ -135,7 +135,7 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
                               <Span key={index}>{part.value}</Span>
                             )
                           )
-                        : current.description;
+                        : current?.description;
 
                       return (
                         <AL direction="vertical" width="fill-parent" spacing={4} key={v.id}>
@@ -270,7 +270,7 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
                       cornerRadius={4}
                     >
                       <Text fill={'#B91C1C'} fontSize={11}>
-                        Modified
+                        Removed
                       </Text>
                     </AL>
                     <AL
