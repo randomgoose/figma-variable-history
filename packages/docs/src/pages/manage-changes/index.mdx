@@ -1,0 +1,17 @@
+# View changes
+
+This plugin collects all the changes you made to a Figma variables in a file. View the changes in the **Changes** tab.
+
+![Change types](/images/change-types.png)
+
+The icon on the right side indicates the type of a change.
+- <div className="w-4 h-4 font-semibold inline-flex text-[11px] items-center justify-center rounded-sm bg-[rgb(240,253,244)] text-[#009951]">+</div> is for <span className="text-[#009951] font-medium">new</span> variables.
+- <div className="w-4 h-4 font-semibold inline-flex text-[11px] items-center justify-center rounded-sm bg-[rgb(254,252,232)] text-[#b86200]">M</div> is for <span className="text-[#b86200] font-medium">modified</span> variables.
+- <div className="w-4 h-4 font-semibold inline-flex text-[11px] items-center justify-center rounded-sm bg-[rgb(254,242,242)] text-[#dc3412]">-</div> is for <span className="text-[#dc3412] font-medium">removed</span> variables.
+
+
+## View change details
+
+Select a variable to view change details. The plugin compares a variable with its state in the last version and lists modified properties only.
+
+![Change details](/images/change-details.png)

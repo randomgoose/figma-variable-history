@@ -16,6 +16,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/_app.mdx", "theme.config.jsx", "src/pages/_app.mdx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/_app.mdx", "theme.config.jsx", "src/pages/_app.mdx", "src/pages/generate-changelog/index.mdc"],
   "exclude": ["node_modules"]
 }

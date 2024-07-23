@@ -1,5 +1,6 @@
 {
     "index": "Introduction",
-    "track-changes": "Track changes",
+    "manage-changes": "Manage changes",
+    "logging": "Logging changes",
     "sync-variables": "Sync variables"
 }
