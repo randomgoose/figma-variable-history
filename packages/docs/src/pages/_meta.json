@@ -1,6 +1,7 @@
 {
     "index": "Introduction",
     "manage-changes": "Manage changes",
+    "version-history": "Version history",
     "logging": "Logging changes",
     "sync-variables": "Sync variables"
 }
