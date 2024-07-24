@@ -1,2 +1,7 @@
 # Restore to a version
 
+When restoring to a previous version, the plugin processes different change types as follows:
+
+- For an added variable: the plugin adds a prefix 'disabled' to the variable's name and ignores the variable instead of removing it.
+- For a modified variable, the plugin resets all its properties to the states in the selected version.
+- For a removed variable: the plugin recreates a variable that is identical to the previous one in every property except id.

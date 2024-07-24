@@ -49,6 +49,7 @@ export function useSync() {
     });
 
     setResult(_result);
+    setStage('success');
   };
 
   return {

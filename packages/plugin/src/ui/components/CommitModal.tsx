@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../AppContext';
 import { useSync } from '../../hooks/use-sync';
-import { Root, Trigger, Portal, Overlay, Content, Title } from '@radix-ui/react-dialog';
+import { Root, Trigger, Portal, Overlay, Content, Title, Close } from '@radix-ui/react-dialog';
 import { GitHubLogo } from '../icons/GitHubLogo';
 import { AnimatePresence } from 'framer-motion';
 import { SyncProgress } from './SyncProgress';
@@ -25,34 +25,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
   const [shouldSyncGit, setShouldSyncGit] = useState(false);
 
   const { variables, collections, setting, commits } = useContext(AppContext);
-  const { syncGit, stage, setStage, cssContent } = useSync();
-
-  // const parseStage = useCallback(() => {
-  //   if (!result) {
-  //     switch (stage) {
-  //       case 'compile':
-  //         return 'Compiling...';
-  //       case 'fetch_repo_info':
-  //         return 'Fetching repository info...';
-  //       case 'create_branch':
-  //         return 'Creating branch...';
-  //       case 'update_file':
-  //         return 'Updating file...';
-  //       case 'create_pr':
-  //         return 'Creating pull request...';
-  //     }
-  //   } else {
-  //     if (result.success) {
-  //       return (
-  //         <div>
-  //           `Success. Pull request created. <a href={result.prURL}>${result.prURL}</a>`
-  //         </div>
-  //       );
-  //     } else {
-  //       return `Failed. ${result.message}`;
-  //     }
-  //   }
-  // }, [stage, result]);
+  const { syncGit, stage, setStage, cssContent, result } = useSync();
 
   useEffect(() => {
     if (shouldSyncGit) {
@@ -130,7 +103,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                   className="w-full flex flex-col gap-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  exit={{ opacity: 0, position: 'absolute' }}
                 >
                   <input
                     className="input"
@@ -150,7 +123,44 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
             </AnimatePresence>
 
             {stage !== '' ? (
-              <SyncProgress items={gitSyncProgessItems} activeKey={stage} />
+              stage === 'success' ? (
+                <div className="flex flex-col items-center">
+                  <svg
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                      fill="#CFF7D3"
+                    />
+                    <path
+                      d="M9 12L11 14L15 10"
+                      stroke="#14AE5C"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+
+                  <div className="text-sm font-semibold mt-3">You're all set!</div>
+                  <div className="mt-1 text-center">
+                    The changes are commited and synced <br /> with the repository.
+                  </div>
+
+                  <a href={result?.prURL} target="_blank" className="btn-primary mt-4 w-full">
+                    View the PR
+                  </a>
+
+                  <Close asChild>
+                    <button className="btn-outline mt-2 w-full">Close</button>
+                  </Close>
+                </div>
+              ) : (
+                <SyncProgress items={gitSyncProgessItems} activeKey={stage} />
+              )
             ) : (
               <>
                 <div

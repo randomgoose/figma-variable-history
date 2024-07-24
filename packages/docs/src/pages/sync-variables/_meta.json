@@ -1,3 +1,4 @@
 {
-    "index": "Enable GitHub sync"
+    "enable-github-sync": "Enable GitHub sync",
+    "sync-to-github": "Sync to GitHub"
 }

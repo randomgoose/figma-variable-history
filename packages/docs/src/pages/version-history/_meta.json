@@ -1,5 +1,5 @@
 {
-    "index": "View commits",
+    "view-commits": "View commits",
     "export-variables": "Export variables",
     "search-variables": "Search variables in history",
     "restore-version": "Restore a version"

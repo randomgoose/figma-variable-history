@@ -30,6 +30,7 @@ export default async function () {
         break;
       case 'REVERT_VARIABLE_VALUE':
         commitBridge.revertVariable(msg.payload.variable, msg.payload.type);
+        await commitBridge.emitData();
         break;
       case 'CONVERT_VARIABLES_TO_CSS':
         const commit = commitBridge.getCommitById(msg.payload);

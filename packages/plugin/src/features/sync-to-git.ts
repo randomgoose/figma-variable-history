@@ -1,6 +1,11 @@
 import { request } from '../utils/request';
 
-export type SyncToGitStage = 'fetch_repo_info' | 'create_branch' | 'update_file' | 'create_pr';
+export type SyncToGitStage =
+  | 'fetch_repo_info'
+  | 'create_branch'
+  | 'update_file'
+  | 'create_pr'
+  | 'success';
 export type SyncToGitResult = { success: boolean; message?: string; prURL?: string };
 
 export async function syncToGit({
