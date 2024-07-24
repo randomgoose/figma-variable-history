@@ -283,14 +283,14 @@ export function Commits({ commits }: { commits: ICommit[] }) {
               </div>
             </div>
             <motion.div className="[&::-webkit-scrollbar]:w-0 h-full overflow-auto scroll-smooth">
-              <div>
+              <div className="w-full">
                 {commits.map((commit) => {
                   const collaborator = commit.collaborators[0];
 
                   return (
                     <div
                       key={commit.id}
-                      className={clsx(styles.commitItem, 'shrink-0')}
+                      className={clsx(styles.commitItem, 'shrink-0 overflow-hidden')}
                       id={commit.id}
                       onClick={() => setSelected(commit.id)}
                       style={{
@@ -298,8 +298,8 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                       }}
                     >
                       <div className={clsx(styles.commitItem__icon, 'shrink-0')} />
-                      <div className={clsx(styles.commitItem__content, 'w-fit')}>
-                        <div className="whitespace-nowrap" style={{ fontWeight: 500 }}>
+                      <div className={clsx(styles.commitItem__content, 'grow overflow-hidden')}>
+                        <div className="truncate max-w-full" style={{ fontWeight: 500 }}>
                           {commit.summary || 'Untitled commit'}
                         </div>
                         {collaborator ? (
