@@ -1,7 +1,7 @@
 const tutorials = [
   {
     label: 'Commit changes',
-    url: '',
+    url: 'https://figma-variable-history-docs.vercel.app/manage-changes/commit-changes',
     icon: (
       <svg
         width="33"
@@ -22,7 +22,7 @@ const tutorials = [
   },
   {
     label: 'Restore a commit',
-    url: '',
+    url: 'https://figma-variable-history-docs.vercel.app/version-history/restore-version',
     icon: (
       <svg
         width="33"
@@ -55,7 +55,7 @@ const tutorials = [
   },
   {
     label: 'Generate changelog',
-    url: '',
+    url: 'https://figma-variable-history-docs.vercel.app/logging',
     icon: (
       <svg
         width="33"
@@ -88,7 +88,7 @@ const tutorials = [
   },
   {
     label: 'Sync to GitHub',
-    url: '',
+    url: 'https://figma-variable-history-docs.vercel.app/sync-variables/enable-github-sync',
     icon: (
       <svg
         width="33"
