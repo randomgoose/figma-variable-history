@@ -67,7 +67,7 @@ export function diffVariables(a: Variable, b: Variable) {
 
   // Compare values by mode
   const valuesByMode = Object.fromEntries(
-    Object.entries(a.valuesByMode)
+    Object.entries({ ...a.valuesByMode, ...b.valuesByMode })
       .map(([modeId]) => {
         if (typeof a.valuesByMode[modeId] === 'undefined') {
           return [modeId, [undefined, b.valuesByMode[modeId]]];
