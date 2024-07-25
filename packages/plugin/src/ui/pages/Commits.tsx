@@ -182,7 +182,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                             setSearching(false);
                             setKeyword('');
                           }}
-                          className="p-3 border rounded-md mt-2"
+                          className="p-3 border rounded-md"
                           key={commit.id}
                         >
                           <div className="font-semibold">{commit.summary}</div>
@@ -252,8 +252,21 @@ export function Commits({ commits }: { commits: ICommit[] }) {
 
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
+                    <button className="btn-ghost w-7 h-7 ml-auto" onClick={generateChangelog}>
+                      <ArrowDownToLine size={12} />
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content side="bottom" className="tooltip-content">
+                      Generate changelog
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
                     <button
-                      className="btn-ghost ml-auto w-7 h-7"
+                      className="btn-ghost w-7 h-7"
                       onClick={() => {
                         setSearching(true);
                       }}
@@ -264,19 +277,6 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                   <Tooltip.Portal>
                     <Tooltip.Content side="bottom" className="tooltip-content">
                       Search
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip.Root>
-
-                <Tooltip.Root>
-                  <Tooltip.Trigger asChild>
-                    <button className="btn-ghost w-7 h-7" onClick={generateChangelog}>
-                      <ArrowDownToLine size={12} />
-                    </button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content side="bottom" className="tooltip-content">
-                      Generate changelog
                     </Tooltip.Content>
                   </Tooltip.Portal>
                 </Tooltip.Root>

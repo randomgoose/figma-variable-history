@@ -10,6 +10,7 @@ export function GroupedChanges({
   onClickVariableItem,
   selected,
   disableInteraction = false,
+  keyword = '',
 }: {
   groupedChanges: {
     [key: string]: { added: Variable[]; modified: Variable[]; removed: Variable[] };
@@ -17,6 +18,7 @@ export function GroupedChanges({
   onClickVariableItem: (id: string) => void;
   selected?: string;
   disableInteraction?: boolean;
+  keyword?: string;
 }) {
   const [collectionList, setCollectionList] = useState<VariableCollection['id'][]>([]);
   const { collections, commits } = useContext(AppContext);
@@ -97,17 +99,19 @@ export function GroupedChanges({
                   ...added.map((v) => ({ v, type: 'added' })),
                   ...modified.map((v) => ({ v, type: 'modified' })),
                   ...removed.map((v) => ({ v, type: 'removed' })),
-                ].map(({ v, type }, index) => (
-                  <VariableItem
-                    key={v.id}
-                    variable={v}
-                    type={type as VariableChangeType}
-                    selected={v.id === selected}
-                    onClick={(id) => onClickVariableItem(id)}
-                    custom={index}
-                    allowDiscard={!disableInteraction}
-                  />
-                ))}
+                ]
+                  .filter(({ v }) => v.name.includes(keyword))
+                  .map(({ v, type }, index) => (
+                    <VariableItem
+                      key={v.id}
+                      variable={v}
+                      type={type as VariableChangeType}
+                      selected={v.id === selected}
+                      onClick={(id) => onClickVariableItem(id)}
+                      custom={index}
+                      allowDiscard={!disableInteraction}
+                    />
+                  ))}
                 {/* </AnimatePresence> */}
               </div>
             </Content>

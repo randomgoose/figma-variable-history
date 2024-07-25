@@ -16,7 +16,6 @@ interface AppContext {
       valuesByMode: Record<string, { value: VariableValue; resolvedType: string }>;
     }
   >;
-  keyword: string;
   groupedChanges: {
     [k: string]: {
       added: Variable[];
@@ -25,7 +24,6 @@ interface AppContext {
     };
   };
   setColorFormat: (format: AppContext['colorFormat']) => void;
-  setKeyword: (value: string) => void;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -36,10 +34,8 @@ export const AppContext = createContext<AppContext>({
   commits: [],
   variableAliases: {},
   resolvedVariableValues: {},
-  keyword: '',
   groupedChanges: {},
   setColorFormat: () => null,
-  setKeyword: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -53,7 +49,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     AppContext['resolvedVariableValues']
   >({});
   const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
-  const [keyword, setKeyword] = useState('');
 
   const groupedChanges = useMemo(() => {
     return getVariableChangesGroupedByCollection({
@@ -105,8 +100,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       variableAliases,
       resolvedVariableValues,
       setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
-      keyword,
-      setKeyword,
       groupedChanges,
     };
   }, [
@@ -120,8 +113,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     enableGitHubSync,
     setEnableGitHubSync,
     setColorFormat,
-    keyword,
-    setKeyword,
     groupedChanges,
   ]);
 
