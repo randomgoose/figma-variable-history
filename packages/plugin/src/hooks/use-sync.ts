@@ -42,8 +42,10 @@ export function useSync() {
       branch: `figma-variable-${commitId}`,
       commitMessage: `style: auto update css variables via Figma plugin accord to commit:${commitId}`,
       pullRequest: {
-        title: `Auto update css variables via Figma plugin`,
-        body: `This PR is created by FigmaVariableHistory plugin`,
+        title: `[Figma Variable History] ${commits[0].summary}`,
+        body: `${commits[0].description || 'No description'}
+        \n\nThis PR is created by Variable History plugin
+        `,
       },
       onStageChange: (stage) => setStage(stage),
     });

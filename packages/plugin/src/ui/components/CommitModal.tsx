@@ -66,9 +66,10 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
       );
 
       if (setting?.git?.enabled) {
+        setStage('compile');
         setShouldSyncGit(true);
       } else {
-        setStage('compile');
+        setStage('commit_success');
       }
 
       parent.postMessage(
