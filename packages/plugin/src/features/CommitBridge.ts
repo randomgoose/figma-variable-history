@@ -63,17 +63,23 @@ export class CommitBridge {
     }
   }
 
-  private async setLocalVariables(targetVariables: Variable[]) {
+  private async setLocalVariables(targetCommit: ICommit) {
     const localVariables = await figmaHelper.getLocalVariablesAsync();
+    const localCollections = await figmaHelper.getLocalVariableCollectionsAsync();
     const { added, removed, modified } = getVariableChanges({
-      prev: localVariables,
-      current: targetVariables,
+      prev: { variables: localVariables, collections: localCollections },
+      current: { variables: targetCommit.variables, collections: targetCommit.collections },
     });
 
     const idChangeMap: Record<string, string> = {};
     await Promise.all([
       ...added.concat(modified).map(async (data) => {
-        const variable = await figmaHelper.updateVariable({ data, createIfNotExists: true });
+        const variable = await figmaHelper.updateVariable({
+          data,
+          createIfNotExists: true,
+          commitId: targetCommit.id,
+          variableId: data.id,
+        });
         if (variable && variable.id !== data.id) {
           idChangeMap[data.id] = variable.id;
         }
@@ -84,10 +90,44 @@ export class CommitBridge {
     this.updateIdInLocalPluginData(idChangeMap);
   }
 
+  private async setLocalCollectionsToCommit(commitId: ICommit['id']) {
+    const targetCommit = this.getCommits().find((cmt) => cmt.id === commitId);
+
+    if (!targetCommit) return;
+
+    targetCommit.collections.forEach(async (c) => {
+      const localCollection = (await figma.variables.getLocalVariableCollectionsAsync()).find(
+        ({ id }) => id === c.id
+      );
+
+      if (localCollection) {
+        localCollection.name = c.name;
+
+        c.modes.forEach(({ modeId, name }) => {
+          const mode = localCollection.modes.find((m) => m.modeId === modeId);
+
+          if (mode) {
+            mode.name = name;
+          } else {
+            if (!localCollection.modes.find((mode) => mode.name === name)) {
+              localCollection.addMode(name);
+            }
+          }
+        });
+      } else {
+        const collection = figma.variables.createVariableCollection(c.name);
+        c.modes.forEach((mode) => {
+          collection.addMode(mode.name);
+        });
+      }
+    });
+  }
+
   private async setLocalVariablesToCommit(commitId?: ICommit['id']) {
     const targetCommit = commitId ? this.getCommitById(commitId) : this.pluginData.head;
+
     if (!targetCommit) return;
-    await this.setLocalVariables(targetCommit.variables);
+    await this.setLocalVariables(targetCommit);
   }
 
   private getCommitByIndex(
@@ -192,16 +232,16 @@ export class CommitBridge {
     return null;
   }
 
-  async revert(commitId: string) {
-    const delta = this.pluginData.commits.find(({ id }) => id === commitId)?.delta;
-    if (!delta || !this.pluginData.head) return;
+  // async revert(commitId: string) {
+  //   const delta = this.pluginData.commits.find(({ id }) => id === commitId)?.delta;
+  //   if (!delta || !this.pluginData.head) return;
 
-    const localVariables = await figmaHelper.getLocalVariablesAsync();
-    const newVariables = jsonUnpatch(localVariables, delta.variables);
+  //   const localVariables = await figmaHelper.getLocalVariablesAsync();
+  //   const newVariables = jsonUnpatch(localVariables, delta.variables);
 
-    await this.setLocalVariables(newVariables);
-    await this.emitData();
-  }
+  //   await this.setLocalVariables(newVariables);
+  //   await this.emitData();
+  // }
 
   async revertVariable(variable: Variable, type: VariableChangeType) {
     //TODO: Fix this
@@ -210,12 +250,14 @@ export class CommitBridge {
     } else if (type === 'modified') {
       const lastCommit = this.getCommits()?.[0];
       const v = lastCommit.variables.find((v) => v.id === variable.id);
-      if (v) figmaHelper.updateVariable({ data: v });
+      if (v)
+        figmaHelper.updateVariable({ data: v, variableId: variable.id, commitId: lastCommit.id });
     } else {
       const idChangeMap: Record<string, string> = {};
       const newVariable = await figmaHelper.updateVariable({
         data: variable,
         createIfNotExists: true,
+        variableId: variable.id,
       });
       if (newVariable && newVariable.id !== variable.id) {
         idChangeMap[variable.id] = newVariable.id;
@@ -226,13 +268,19 @@ export class CommitBridge {
   }
 
   async reset(commitId: string) {
-    const targetCommitIndex = this.pluginData.commits.findIndex(({ id }) => id === commitId);
-    const targetCommit = this.getCommitByIndex(targetCommitIndex);
+    // const targetCommitIndex = this.pluginData.commits.findIndex(({ id }) => id === commitId);
+    const targetCommit = this.getCommits().find((cmt) => cmt.id === commitId);
+    // const tCommit = this.getCommits().find(cmt => cmt.id === commitId)
+    // console.log(targetCommit, tCommit)
 
     if (!targetCommit) return;
-
-    const timestamp = +new Date();
     // this.setLocalPluginData(targetCommit, [...this.pluginData.commits]);
+
+    // TODO
+    const timestamp = +new Date();
+    await this.setLocalCollectionsToCommit(targetCommit.id);
+    await this.setLocalVariablesToCommit(targetCommit.id);
+    await this.emitData();
 
     this.commit({
       ...targetCommit,
@@ -241,20 +289,6 @@ export class CommitBridge {
       collaborators: figma.currentUser ? [figma.currentUser] : targetCommit.collaborators,
       date: timestamp,
     });
-
-    // TODO
-    // const timestamp = +new Date()
-
-    // const newCommit: ICommit = {
-    //   ...targetCommit,
-    //   id: `${timestamp}`,
-    //   summary: `[Restore] ${targetCommit.summary}`,
-    //   description: '',
-    //   date: timestamp
-    // }
-
-    await this.setLocalVariablesToCommit();
-    await this.emitData();
   }
 
   refresh() {

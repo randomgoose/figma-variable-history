@@ -94,7 +94,13 @@ export function Changes() {
         {selected ? (
           <VariableDetail
             current={variables.find((v) => v.id === selected)}
+            currentCollection={collections.find(
+              (c) => c.id === variables.find((v) => v.id === selected)?.variableCollectionId
+            )}
             prev={commits?.[0]?.variables.find((v: Variable) => v.id === selected)}
+            prevCollection={commits?.[0]?.collections.find(
+              (c) => c.id === variables.find((v) => v.id === selected)?.variableCollectionId
+            )}
           />
         ) : numOfChanges > 0 ? null : (
           <Preview />

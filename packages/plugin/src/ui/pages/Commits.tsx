@@ -82,8 +82,14 @@ export function Commits({ commits }: { commits: ICommit[] }) {
     const index = commits.findIndex((c) => c.id === selected);
     return index > -1
       ? getVariableChangesGroupedByCollection({
-          current: commits[index]?.variables,
-          prev: commits[index + 1]?.variables || [],
+          current: {
+            variables: commits[index]?.variables,
+            collections: commits[index]?.collections,
+          },
+          prev: {
+            variables: commits[index + 1]?.variables || [],
+            collections: commits[index + 1]?.collections || [],
+          },
         })
       : {};
   }, [commits, selected]);
@@ -369,9 +375,11 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                     <Dialog.Close autoFocus asChild>
                       <button className="btn-outline">Cancel</button>
                     </Dialog.Close>
-                    <button className="btn-primary" onClick={() => resetCommit(selectedCommit)}>
-                      Confirm
-                    </button>
+                    <Dialog.Close asChild>
+                      <button className="btn-primary" onClick={() => resetCommit(selectedCommit)}>
+                        Confirm
+                      </button>
+                    </Dialog.Close>
                   </div>
                 </Dialog.Content>
               </Dialog.Portal>

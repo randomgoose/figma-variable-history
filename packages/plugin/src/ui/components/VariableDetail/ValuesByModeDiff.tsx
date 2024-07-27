@@ -7,9 +7,20 @@ import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-dropdown-m
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { union } from 'lodash-es';
 
-export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: Variable }) {
-  const { collections, colorFormat, setColorFormat } = useContext(AppContext);
-  const collection = collections.find((c) => c.id === current?.variableCollectionId);
+interface ValuesByModeDiffProps {
+  current: Variable;
+  currentCollection: VariableCollection;
+  prev?: Variable;
+  prevCollection?: VariableCollection;
+}
+
+export function ValuesByModeDiff({
+  current,
+  prev,
+  currentCollection,
+}: // prevCollection,
+ValuesByModeDiffProps) {
+  const { colorFormat, setColorFormat } = useContext(AppContext);
 
   const unionedModeIds = prev
     ? union(Object.keys(current.valuesByMode), Object.keys(prev.valuesByMode))
@@ -78,7 +89,8 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
         ? changedModeIds.map((modeId) => (
             <div className={'variableDetail-item'} key={modeId}>
               <div>
-                {collection?.modes.find((mode) => mode.modeId === modeId)?.name || 'Removed mode'}
+                {currentCollection?.modes.find((mode) => mode.modeId === modeId)?.name ||
+                  'Removed mode'}
               </div>
               <div>
                 <ParsedValue
@@ -89,7 +101,6 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
               </div>
               <div className={'variableDetail-itemArrow'}>
                 <ArrowRight className="text-[color:var(--figma-color-icon-tertiary)]" size={14} />
-                {/* <IconArrowRight16 /> */}
               </div>
               <div>
                 <ParsedValue
@@ -107,7 +118,8 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
               key={modeId}
             >
               <div>
-                {collection?.modes.find((mode) => mode.modeId === modeId)?.name || 'Removed mode'}
+                {currentCollection?.modes.find((mode) => mode.modeId === modeId)?.name ||
+                  'Removed mode'}
               </div>
               <div>
                 <ParsedValue

@@ -35,6 +35,10 @@ export async function generateChangeLog() {
     nodeMapCache.root = container.id;
   }
 
+  // Zoom to the container
+  figma.currentPage = container.parent?.type === 'PAGE' ? container.parent : figma.currentPage;
+  figma.viewport.scrollAndZoomIntoView([container]);
+
   const findIndexToInsert = (commitId: string) => {
     const childCommitIds = container.children.map((child) => {
       return Object.entries(nodeMapCache).find(([, nodeId]) => nodeId === child.id)?.[0];

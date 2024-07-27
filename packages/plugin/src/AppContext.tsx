@@ -52,8 +52,11 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
 
   const groupedChanges = useMemo(() => {
     return getVariableChangesGroupedByCollection({
-      prev: commits[0] ? commits[0].variables : [],
-      current: variables,
+      prev: {
+        variables: commits[0] ? commits[0].variables : [],
+        collections: commits[0] ? commits[0].collections : [],
+      },
+      current: { variables, collections },
     });
   }, [commits, variables]);
 
