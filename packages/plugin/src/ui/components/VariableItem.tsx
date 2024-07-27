@@ -6,6 +6,7 @@ import { VariableChangeType } from '../../types';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { Color } from '../icons/Color';
+import { sendMessage } from '../../utils/message';
 
 const MotionTrigger = motion(Trigger);
 
@@ -137,14 +138,7 @@ export function VariableItem({
           <Item
             className={'dropdown-item'}
             onClick={() => {
-              parent.postMessage(
-                {
-                  pluginMessage: { type: 'REVERT_VARIABLE_VALUE', payload: { variable, type } },
-                  pluginId: '*',
-                },
-                '*'
-              );
-              // emit<RevertVariableHandler>('REVERT_VARIABLE_VALUE', variable, type);
+              sendMessage('REVERT_VARIABLE_VALUE', { variable, type });
             }}
           >
             Discard changes

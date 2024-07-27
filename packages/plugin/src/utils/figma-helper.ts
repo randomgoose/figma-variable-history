@@ -1,6 +1,8 @@
 import { cloneObject } from '@create-figma-plugin/utilities';
 import { DISABLE_VARIABLE_NAME_PREFIX, PLUGIN_DATA_KEY_PREFIX } from '../config';
 import { isSameVariable } from './variable';
+import { ICommit } from '../types';
+import { commitBridge } from '../features/CommitBridge';
 
 export const figmaHelper = {
   getPluginData(dataKey: string): any {
@@ -81,31 +83,111 @@ export const figmaHelper = {
     return null;
   },
 
+  async getVariableCollection(id: string) {
+    const collection = (await figma.variables.getLocalVariableCollectionsAsync()).find(
+      (c) => c.id === id
+    );
+
+    if (collection) {
+      return collection;
+    } else {
+      const commits = commitBridge.getCommits();
+      const recentCommit = commits?.find((commit: ICommit) =>
+        commit?.collections?.find((c) => c.id === id)
+      );
+
+      if (recentCommit) {
+        const recentCollection = recentCommit?.collections.find(
+          (c: VariableCollection) => c.id === id
+        );
+
+        if (recentCollection) {
+          const sameNameCollection = figma.variables
+            .getLocalVariableCollections()
+            .find((c) => c.name === recentCollection.name);
+
+          if (sameNameCollection) {
+            return sameNameCollection;
+          } else {
+            const newCollection = figma.variables.createVariableCollection(recentCollection.name);
+            // recentCollection.modes.forEach((mode) => {
+            //   if (!newCollection.modes.find(({ name }) => name === mode.name)) {
+            //     newCollection.addMode(mode.name);
+            //   }
+            // });
+
+            return newCollection;
+          }
+        } else {
+        }
+      }
+    }
+  },
+
+  // async getRecentIdenticalMode(modeId: string, collectionId: string) {
+  //   const collection = await figma.variables.getVariableCollectionByIdAsync(collectionId);
+
+  //   if (!collection) { return; }
+  //   else {
+  //     const mode = collection.modes.find(({ modeId: id }) => id === modeId);
+
+  //     if (mode) {
+  //       return mode;
+  //     } else {
+  //       const commits = commitBridge.getCommits()
+  //       const recentCommit = commits?.find((commit: ICommit) => commit?.collections?.find(c => c.id === collectionId && c.modes.find(({ modeId: id }) => id === modeId)))
+  //       const recentCollection = recentCommit?.collections.find(c => c.id === collectionId && c.modes.find(({ modeId: id }) => id === modeId))
+  //       const recentMode = recentCollection?.modes.find(({ modeId: id }) => id === modeId)
+  //       const sameNameMode
+  //     }
+  //   }
+  // },
+
   async updateVariable({
     data,
     createIfNotExists = false,
+    variableId,
+    commitId,
   }: {
     data: Variable;
     createIfNotExists?: boolean;
+    variableId: string;
+    commitId: string;
   }) {
-    let variable = (await this.getVariableByIdAsync(data.id, { clone: false })) as Variable;
+    let variable = (await this.getVariableByIdAsync(variableId, { clone: false })) as Variable;
+    const commit = commitBridge.getCommitById(commitId);
 
     if (!variable && createIfNotExists) {
-      const collection = await figma.variables.getVariableCollectionByIdAsync(
-        data.variableCollectionId
-      );
+      const collection = await figmaHelper.getVariableCollection(data.variableCollectionId);
       // Calling createVariable with a collection id is deprecated, pass the collection node instead.
       variable = figma.variables.createVariable(data.name, collection as any, data.resolvedType);
     }
 
     if (variable) {
+      const collection = await figma.variables.getVariableCollectionByIdAsync(
+        variable.variableCollectionId
+      );
+
       variable.name = data.name;
       variable.scopes = data.scopes;
       variable.description = data.description;
       variable.hiddenFromPublishing = data.hiddenFromPublishing;
+
       Object.entries(data.valuesByMode).forEach(([modeId, value]) => {
-        variable.setValueForMode(modeId, value);
+        if (collection?.modes.find(({ modeId: id }) => id === modeId)) {
+          variable.setValueForMode(modeId, value);
+        } else {
+          const targetMode = commit?.collections
+            .find((c) => c.id === variable.variableCollectionId)
+            ?.modes.find((mode) => mode.modeId === modeId);
+          const sameNameMode = collection?.modes.find(({ name }) => name === targetMode?.name);
+          if (sameNameMode) {
+            variable.setValueForMode(sameNameMode.modeId, value);
+          }
+          // const sameNameMode = collection?.modes.find(({ name }) => name === )
+        }
       });
+
       Object.entries(data.codeSyntax).forEach(([platform, syntax]) =>
         variable.setVariableCodeSyntax(platform as CodeSyntaxPlatform, syntax)
       );

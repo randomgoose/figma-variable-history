@@ -50,6 +50,9 @@ importers:
 
   packages/docs:
     dependencies:
+      lucide-react:
+        specifier: ^0.400.0
+        version: 0.400.0(react@18.3.1)
       next:
         specifier: 14.2.5
         version: 14.2.5(react-dom@18.3.1)(react@18.3.1)
@@ -170,8 +173,8 @@ importers:
         specifier: ^0.19.9
         version: 0.19.12
       plugma:
-        specifier: ^0.0.23
-        version: 0.0.23(@types/node@20.5.1)(rollup@4.18.0)
+        specifier: ^0.0.28
+        version: 0.0.28(@types/node@20.5.1)(rollup@4.18.0)
       postcss:
         specifier: ^8.4.39
         version: 8.4.39
@@ -7773,8 +7776,8 @@ packages:
     engines: {node: '>= 6'}
     dev: true
 
-  /plugma@0.0.23(@types/node@20.5.1)(rollup@4.18.0):
-    resolution: {integrity: sha512-l4i6hSCDwnANXcHIvVsFbwEw7B76B8MgTGE2xPhNsV14nwIC+78DLrdVM6fwPp9eVUfce+XIYFkl+SxvmsL7sA==}
+  /plugma@0.0.28(@types/node@20.5.1)(rollup@4.18.0):
+    resolution: {integrity: sha512-LHQauckqWHemi+PMzpk81XYbT0/7+vyTYl6K6WNk+ghIPRo946V2ZqQyUrF4TuVypZEBI80z8teXk1Uo2sJppQ==}
     hasBin: true
     requiresBuild: true
     dependencies:

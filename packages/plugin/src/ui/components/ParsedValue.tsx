@@ -7,6 +7,7 @@ import { VariablePill } from './VariablePill';
 import { toast } from 'sonner';
 import clsx from 'clsx';
 import { sendMessage } from '../../utils/message';
+import { parsedValue } from '../styles.module.css';
 
 function CopyTextWrapper({
   children,
@@ -107,12 +108,20 @@ export function ParsedValue({
     switch (variable.resolvedType) {
       case 'BOOLEAN':
         return resolvedValue === true ? (
-          <VariablePill type="TRUE" value={alias} />
+          <CopyTextWrapper text={isAlias ? alias : parsedValue}>
+            <VariablePill type="TRUE" value={alias} />
+          </CopyTextWrapper>
         ) : (
-          <VariablePill type="FALSE" value={alias} />
+          <CopyTextWrapper text={isAlias ? alias : parsedValue}>
+            <VariablePill type="FALSE" value={alias} />
+          </CopyTextWrapper>
         );
       case 'STRING':
-        return <VariablePill type={'STRING'} value={alias} />;
+        return (
+          <CopyTextWrapper text={isAlias ? alias : parsedValue}>
+            <VariablePill type={'STRING'} value={alias} />
+          </CopyTextWrapper>
+        );
       case 'COLOR':
         if (typeof resolvedValue === 'object' && 'r' in resolvedValue) {
           const parsedValue =
@@ -125,7 +134,7 @@ export function ParsedValue({
               : `#${convertRgbColorToHexColor(resolvedValue)}`;
 
           return (
-            <CopyTextWrapper text={parsedValue}>
+            <CopyTextWrapper text={isAlias ? alias : parsedValue}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 {!alias ? (
                   <div

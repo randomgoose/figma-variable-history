@@ -10,10 +10,10 @@ import { Preview } from '../components/Preview';
 
 export function Changes() {
   const [, setCollectionList] = useState<VariableCollection['id'][]>([]);
+  const [keyword, setKeyword] = useState('');
   const [selected, setSelected] = useState<string>('');
 
-  const { groupedChanges, collections, keyword, setKeyword, variables, commits } =
-    useContext(AppContext);
+  const { groupedChanges, collections, variables, commits } = useContext(AppContext);
 
   useEffect(() => {
     setCollectionList(collections.map((c) => c.id));
@@ -69,6 +69,7 @@ export function Changes() {
             <div className="flex flex-col overflow-auto h-full">
               {numOfChanges > 0 ? (
                 <GroupedChanges
+                  keyword={keyword}
                   selected={selected}
                   groupedChanges={groupedChanges}
                   onClickVariableItem={(id) => setSelected(id)}
@@ -93,7 +94,13 @@ export function Changes() {
         {selected ? (
           <VariableDetail
             current={variables.find((v) => v.id === selected)}
+            currentCollection={collections.find(
+              (c) => c.id === variables.find((v) => v.id === selected)?.variableCollectionId
+            )}
             prev={commits?.[0]?.variables.find((v: Variable) => v.id === selected)}
+            prevCollection={commits?.[0]?.collections.find(
+              (c) => c.id === variables.find((v) => v.id === selected)?.variableCollectionId
+            )}
           />
         ) : numOfChanges > 0 ? null : (
           <Preview />

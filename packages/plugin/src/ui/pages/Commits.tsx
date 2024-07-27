@@ -82,8 +82,14 @@ export function Commits({ commits }: { commits: ICommit[] }) {
     const index = commits.findIndex((c) => c.id === selected);
     return index > -1
       ? getVariableChangesGroupedByCollection({
-          current: commits[index]?.variables,
-          prev: commits[index + 1]?.variables || [],
+          current: {
+            variables: commits[index]?.variables,
+            collections: commits[index]?.collections,
+          },
+          prev: {
+            variables: commits[index + 1]?.variables || [],
+            collections: commits[index + 1]?.collections || [],
+          },
         })
       : {};
   }, [commits, selected]);
@@ -182,7 +188,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                             setSearching(false);
                             setKeyword('');
                           }}
-                          className="p-3 border rounded-md mt-2"
+                          className="p-3 border rounded-md"
                           key={commit.id}
                         >
                           <div className="font-semibold">{commit.summary}</div>
@@ -252,8 +258,21 @@ export function Commits({ commits }: { commits: ICommit[] }) {
 
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
+                    <button className="btn-ghost w-7 h-7 ml-auto" onClick={generateChangelog}>
+                      <ArrowDownToLine size={12} />
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content side="bottom" className="tooltip-content">
+                      Generate changelog
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
                     <button
-                      className="btn-ghost ml-auto w-7 h-7"
+                      className="btn-ghost w-7 h-7"
                       onClick={() => {
                         setSearching(true);
                       }}
@@ -264,19 +283,6 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                   <Tooltip.Portal>
                     <Tooltip.Content side="bottom" className="tooltip-content">
                       Search
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip.Root>
-
-                <Tooltip.Root>
-                  <Tooltip.Trigger asChild>
-                    <button className="btn-ghost w-7 h-7" onClick={generateChangelog}>
-                      <ArrowDownToLine size={12} />
-                    </button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content side="bottom" className="tooltip-content">
-                      Generate changelog
                     </Tooltip.Content>
                   </Tooltip.Portal>
                 </Tooltip.Root>
@@ -369,9 +375,11 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                     <Dialog.Close autoFocus asChild>
                       <button className="btn-outline">Cancel</button>
                     </Dialog.Close>
-                    <button className="btn-primary" onClick={() => resetCommit(selectedCommit)}>
-                      Confirm
-                    </button>
+                    <Dialog.Close asChild>
+                      <button className="btn-primary" onClick={() => resetCommit(selectedCommit)}>
+                        Confirm
+                      </button>
+                    </Dialog.Close>
                   </div>
                 </Dialog.Content>
               </Dialog.Portal>

@@ -4,7 +4,7 @@ import { AppContext } from '../AppContext';
 
 export function useSync() {
   const { commits } = useContext(AppContext);
-  const [stage, setStage] = useState<SyncToGitStage | 'compile' | ''>('');
+  const [stage, setStage] = useState<SyncToGitStage | 'compile' | 'commit_success' | ''>('');
   const [result, setResult] = useState<SyncToGitResult | null>(null);
   const [cssContent, setCssContent] = useState<string | null>(null);
 
@@ -16,7 +16,7 @@ export function useSync() {
     addEventListener('message', (e) => {
       if (e.data.pluginMessage.type === 'CONVERT_VARIABLES_TO_CSS_DONE') {
         setCssContent(decodeURIComponent(e.data.pluginMessage.payload));
-        setStage('');
+        // setStage('');
       }
     });
   }, []);
@@ -42,8 +42,10 @@ export function useSync() {
       branch: `figma-variable-${commitId}`,
       commitMessage: `style: auto update css variables via Figma plugin accord to commit:${commitId}`,
       pullRequest: {
-        title: `Auto update css variables via Figma plugin`,
-        body: `This PR is created by FigmaVariableHistory plugin`,
+        title: `[Figma Variable History] ${commits[0].summary}`,
+        body: `${commits[0].description || 'No description'}
+        \n\nThis PR is created by Variable History plugin
+        `,
       },
       onStageChange: (stage) => setStage(stage),
     });
