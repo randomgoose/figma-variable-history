@@ -15,8 +15,8 @@ export function jsonDiff(left: unknown, right: unknown) {
 export function jsonPatch(json: unknown, delta: Delta | Delta[]) {
   delta = Array.isArray(delta) ? delta : [delta];
   let result = JSON.parse(JSON.stringify(json));
-  for (const currentDelta of delta) {
-    result = jsondiffpatchInstance.patch(result, currentDelta as Delta);
+  for (let i = delta.length - 1; i >= 0; i--) {
+    result = jsondiffpatchInstance.patch(result, delta[i] as Delta);
   }
   return result;
 }
@@ -24,8 +24,8 @@ export function jsonPatch(json: unknown, delta: Delta | Delta[]) {
 export function jsonUnpatch(json: unknown, delta: Delta | Delta[]) {
   delta = Array.isArray(delta) ? delta : [delta];
   let result = JSON.parse(JSON.stringify(json));
-  for (let i = delta.length - 1; i >= 0; i--) {
-    result = jsondiffpatchInstance.unpatch(result, delta[i] as Delta);
+  for (const currentDelta of delta) {
+    result = jsondiffpatchInstance.unpatch(result, currentDelta as Delta);
   }
   return result;
 }
