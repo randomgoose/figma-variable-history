@@ -1,5 +1,5 @@
 import omit from 'lodash-es/omit';
-import type { Delta } from 'jsondiffpatch';
+import { type Delta } from 'jsondiffpatch';
 
 import type { ICommit, VariableChangeType } from '../types';
 import { jsonDiff, jsonPatch, jsonUnpatch } from '../utils/json-patch';
@@ -59,6 +59,7 @@ export class CommitBridge {
         this.pluginData.commits,
         (value) => idChangeMap[value] || value
       );
+
       this.setLocalPluginData(head, commits);
     }
   }
@@ -103,6 +104,8 @@ export class CommitBridge {
       if (localCollection) {
         localCollection.name = c.name;
 
+        const idChangeMap: Record<string, string> = {};
+
         c.modes.forEach(({ modeId, name }) => {
           const mode = localCollection.modes.find((m) => m.modeId === modeId);
 
@@ -110,15 +113,29 @@ export class CommitBridge {
             mode.name = name;
           } else {
             if (!localCollection.modes.find((mode) => mode.name === name)) {
-              localCollection.addMode(name);
+              const newModeId = localCollection.addMode(name);
+              idChangeMap[modeId] = newModeId;
             }
           }
         });
+
+        this.updateIdInLocalPluginData(idChangeMap);
       } else {
+        const idChangeMap: Record<string, string> = {};
         const collection = figma.variables.createVariableCollection(c.name);
-        c.modes.forEach((mode) => {
-          collection.addMode(mode.name);
+        idChangeMap[c.id] = collection.id;
+
+        c.modes.forEach((mode, index) => {
+          if (index === 0 && collection.modes.length === 1) {
+            collection.renameMode(collection.modes[0].modeId, mode.name);
+            idChangeMap[mode.modeId] = collection.modes[0].modeId;
+          } else {
+            const newModeId = collection.addMode(mode.name);
+            idChangeMap[mode.modeId] = newModeId;
+          }
         });
+
+        this.updateIdInLocalPluginData(idChangeMap);
       }
     });
   }
@@ -185,6 +202,7 @@ export class CommitBridge {
 
   getCommits(): ICommit[] {
     let lastCommitInfo: { commit: ICommit; index: number } | null = null;
+
     return this.pluginData.commits
       .map((_, index) => {
         const commit = this.getCommitByIndex(index, lastCommitInfo || undefined);
@@ -278,9 +296,6 @@ export class CommitBridge {
 
     // TODO
     const timestamp = +new Date();
-    await this.setLocalCollectionsToCommit(targetCommit.id);
-    await this.setLocalVariablesToCommit(targetCommit.id);
-    await this.emitData();
 
     this.commit({
       ...targetCommit,
@@ -289,6 +304,18 @@ export class CommitBridge {
       collaborators: figma.currentUser ? [figma.currentUser] : targetCommit.collaborators,
       date: timestamp,
     });
+
+    await this.setLocalCollectionsToCommit(targetCommit.id);
+    await this.setLocalVariablesToCommit(targetCommit.id);
+    await this.emitData();
+
+    // this.commit({
+    //   ...targetCommit,
+    //   id: timestamp + '',
+    //   summary: `[Reset] ${targetCommit.summary}`,
+    //   collaborators: figma.currentUser ? [figma.currentUser] : targetCommit.collaborators,
+    //   date: timestamp,
+    // });
   }
 
   refresh() {

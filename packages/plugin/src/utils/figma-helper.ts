@@ -109,39 +109,14 @@ export const figmaHelper = {
           if (sameNameCollection) {
             return sameNameCollection;
           } else {
-            const newCollection = figma.variables.createVariableCollection(recentCollection.name);
-            // recentCollection.modes.forEach((mode) => {
-            //   if (!newCollection.modes.find(({ name }) => name === mode.name)) {
-            //     newCollection.addMode(mode.name);
-            //   }
-            // });
-
-            return newCollection;
+            // const newCollection = figma.variables.createVariableCollection(recentCollection.name);
+            // return newCollection;
           }
         } else {
         }
       }
     }
   },
-
-  // async getRecentIdenticalMode(modeId: string, collectionId: string) {
-  //   const collection = await figma.variables.getVariableCollectionByIdAsync(collectionId);
-
-  //   if (!collection) { return; }
-  //   else {
-  //     const mode = collection.modes.find(({ modeId: id }) => id === modeId);
-
-  //     if (mode) {
-  //       return mode;
-  //     } else {
-  //       const commits = commitBridge.getCommits()
-  //       const recentCommit = commits?.find((commit: ICommit) => commit?.collections?.find(c => c.id === collectionId && c.modes.find(({ modeId: id }) => id === modeId)))
-  //       const recentCollection = recentCommit?.collections.find(c => c.id === collectionId && c.modes.find(({ modeId: id }) => id === modeId))
-  //       const recentMode = recentCollection?.modes.find(({ modeId: id }) => id === modeId)
-  //       const sameNameMode
-  //     }
-  //   }
-  // },
 
   async updateVariable({
     data,

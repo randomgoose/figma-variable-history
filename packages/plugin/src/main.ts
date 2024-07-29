@@ -20,13 +20,14 @@ export default async function () {
         await commitBridge.commit(msg.payload);
         break;
       case 'RESET_COMMIT':
-        commitBridge.reset(msg.payload);
+        await commitBridge.reset(msg.payload);
+        await commitBridge.emitData();
         break;
       case 'REFRESH':
         await commitBridge.emitData();
         break;
       case 'REVERT_VARIABLE_VALUE':
-        commitBridge.revertVariable(msg.payload.variable, msg.payload.type);
+        await commitBridge.revertVariable(msg.payload.variable, msg.payload.type);
         await commitBridge.emitData();
         break;
       case 'CONVERT_VARIABLES_TO_CSS':

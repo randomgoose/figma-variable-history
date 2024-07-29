@@ -9,7 +9,7 @@ import { union } from 'lodash-es';
 
 interface ValuesByModeDiffProps {
   current: Variable;
-  currentCollection: VariableCollection;
+  currentCollection?: VariableCollection;
   prev?: Variable;
   prevCollection?: VariableCollection;
 }
@@ -18,8 +18,8 @@ export function ValuesByModeDiff({
   current,
   prev,
   currentCollection,
-}: // prevCollection,
-ValuesByModeDiffProps) {
+  prevCollection,
+}: ValuesByModeDiffProps) {
   const { colorFormat, setColorFormat } = useContext(AppContext);
 
   const unionedModeIds = prev
@@ -86,31 +86,34 @@ ValuesByModeDiffProps) {
       </div>
 
       {prev
-        ? changedModeIds.map((modeId) => (
-            <div className={'variableDetail-item'} key={modeId}>
-              <div>
-                {currentCollection?.modes.find((mode) => mode.modeId === modeId)?.name ||
-                  'Removed mode'}
+        ? changedModeIds.map((modeId) => {
+            return (
+              <div className={'variableDetail-item'} key={modeId}>
+                <div>
+                  {currentCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
+                    prevCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
+                    'Removed mode'}
+                </div>
+                <div>
+                  <ParsedValue
+                    variable={prev}
+                    modeId={modeId}
+                    option={{ format: colorFormat, showLabel: true }}
+                  />
+                </div>
+                <div className={'variableDetail-itemArrow'}>
+                  <ArrowRight className="text-[color:var(--figma-color-icon-tertiary)]" size={14} />
+                </div>
+                <div>
+                  <ParsedValue
+                    variable={current}
+                    modeId={modeId}
+                    option={{ format: colorFormat, showLabel: true }}
+                  />
+                </div>
               </div>
-              <div>
-                <ParsedValue
-                  variable={prev}
-                  modeId={modeId}
-                  option={{ format: colorFormat, showLabel: true }}
-                />
-              </div>
-              <div className={'variableDetail-itemArrow'}>
-                <ArrowRight className="text-[color:var(--figma-color-icon-tertiary)]" size={14} />
-              </div>
-              <div>
-                <ParsedValue
-                  variable={current}
-                  modeId={modeId}
-                  option={{ format: colorFormat, showLabel: true }}
-                />
-              </div>
-            </div>
-          ))
+            );
+          })
         : Object.entries(current?.valuesByMode).map(([modeId]) => (
             <div
               className={'variableDetail-item'}
@@ -118,7 +121,7 @@ ValuesByModeDiffProps) {
               key={modeId}
             >
               <div>
-                {currentCollection?.modes.find((mode) => mode.modeId === modeId)?.name ||
+                {currentCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
                   'Removed mode'}
               </div>
               <div>

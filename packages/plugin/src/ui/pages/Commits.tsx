@@ -168,8 +168,14 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                     const groupedChanges =
                       index > -1
                         ? getVariableChangesGroupedByCollection({
-                            current: commits[index]?.variables,
-                            prev: commits[index + 1]?.variables || [],
+                            current: {
+                              variables: commits[index]?.variables,
+                              collections: commits[index]?.collections,
+                            },
+                            prev: {
+                              variables: commits[index + 1]?.variables || [],
+                              collections: commits[index + 1]?.collections || [],
+                            },
                           })
                         : {};
 
@@ -413,8 +419,27 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                     current={commits
                       .find((c) => c.id === selected)
                       ?.variables.find((v) => v.id === selectedVariableId)}
+                    currentCollection={commits
+                      ?.find((c) => c.id === selected)
+                      ?.collections.find(
+                        (c) =>
+                          c.id ===
+                          commits
+                            .find((c) => c.id === selected)
+                            ?.variables.find((v) => v.id === selectedVariableId)
+                            ?.variableCollectionId
+                      )}
                     prev={commits[commits.findIndex((c) => c.id === selected) + 1]?.variables.find(
                       (v) => v.id === selectedVariableId
+                    )}
+                    prevCollection={commits[
+                      commits.findIndex((c) => c.id === selected) + 1
+                    ]?.collections.find(
+                      (c) =>
+                        c.id ===
+                        commits
+                          .find((c) => c.id === selected)
+                          ?.variables.find((v) => v.id === selectedVariableId)?.variableCollectionId
                     )}
                   />
                 ) : null}

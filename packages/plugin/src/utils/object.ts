@@ -10,12 +10,21 @@ export function updateObjectValues<T = Record<string, any>>(
   }
 
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (obj[key] !== null && typeof obj[key] === 'object') {
-        updateObjectValues(obj[key], updateFn);
-      } else {
-        obj[key] = updateFn(obj[key]);
+    try {
+      if (obj.hasOwnProperty(key)) {
+        if (obj[key] !== null && typeof obj[key] === 'object') {
+          updateObjectValues(obj[key], updateFn);
+        } else {
+          obj[key] = updateFn(obj[key]);
+        }
       }
+
+      if (updateFn(key) && updateFn(key) !== key) {
+        obj[updateFn(key)] = obj[key];
+        delete obj[key];
+      }
+    } catch (e) {
+      console.error(e);
     }
   }
 

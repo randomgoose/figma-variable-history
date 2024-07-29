@@ -5,7 +5,7 @@ import { CodeSyntaxDiff } from './CodeSyntaxDiff';
 
 export interface VariableDetailProps {
   current?: Variable;
-  currentCollection: VariableCollection;
+  currentCollection?: VariableCollection;
   prev?: Variable;
   prevCollection?: VariableCollection;
 }
