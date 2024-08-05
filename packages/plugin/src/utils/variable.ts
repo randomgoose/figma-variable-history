@@ -201,18 +201,28 @@ export function getVariableChangesGroupedByCollection({
   const unionedKeys = union(Object.keys(groupedCurrent), Object.keys(groupedPrev));
 
   return Object.fromEntries(
-    unionedKeys.map((collectionId) => [
-      collectionId,
-      getVariableChanges({
-        prev: {
-          variables: groupedPrev[collectionId] || [],
-          collections: prev?.collections,
-        },
-        current: {
-          variables: groupedCurrent[collectionId] || [],
-          collections: current.collections,
-        },
-      }),
-    ])
+    unionedKeys.map((collectionId) => {
+      return [
+        collectionId,
+        getVariableChanges({
+          prev: {
+            variables: groupedPrev[collectionId] || [],
+            collections: prev?.collections,
+          },
+          current: {
+            variables: groupedCurrent[collectionId] || [],
+            collections: current.collections,
+          },
+        }),
+      ];
+    })
   );
+}
+
+export function isAlias(value: VariableValue) {
+  if (typeof value === 'object' && 'type' in value && value.type === 'VARIABLE_ALIAS') {
+    return true;
+  } else {
+    return false;
+  }
 }

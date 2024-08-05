@@ -2,6 +2,7 @@ import { DescriptionDiff } from './DescriptionDiff';
 import { ValuesByModeDiff } from './ValuesByModeDiff';
 import { VariableScopesDiff } from './VariableScopesDiff';
 import { CodeSyntaxDiff } from './CodeSyntaxDiff';
+import { NameDiff } from './NameDiff';
 
 export interface VariableDetailProps {
   current?: Variable;
@@ -18,6 +19,7 @@ export function VariableDetail(props: VariableDetailProps) {
       <div className="overflow-auto">
         {current ? (
           <>
+            <NameDiff current={current} prev={prev} />
             <ValuesByModeDiff
               current={current}
               prev={prev}
@@ -27,6 +29,18 @@ export function VariableDetail(props: VariableDetailProps) {
             <DescriptionDiff current={current} prev={prev} />
             <CodeSyntaxDiff current={current} prev={prev} />
             <VariableScopesDiff current={current} prev={prev} />
+          </>
+        ) : prev ? (
+          <>
+            <NameDiff current={prev} />
+            <ValuesByModeDiff
+              current={prev}
+              currentCollection={currentCollection}
+              prevCollection={prevCollection}
+            />
+            <DescriptionDiff current={prev} />
+            <CodeSyntaxDiff current={prev} />
+            <VariableScopesDiff current={prev} />
           </>
         ) : null}
       </div>

@@ -24,6 +24,8 @@ interface AppContext {
     };
   };
   setColorFormat: (format: AppContext['colorFormat']) => void;
+  tab: 'changes' | 'commits' | 'settings';
+  setTab: (tab: AppContext['tab']) => void;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -36,6 +38,8 @@ export const AppContext = createContext<AppContext>({
   resolvedVariableValues: {},
   groupedChanges: {},
   setColorFormat: () => null,
+  tab: 'changes',
+  setTab: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -49,6 +53,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     AppContext['resolvedVariableValues']
   >({});
   const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
+  const [tab, setTab] = useState<AppContext['tab']>('changes');
 
   const groupedChanges = useMemo(() => {
     return getVariableChangesGroupedByCollection({
@@ -104,6 +109,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       resolvedVariableValues,
       setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
       groupedChanges,
+      tab,
+      setTab,
     };
   }, [
     setting,
@@ -117,6 +124,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     setEnableGitHubSync,
     setColorFormat,
     groupedChanges,
+    tab,
+    setTab,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

@@ -102,9 +102,9 @@ export const figmaHelper = {
         );
 
         if (recentCollection) {
-          const sameNameCollection = figma.variables
-            .getLocalVariableCollections()
-            .find((c) => c.name === recentCollection.name);
+          const sameNameCollection = (
+            await figma.variables.getLocalVariableCollectionsAsync()
+          ).find((c) => c.name === recentCollection.name);
 
           if (sameNameCollection) {
             return sameNameCollection;
@@ -159,7 +159,6 @@ export const figmaHelper = {
           if (sameNameMode) {
             variable.setValueForMode(sameNameMode.modeId, value);
           }
-          // const sameNameMode = collection?.modes.find(({ name }) => name === )
         }
       });
 
@@ -194,11 +193,18 @@ export const figmaHelper = {
       : null;
 
     if (v && c) {
-      const consumer = figma.createFrame();
-      consumer.setExplicitVariableModeForCollection(c, modeId);
-      const resolvedVariableValue = v.resolveForConsumer(consumer);
-      consumer.remove();
-      return resolvedVariableValue;
+      if (c.modes.find((mode) => mode.modeId === modeId)) {
+        try {
+          const consumer = figma.createFrame();
+          consumer.setExplicitVariableModeForCollection(c, modeId);
+          const resolvedVariableValue = v.resolveForConsumer(consumer);
+          consumer.name = modeId;
+          consumer.remove();
+          return resolvedVariableValue;
+        } catch (err) {
+          console.error(`Failed to resolve variable alias\n`, err);
+        }
+      }
     }
 
     return null;

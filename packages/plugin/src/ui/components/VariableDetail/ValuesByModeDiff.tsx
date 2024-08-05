@@ -89,7 +89,7 @@ export function ValuesByModeDiff({
         ? changedModeIds.map((modeId) => {
             return (
               <div className={'variableDetail-item'} key={modeId}>
-                <div>
+                <div className="truncate">
                   {currentCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
                     prevCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
                     'Removed mode'}

@@ -62,7 +62,9 @@ export default async function () {
         }
         break;
       case 'GET_VARIABLE_BY_ID':
-        const variable = await figmaHelper.getVariableByIdAsync(msg.payload);
+        const variable =
+          (await figmaHelper.getVariableByIdAsync(msg.payload)) ||
+          commitBridge.findOneMatchedVariable(msg.payload);
         if (variable) {
           figma.ui.postMessage({
             type: 'SET_VARIABLE_ALIAS',

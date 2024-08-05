@@ -21,7 +21,7 @@ export async function generateChangeLog() {
   // create changelog container if it's not exists
   let container: FrameNode = null as any;
   if (nodeMapCache.root) {
-    container = figma.getNodeById(nodeMapCache.root) as any;
+    container = (await figma.getNodeByIdAsync(nodeMapCache.root)) as any;
   }
   if (!container) {
     container = figma.createFrame();
@@ -36,7 +36,11 @@ export async function generateChangeLog() {
   }
 
   // Zoom to the container
-  figma.currentPage = container.parent?.type === 'PAGE' ? container.parent : figma.currentPage;
+  // figma.currentPage = container.parent?.type === 'PAGE' ? container.parent : figma.currentPage;
+  await figma.setCurrentPageAsync(
+    container.parent?.type === 'PAGE' ? container.parent : figma.currentPage
+  );
+
   figma.viewport.scrollAndZoomIntoView([container]);
 
   const findIndexToInsert = (commitId: string) => {
@@ -59,7 +63,9 @@ export async function generateChangeLog() {
   // create changelog for every commit
   await Promise.all(
     commits.map(async ({ id }, index) => {
-      if (!nodeMapCache[id] || !figma.getNodeById(nodeMapCache[id])) {
+      const node = await figma.getNodeByIdAsync(nodeMapCache[id]);
+
+      if (!nodeMapCache[id] || !node) {
         const node = await figma.createNodeFromJSXAsync(<Commit commits={commits} index={index} />);
         container.insertChild(findIndexToInsert(id), node);
         nodeMapCache[id] = node.id;
@@ -68,12 +74,14 @@ export async function generateChangeLog() {
   );
 
   // remove changelogs for useless commits
-  Object.entries(nodeMapCache).map(([commitId, nodeId]) => {
-    if (commitId !== 'root' && !commits.find(({ id }) => id === commitId)) {
-      figma.getNodeById(nodeId)?.remove();
-      delete nodeMapCache[commitId];
-    }
-  });
+  await Promise.all(
+    Object.entries(nodeMapCache).map(async ([commitId, nodeId]) => {
+      if (commitId !== 'root' && !commits.find(({ id }) => id === commitId)) {
+        (await figma.getNodeByIdAsync(nodeId))?.remove();
+        delete nodeMapCache[commitId];
+      }
+    })
+  );
 
   // update changelog node map
   figmaHelper.setPluginData(PLUGIN_DATA_KEY_CHANGELOG_NODES, nodeMapCache);

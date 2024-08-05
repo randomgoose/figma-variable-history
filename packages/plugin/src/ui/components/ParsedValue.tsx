@@ -1,39 +1,12 @@
 import { convertRgbColorToHexColor } from '@create-figma-plugin/utilities';
 import { convertFigmaRGBtoString, formatPercentage } from '../../utils/color';
-import { copyText } from '../../utils/text';
-import { useContext, useEffect, ReactNode } from 'react';
+import { useContext, useEffect } from 'react';
 import { AppContext } from '../../AppContext';
 import { VariablePill } from './VariablePill';
-import { toast } from 'sonner';
 import clsx from 'clsx';
 import { sendMessage } from '../../utils/message';
 import { parsedValue } from '../styles.module.css';
-
-function CopyTextWrapper({
-  children,
-  text,
-  allowCopy = true,
-}: {
-  children: ReactNode;
-  text: string;
-  allowCopy?: boolean;
-}) {
-  return (
-    <div
-      className={
-        'max-w-full text-ellipsis whitespace-nowrap overflow-hidden py-1 px-1.5 rounded-[4px] transition-all duration-200 hover:bg-[color:var(--figma-color-bg-secondary)] cursor-pointer active:scale-95'
-      }
-      onClick={() => {
-        if (allowCopy) {
-          copyText(text);
-          toast(`Copied ${text}!`, { duration: 1000 });
-        }
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+import { CopyTextWrapper } from './CopyWrapper';
 
 export function ParsedValue({
   variable,
@@ -136,14 +109,12 @@ export function ParsedValue({
           return (
             <CopyTextWrapper text={isAlias ? alias : parsedValue}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {!alias ? (
-                  <div
-                    className={
-                      'w-4 h-4 rounded-[1px] border border-black/10 shrink-0 flex items-center'
-                    }
-                    style={{ background: convertFigmaRGBtoString(resolvedValue) }}
-                  />
-                ) : null}
+                <div
+                  className={
+                    'w-4 h-4 rounded-[1px] border border-black/10 shrink-0 flex items-center'
+                  }
+                  style={{ background: convertFigmaRGBtoString(resolvedValue) }}
+                />
                 {option?.showLabel ? (
                   <div
                     className={clsx(
@@ -160,7 +131,20 @@ export function ParsedValue({
             </CopyTextWrapper>
           );
         } else {
-          return eleVariableNotDefined;
+          return (
+            <CopyTextWrapper text={isAlias ? alias : parsedValue}>
+              <div
+                className={clsx(
+                  'max-w-full truncate',
+                  isAlias
+                    ? 'hover:max-w-fit px-[5px] py-0 rounded-[4px] bg-[color:var(--figma-color-bg-secondary)] border border-[color:var(--figma-color-border)] h-5 leading-4'
+                    : undefined
+                )}
+              >
+                {alias || parsedValue}
+              </div>
+            </CopyTextWrapper>
+          );
         }
       case 'FLOAT':
         return (

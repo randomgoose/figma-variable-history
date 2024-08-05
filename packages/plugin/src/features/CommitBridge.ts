@@ -51,7 +51,7 @@ export class CommitBridge {
     figmaHelper.setPluginData(PLUGIN_DATA_KEY_COMMITS, this.pluginData.commits);
   }
 
-  private updateIdInLocalPluginData(idChangeMap: Record<string, string>) {
+  updateIdInLocalPluginData(idChangeMap: Record<string, string>) {
     if (!this.pluginData.head) return;
     if (Object.keys(idChangeMap).length) {
       const head = updateObjectValues(this.pluginData.head, (value) => idChangeMap[value] || value);
@@ -144,6 +144,9 @@ export class CommitBridge {
     const targetCommit = commitId ? this.getCommitById(commitId) : this.pluginData.head;
 
     if (!targetCommit) return;
+
+    // Run twice to
+    await this.setLocalVariables(targetCommit);
     await this.setLocalVariables(targetCommit);
   }
 
@@ -180,6 +183,18 @@ export class CommitBridge {
       //   return recoverJson('collections');
       // },
     };
+  }
+
+  findOneMatchedVariable(variableId: string) {
+    const commits = this.getCommits();
+
+    for (const commit of commits) {
+      const v = commit.variables.find((v) => v.id === variableId);
+
+      if (v) {
+        return v;
+      }
+    }
   }
 
   // provide data necessary for ui.tsx
@@ -262,11 +277,11 @@ export class CommitBridge {
   // }
 
   async revertVariable(variable: Variable, type: VariableChangeType) {
+    const lastCommit = this.getCommits()?.[0];
     //TODO: Fix this
     if (type === 'added') {
       await figmaHelper.disableVariable(variable);
     } else if (type === 'modified') {
-      const lastCommit = this.getCommits()?.[0];
       const v = lastCommit.variables.find((v) => v.id === variable.id);
       if (v)
         figmaHelper.updateVariable({ data: v, variableId: variable.id, commitId: lastCommit.id });
@@ -276,6 +291,7 @@ export class CommitBridge {
         data: variable,
         createIfNotExists: true,
         variableId: variable.id,
+        commitId: lastCommit.id,
       });
       if (newVariable && newVariable.id !== variable.id) {
         idChangeMap[variable.id] = newVariable.id;

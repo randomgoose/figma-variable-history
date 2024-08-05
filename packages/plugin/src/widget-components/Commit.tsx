@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { getVariableChangesGroupedByCollection, isSameVariableValue } from '../utils/variable';
 import { ParsedValue } from './ParsedValue';
 import { ICommit } from '../types';
@@ -30,8 +29,14 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
   const lastCommit = commits[index + 1];
 
   const groups = getVariableChangesGroupedByCollection({
-    prev: lastCommit ? lastCommit.variables : [],
-    current: commit.variables || [],
+    prev: {
+      variables: lastCommit ? lastCommit.variables : [],
+      collections: lastCommit ? lastCommit.collections : [],
+    },
+    current: {
+      variables: commit.variables || [],
+      collections: commit.collections || [],
+    },
   });
 
   return (
@@ -44,7 +49,6 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
       spacing={48}
     >
       <CommitMeta {...commit} />
-
       <AL direction="vertical" width={'fill-parent'} spacing={48}>
         {Object.entries(groups)
           .filter(
@@ -53,8 +57,11 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
           .map(([id, { added, modified, removed }]) => (
             <AL key={id} direction="vertical" width={'fill-parent'} spacing={24}>
               <Text fontSize={16} fontWeight={'bold'}>
-                {figma.variables.getLocalVariableCollections().find((c) => c.id === id)?.name ||
+                {/* {(await figmaHelper.getVariableCollection(id))?.name || 'Unknown collection'} */}
+                {commit.collections?.find((c) => c.id === id)?.name ||
+                  lastCommit.collections?.find((c) => c.id === id)?.name ||
                   'Unknown collection'}
+                {/* {figma.variables.getLocalVariableCollections().find((c) => c.id === id)?.name || 'Unknown collection'} */}
               </Text>
 
               <AL direction="vertical" width="fill-parent" spacing={72} name="Changes">
@@ -111,6 +118,7 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
                       );
                       const prev = lastCommit?.variables.find(({ id }) => id === v.id);
                       const isSameDescription = v.description === prev?.description;
+                      const isScopeChanged = v.scopes.join() !== prev?.scopes.join();
 
                       const content = prev
                         ? Diff.diffWords(prev.description, v.description).map((part, index) =>
@@ -223,35 +231,37 @@ export function Commit({ commits, index }: { commits: ICommit[]; index: number }
                               </AL>
                             )}
 
-                            <AL width="fill-parent">
-                              <Text
-                                height={24}
-                                fontSize={11}
-                                verticalAlignText="center"
-                                width={108}
-                              >
-                                Scopes
-                              </Text>
-                              {/* Variable description */}
-                              <AL
-                                width={'fill-parent'}
-                                spacing={8}
-                                verticalAlignItems="center"
-                                minHeight={24}
-                              >
-                                <Text fontSize={11} width={'fill-parent'}>
-                                  {prev?.scopes
-                                    .map((s) => s.split('_').join(' ').toLowerCase())
-                                    .join(', ') || 'no_scopes'}
+                            {isScopeChanged ? (
+                              <AL width="fill-parent">
+                                <Text
+                                  height={24}
+                                  fontSize={11}
+                                  verticalAlignText="center"
+                                  width={108}
+                                >
+                                  Scopes
                                 </Text>
-                                <ArrowRight />
-                                <Text fontSize={11} width={'fill-parent'}>
-                                  {v.scopes
-                                    .map((s) => s.split('_').join(' ').toLowerCase())
-                                    .join(', ')}
-                                </Text>
+                                {/* Variable description */}
+                                <AL
+                                  width={'fill-parent'}
+                                  spacing={8}
+                                  verticalAlignItems="center"
+                                  minHeight={24}
+                                >
+                                  <Text fontSize={11} width={'fill-parent'}>
+                                    {prev?.scopes
+                                      .map((s) => s.split('_').join(' ').toLowerCase())
+                                      .join(', ') || 'no_scopes'}
+                                  </Text>
+                                  <ArrowRight />
+                                  <Text fontSize={11} width={'fill-parent'}>
+                                    {v.scopes
+                                      .map((s) => s.split('_').join(' ').toLowerCase())
+                                      .join(', ')}
+                                  </Text>
+                                </AL>
                               </AL>
-                            </AL>
+                            ) : null}
                           </AL>
                         </AL>
                       );

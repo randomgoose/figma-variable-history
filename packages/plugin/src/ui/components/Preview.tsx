@@ -21,7 +21,7 @@ const tutorials = [
     ),
   },
   {
-    label: 'Restore a commit',
+    label: 'Restore to a commit',
     url: 'https://figma-variable-history-docs.vercel.app/version-history/restore-version',
     icon: (
       <svg
@@ -133,7 +133,7 @@ export function Preview() {
     <div className="p-8 w-full h-full">
       <h2 className="text-base font-semibold">No changes</h2>
       <p className="mt-2" style={{ color: 'var(--figma-color-text-secondary)' }}>
-        There are no changes in this file. Learn how{' '}
+        There are no uncommitted changes in this file. Learn how{' '}
         <span className="font-semibold">Variable History</span> can help you manage variable
         changes.
       </p>

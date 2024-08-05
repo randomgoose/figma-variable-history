@@ -6,7 +6,6 @@ import { GitHubLogo } from '../icons/GitHubLogo';
 import { AnimatePresence } from 'framer-motion';
 import { SyncProgress } from './SyncProgress';
 import { SyncToGitStage } from '../../features/sync-to-git';
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import * as Switch from '@radix-ui/react-switch';
 import { sendMessage } from '../../utils/message';
@@ -25,7 +24,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
   const [description, setDescription] = useState('');
   const [shouldSyncGit, setShouldSyncGit] = useState(false);
 
-  const { variables, collections, setting, commits } = useContext(AppContext);
+  const { variables, collections, setting, commits, setTab } = useContext(AppContext);
   const { syncGit, stage, setStage, cssContent, result } = useSync();
 
   useEffect(() => {
@@ -159,7 +158,9 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
         <div>
           <Feedback title={"You're all set!"} description={'The changes are commited.'} />
 
-          <button className="btn-primary mt-4 w-full">View commits</button>
+          <button className="btn-primary mt-4 w-full" onClick={() => setTab('commits')}>
+            View commits
+          </button>
           <Close asChild>
             <button className="btn-outline mt-2 w-full">Close</button>
           </Close>
@@ -190,12 +191,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
           <div className={'w-80 flex flex-col gap-3 p-3'}>
             <AnimatePresence>
               {!stage ? (
-                <motion.div
-                  className="w-full flex flex-col gap-3"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0, position: 'absolute' }}
-                >
+                <div className="w-full flex flex-col gap-3">
                   <input
                     className="input"
                     value={summary}
@@ -209,7 +205,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                     placeholder="Description (optional)"
                     style={{ height: 96 }}
                   />
-                </motion.div>
+                </div>
               ) : null}
             </AnimatePresence>
             {renderStage(stage)}

@@ -27,7 +27,7 @@
   },
   "plugma": {
     "manifest": {
-      "id": "plugin-pluma",
+      "id": "1401484559876783981",
       "main": "src/main.ts",
       "ui": "src/ui.tsx",
       "editorType": [
@@ -42,7 +42,8 @@
           "*"
         ],
         "reasoning": "Internet access for local development."
-      }
+      },
+      "documentAccess": "dynamic-page"
     }
   },
   "dependencies": {

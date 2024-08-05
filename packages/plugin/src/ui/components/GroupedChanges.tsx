@@ -101,14 +101,13 @@ export function GroupedChanges({
                   ...removed.map((v) => ({ v, type: 'removed' })),
                 ]
                   .filter(({ v }) => v.name.includes(keyword))
-                  .map(({ v, type }, index) => (
+                  .map(({ v, type }) => (
                     <VariableItem
                       key={v.id}
                       variable={v}
                       type={type as VariableChangeType}
                       selected={v.id === selected}
                       onClick={(id) => onClickVariableItem(id)}
-                      custom={index}
                       allowDiscard={!disableInteraction}
                     />
                   ))}
