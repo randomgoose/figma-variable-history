@@ -27,11 +27,17 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
   const { variables, collections, setting, commits, setTab } = useContext(AppContext);
   const { syncGit, stage, setStage, cssContent, result } = useSync();
 
+  const hasMissingFields =
+    setting.git?.filePath === '' ||
+    setting.git?.repository === '' ||
+    setting.git?.token === '' ||
+    setting.git?.owner === '';
+
   useEffect(() => {
     if (shouldSyncGit) {
       const timestamp = +new Date();
 
-      if (setting?.git?.enabled && cssContent) {
+      if (setting?.git?.enabled && cssContent && !hasMissingFields) {
         syncGit(timestamp + '', { ...setting?.git }).then(() => {
           setShouldSyncGit(false);
         });
@@ -111,27 +117,43 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
             </div>
             <div className="flex flex-col grow overflow-hidden">
               <div>Sync to GitHub</div>
-              <div
-                className="truncate font-normal"
-                style={{ color: 'var(--figma-color-text-secondary)' }}
-              >
-                {setting?.git?.repository}
-              </div>
+              {setting.git?.enabled ? (
+                hasMissingFields ? (
+                  <div
+                    className="underline cursor-pointer"
+                    style={{ color: 'var(--figma-color-text-danger)' }}
+                    onClick={() => {
+                      setTab('settings');
+                    }}
+                  >
+                    Missing fields
+                  </div>
+                ) : (
+                  <div
+                    className="truncate font-normal"
+                    style={{ color: 'var(--figma-color-text-secondary)' }}
+                  >
+                    {setting?.git?.repository}
+                  </div>
+                )
+              ) : null}
             </div>
             <Switch.Root
-              className="switch-root ml-auto"
+              className={clsx('switch-root ml-auto')}
               checked={setting?.git?.enabled}
               onCheckedChange={(checked) =>
-                sendMessage('SET_PLUGIN_SETTING', {
-                  git: { ...setting?.git, enabled: checked },
-                })
+                sendMessage('SET_PLUGIN_SETTING', { git: { ...setting?.git, enabled: checked } })
               }
             >
               <Switch.Thumb className="switch-thumb" />
             </Switch.Root>
           </div>
 
-          <button className="btn-primary" disabled={summary.length <= 0} onClick={handleClick}>
+          <button
+            className="btn-primary"
+            disabled={summary.length <= 0 || (setting?.git?.enabled && hasMissingFields)}
+            onClick={handleClick}
+          >
             {setting?.git?.enabled ? 'Commit and sync' : 'Commit'}
           </button>
         </>

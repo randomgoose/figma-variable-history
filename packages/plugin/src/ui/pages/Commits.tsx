@@ -375,18 +375,25 @@ export function Commits({ commits }: { commits: ICommit[] }) {
 
                 <Dialog.Root>
                   <Dialog.Trigger asChild>
-                    {/* <Tooltip.Root> */}
-                    {/* <Tooltip.Trigger asChild disabled={numOfChanges <= 0}> */}
-                    <button disabled={numOfChanges > 0} className="btn-outline ml-auto">
-                      Restore
-                    </button>
-                    {/* </Tooltip.Trigger> */}
-                    {/* <Tooltip.Portal> */}
-                    {/* <Tooltip.Content className='tooltip-content'> */}
-                    {/* You have uncommited changes. Please commit or discard changes before restoring. */}
-                    {/* </Tooltip.Content> */}
-                    {/* </Tooltip.Portal> */}
-                    {/* </Tooltip.Root> */}
+                    {numOfChanges > 0 ? (
+                      <Tooltip.Root>
+                        <Tooltip.Trigger asChild disabled={numOfChanges <= 0}>
+                          <button disabled={numOfChanges > 0} className="btn-outline ml-auto">
+                            Restore
+                          </button>
+                        </Tooltip.Trigger>
+                        <Tooltip.Portal>
+                          <Tooltip.Content className="tooltip-content">
+                            You have uncommited changes. Please commit or discard changes before
+                            restoring.
+                          </Tooltip.Content>
+                        </Tooltip.Portal>
+                      </Tooltip.Root>
+                    ) : (
+                      <button disabled={numOfChanges > 0} className="btn-outline ml-auto">
+                        Restore
+                      </button>
+                    )}
                   </Dialog.Trigger>
                   <Dialog.Portal>
                     <Dialog.Overlay className="dialog-overlay" />
