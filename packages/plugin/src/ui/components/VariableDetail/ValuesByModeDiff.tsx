@@ -5,14 +5,30 @@ import { AppContext } from '../../../AppContext';
 import { isSameVariableValue } from '../../../utils/variable';
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-dropdown-menu';
 import { ArrowRight, ChevronDown } from 'lucide-react';
+import { union } from 'lodash-es';
 
-export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: Variable }) {
-  const { collections, colorFormat, setColorFormat } = useContext(AppContext);
-  const collection = collections.find((c) => c.id === current?.variableCollectionId);
+interface ValuesByModeDiffProps {
+  current: Variable;
+  currentCollection?: VariableCollection;
+  prev?: Variable;
+  prevCollection?: VariableCollection;
+}
 
-  const changedValues = prev
-    ? Object.entries(current?.valuesByMode).filter(
-        ([modeId, value]) => !isSameVariableValue(value, prev.valuesByMode[modeId])
+export function ValuesByModeDiff({
+  current,
+  prev,
+  currentCollection,
+  prevCollection,
+}: ValuesByModeDiffProps) {
+  const { colorFormat, setColorFormat } = useContext(AppContext);
+
+  const unionedModeIds = prev
+    ? union(Object.keys(current.valuesByMode), Object.keys(prev.valuesByMode))
+    : Object.keys(current.valuesByMode);
+
+  const changedModeIds = prev
+    ? unionedModeIds.filter(
+        (id) => !isSameVariableValue(current.valuesByMode[id], prev.valuesByMode[id])
       )
     : [];
 
@@ -29,7 +45,7 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
     : false;
 
   const showValuesByMode =
-    (prev && (changedValues.length || hasNewModes || hasRemovedModes)) || !prev;
+    (prev && (changedModeIds.length || hasNewModes || hasRemovedModes)) || !prev;
 
   const showColorFormatPicker = current.resolvedType === 'COLOR';
 
@@ -70,31 +86,34 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
       </div>
 
       {prev
-        ? changedValues.map(([modeId]) => (
-            <div className={'variableDetail-item'} key={modeId}>
-              <div>
-                {collection?.modes.find((mode) => mode.modeId === modeId)?.name || 'Removed mode'}
+        ? changedModeIds.map((modeId) => {
+            return (
+              <div className={'variableDetail-item'} key={modeId}>
+                <div className="truncate">
+                  {currentCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
+                    prevCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
+                    'Removed mode'}
+                </div>
+                <div>
+                  <ParsedValue
+                    variable={prev}
+                    modeId={modeId}
+                    option={{ format: colorFormat, showLabel: true }}
+                  />
+                </div>
+                <div className={'variableDetail-itemArrow'}>
+                  <ArrowRight className="text-[color:var(--figma-color-icon-tertiary)]" size={14} />
+                </div>
+                <div>
+                  <ParsedValue
+                    variable={current}
+                    modeId={modeId}
+                    option={{ format: colorFormat, showLabel: true }}
+                  />
+                </div>
               </div>
-              <div>
-                <ParsedValue
-                  variable={prev}
-                  modeId={modeId}
-                  option={{ format: colorFormat, showLabel: true }}
-                />
-              </div>
-              <div className={'variableDetail-itemArrow'}>
-                <ArrowRight className="text-[color:var(--figma-color-icon-tertiary)]" size={14} />
-                {/* <IconArrowRight16 /> */}
-              </div>
-              <div>
-                <ParsedValue
-                  variable={current}
-                  modeId={modeId}
-                  option={{ format: colorFormat, showLabel: true }}
-                />
-              </div>
-            </div>
-          ))
+            );
+          })
         : Object.entries(current?.valuesByMode).map(([modeId]) => (
             <div
               className={'variableDetail-item'}
@@ -102,7 +121,8 @@ export function ValuesByModeDiff({ current, prev }: { current: Variable; prev?: 
               key={modeId}
             >
               <div>
-                {collection?.modes.find((mode) => mode.modeId === modeId)?.name || 'Removed mode'}
+                {currentCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
+                  'Removed mode'}
               </div>
               <div>
                 <ParsedValue

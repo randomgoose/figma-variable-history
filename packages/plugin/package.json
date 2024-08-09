@@ -16,7 +16,7 @@
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.19",
     "esbuild": "^0.19.9",
-    "plugma": "^0.0.23",
+    "plugma": "^0.0.28",
     "postcss": "^8.4.39",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -27,22 +27,25 @@
   },
   "plugma": {
     "manifest": {
-      "id": "plugin-pluma",
+      "id": "1401484559876783981",
       "main": "src/main.ts",
       "ui": "src/ui.tsx",
       "editorType": [
-        "figma",
-        "figjam"
+        "figma"
       ],
       "permissions": [
         "currentuser"
       ],
       "networkAccess": {
         "allowedDomains": [
-          "*"
+          "https://api.github.com/",
+          "https://s3-alpha.figma.com/",
+          "https://fonts.gstatic.com/",
+          "https://fonts.googleapis.com/"
         ],
-        "reasoning": "Internet access for local development."
-      }
+        "reasoning": "Internet access for fonts, image resources and GitHub API with the user's permissions."
+      },
+      "documentAccess": "dynamic-page"
     }
   },
   "dependencies": {

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap'); */
 
 @tailwind base;
 @tailwind components;
@@ -26,6 +26,10 @@ body {
 
   .btn-outline {
     @apply flex justify-center items-center px-[14px] py-2 max-h-8 rounded-md border border-[color:var(--figma-color-border-strong)] font-medium shrink-0;
+  }
+
+  .btn-outline:disabled {
+    @apply border-[color:var(--figma-color-border-disabled)] text-[color:var(--figma-color-text-disabled)];
   }
 
   .btn-ghost {
@@ -69,7 +73,7 @@ body {
   }
 
   .tooltip-content {
-    @apply px-2 py-1 rounded-sm bg-[color:var(--figma-color-bg-inverse)] text-[color:var(--figma-color-text-oninverse)];
+    @apply px-2 py-1 max-w-56 rounded-sm bg-[color:var(--figma-color-bg-inverse)] text-[color:var(--figma-color-text-oninverse)];
   }
 
   .variableItem {

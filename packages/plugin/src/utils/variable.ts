@@ -34,48 +34,90 @@ export function isSameVariableValue(a?: VariableValue, b?: VariableValue): boole
 /**
  * Diff value changes of two variables
  */
-export function diffVariables(a: Variable, b: Variable) {
+export function diffVariables(
+  a: { variable: Variable; collection?: VariableCollection },
+  b: { variable: Variable; collection?: VariableCollection }
+) {
   const diff: any = {};
 
-  if (a.name !== b.name) {
-    diff.name = [a.name, b.name];
+  if (a.variable.name !== b.variable.name) {
+    diff.name = [a.variable.name, b.variable.name];
   }
 
-  if (a.description !== b.description) {
-    diff.description = [a.description, b.description];
+  if (a.variable.description !== b.variable.description) {
+    diff.description = [a.variable.description, b.variable.description];
   }
 
-  if (a.resolvedType !== b.resolvedType) {
-    diff.resolvedType = [a.resolvedType, b.resolvedType];
-  }
-
-  if (
-    difference(a.scopes, b.scopes).length > 0 ||
-    (a.scopes.length === 0 && b.scopes.length > 0) ||
-    (a.scopes.length > 0 && b.scopes.length === 0)
-  ) {
-    diff.scopes = [a.scopes, b.scopes];
+  if (a.variable.resolvedType !== b.variable.resolvedType) {
+    diff.resolvedType = [a.variable.resolvedType, b.variable.resolvedType];
   }
 
   if (
-    a.codeSyntax.ANDROID !== b.codeSyntax.ANDROID ||
-    a.codeSyntax.WEB !== b.codeSyntax.WEB ||
-    a.codeSyntax.iOS !== b.codeSyntax.iOS
+    difference(a.variable.scopes, b.variable.scopes).length > 0 ||
+    (a.variable.scopes.length === 0 && b.variable.scopes.length > 0) ||
+    (a.variable.scopes.length > 0 && b.variable.scopes.length === 0)
   ) {
-    diff.codeSyntax = [a.codeSyntax, b.codeSyntax];
+    diff.scopes = [a.variable.scopes, b.variable.scopes];
+  }
+
+  if (
+    a.variable.codeSyntax.ANDROID !== b.variable.codeSyntax.ANDROID ||
+    a.variable.codeSyntax.WEB !== b.variable.codeSyntax.WEB ||
+    a.variable.codeSyntax.iOS !== b.variable.codeSyntax.iOS
+  ) {
+    diff.codeSyntax = [a.variable.codeSyntax, b.variable.codeSyntax];
   }
 
   // Compare values by mode
   const valuesByMode = Object.fromEntries(
-    Object.entries(a.valuesByMode)
+    Object.entries({ ...a.variable.valuesByMode, ...b.variable.valuesByMode })
       .map(([modeId]) => {
-        if (typeof a.valuesByMode[modeId] === 'undefined') {
-          return [modeId, [undefined, b.valuesByMode[modeId]]];
-        } else if (typeof b.valuesByMode[modeId] === 'undefined') {
-          return [modeId, [a.valuesByMode[modeId], undefined]];
+        const aModeName = a.collection?.modes.find((mode) => mode.modeId === modeId)?.name;
+        const bModeName = b.collection?.modes.find((mode) => mode.modeId === modeId)?.name;
+
+        if (typeof a.variable.valuesByMode[modeId] === 'undefined') {
+          const sameNameMode = a.collection?.modes.find((mode) => mode.name === bModeName);
+          if (!sameNameMode) {
+            return [modeId, [undefined, b.variable.valuesByMode[modeId]]];
+          } else {
+            if (
+              !isSameVariableValue(
+                a.variable.valuesByMode[sameNameMode.modeId],
+                b.variable.valuesByMode[modeId]
+              )
+            ) {
+              return [
+                modeId,
+                [a.variable.valuesByMode[sameNameMode.modeId], b.variable.valuesByMode[modeId]],
+              ];
+            } else {
+              return [modeId, []];
+            }
+          }
+        } else if (typeof b.variable.valuesByMode[modeId] === 'undefined') {
+          const sameNameMode = b.collection?.modes.find((mode) => mode.name === aModeName);
+          if (!sameNameMode) {
+            return [modeId, [a.variable.valuesByMode[modeId], undefined]];
+          } else {
+            if (
+              !isSameVariableValue(
+                a.variable.valuesByMode[modeId],
+                b.variable.valuesByMode[sameNameMode.modeId]
+              )
+            ) {
+              return [
+                modeId,
+                [a.variable.valuesByMode[modeId], b.variable.valuesByMode[sameNameMode.modeId]],
+              ];
+            } else {
+              return [modeId, []];
+            }
+          }
         } else {
-          if (!isSameVariableValue(a.valuesByMode[modeId], b.valuesByMode[modeId])) {
-            return [modeId, [a.valuesByMode[modeId], b.valuesByMode[modeId]]];
+          if (
+            !isSameVariableValue(a.variable.valuesByMode[modeId], b.variable.valuesByMode[modeId])
+          ) {
+            return [modeId, [a.variable.valuesByMode[modeId], b.variable.valuesByMode[modeId]]];
           } else {
             return [modeId, []];
           }
@@ -95,14 +137,14 @@ export function diffVariables(a: Variable, b: Variable) {
  * Get variable list member changes (modify/add/remove)
  */
 export function getVariableChanges({
-  prev = [],
-  current = [],
+  prev = { variables: [], collections: [] },
+  current = { variables: [], collections: [] },
 }: {
-  prev?: Variable[];
-  current?: Variable[];
+  prev?: { variables: Variable[]; collections: VariableCollection[] };
+  current?: { variables: Variable[]; collections: VariableCollection[] };
 }) {
   // use copy of prev, will splice it below
-  prev = [...prev];
+  prev.variables = [...prev.variables];
 
   const result: { added: Variable[]; modified: Variable[]; removed: Variable[] } = {
     added: [],
@@ -110,18 +152,28 @@ export function getVariableChanges({
     removed: [],
   };
 
-  for (const currentItem of current) {
+  for (const currentItem of current.variables) {
     let hasSameVariableInPrev = false;
 
-    for (let i = 0; i < prev.length; i++) {
-      const prevItem = prev[i];
+    for (let i = 0; i < prev.variables.length; i++) {
+      const prevItem = prev.variables[i];
       const isSameOne = isSameVariable(currentItem, prevItem);
+      const prevCollection = prev.collections.find((c) => prevItem.variableCollectionId === c.id);
+      const currentCollection = current.collections.find(
+        (c) => currentItem.variableCollectionId === c.id
+      );
 
       if (isSameOne) {
-        const isDifferent = Object.keys(diffVariables(currentItem, prevItem)).length > 0;
+        const isDifferent =
+          Object.keys(
+            diffVariables(
+              { variable: currentItem, collection: currentCollection },
+              { variable: prevItem, collection: prevCollection }
+            )
+          ).length > 0;
         isDifferent && result.modified.push(currentItem);
         hasSameVariableInPrev = true;
-        prev.splice(i, 1);
+        prev.variables.splice(i, 1);
         i--;
         break;
       }
@@ -132,7 +184,7 @@ export function getVariableChanges({
     }
   }
 
-  result.removed.push(...prev);
+  result.removed.push(...prev.variables);
 
   return result;
 }
@@ -141,20 +193,36 @@ export function getVariableChangesGroupedByCollection({
   prev,
   current,
 }: {
-  prev?: Variable[];
-  current?: Variable[];
+  prev: { variables: Variable[]; collections: VariableCollection[] };
+  current: { variables: Variable[]; collections: VariableCollection[] };
 }) {
-  const groupedCurrent = groupBy(current, (d) => d.variableCollectionId);
-  const groupedPrev = groupBy(prev, (d) => d.variableCollectionId);
+  const groupedCurrent = groupBy(current?.variables, (d) => d.variableCollectionId);
+  const groupedPrev = groupBy(prev?.variables, (d) => d.variableCollectionId);
   const unionedKeys = union(Object.keys(groupedCurrent), Object.keys(groupedPrev));
 
   return Object.fromEntries(
-    unionedKeys.map((collectionId) => [
-      collectionId,
-      getVariableChanges({
-        prev: groupedPrev[collectionId] || [],
-        current: groupedCurrent[collectionId] || [],
-      }),
-    ])
+    unionedKeys.map((collectionId) => {
+      return [
+        collectionId,
+        getVariableChanges({
+          prev: {
+            variables: groupedPrev[collectionId] || [],
+            collections: prev?.collections,
+          },
+          current: {
+            variables: groupedCurrent[collectionId] || [],
+            collections: current.collections,
+          },
+        }),
+      ];
+    })
   );
+}
+
+export function isAlias(value: VariableValue) {
+  if (typeof value === 'object' && 'type' in value && value.type === 'VARIABLE_ALIAS') {
+    return true;
+  } else {
+    return false;
+  }
 }

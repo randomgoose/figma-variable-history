@@ -16,7 +16,6 @@ interface AppContext {
       valuesByMode: Record<string, { value: VariableValue; resolvedType: string }>;
     }
   >;
-  keyword: string;
   groupedChanges: {
     [k: string]: {
       added: Variable[];
@@ -25,7 +24,8 @@ interface AppContext {
     };
   };
   setColorFormat: (format: AppContext['colorFormat']) => void;
-  setKeyword: (value: string) => void;
+  tab: 'changes' | 'commits' | 'settings';
+  setTab: (tab: AppContext['tab']) => void;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -36,10 +36,10 @@ export const AppContext = createContext<AppContext>({
   commits: [],
   variableAliases: {},
   resolvedVariableValues: {},
-  keyword: '',
   groupedChanges: {},
   setColorFormat: () => null,
-  setKeyword: () => null,
+  tab: 'changes',
+  setTab: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -53,12 +53,15 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     AppContext['resolvedVariableValues']
   >({});
   const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
-  const [keyword, setKeyword] = useState('');
+  const [tab, setTab] = useState<AppContext['tab']>('changes');
 
   const groupedChanges = useMemo(() => {
     return getVariableChangesGroupedByCollection({
-      prev: commits[0] ? commits[0].variables : [],
-      current: variables,
+      prev: {
+        variables: commits[0] ? commits[0].variables : [],
+        collections: commits[0] ? commits[0].collections : [],
+      },
+      current: { variables, collections },
     });
   }, [commits, variables]);
 
@@ -105,9 +108,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       variableAliases,
       resolvedVariableValues,
       setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
-      keyword,
-      setKeyword,
       groupedChanges,
+      tab,
+      setTab,
     };
   }, [
     setting,
@@ -120,9 +123,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     enableGitHubSync,
     setEnableGitHubSync,
     setColorFormat,
-    keyword,
-    setKeyword,
     groupedChanges,
+    tab,
+    setTab,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

@@ -9,7 +9,7 @@ import { Settings2 } from 'lucide-react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 function Plugin() {
-  const { commits } = useContext(AppContext);
+  const { commits, tab, setTab } = useContext(AppContext);
 
   useEffect(() => {
     // Refresh the variables when the plugin is focused
@@ -32,7 +32,7 @@ function Plugin() {
   ];
 
   return (
-    <Root defaultValue="changes">
+    <Root value={tab} onValueChange={(value) => setTab(value as any)}>
       <List className="px-2 h-10 flex items-center border-b">
         {tabs.map(({ value }) => (
           <Trigger

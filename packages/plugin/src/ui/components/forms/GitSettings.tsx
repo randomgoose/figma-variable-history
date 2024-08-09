@@ -64,6 +64,7 @@ export function GitSettings() {
               <input
                 className="input w-60"
                 value={value}
+                type={key === 'token' ? 'password' : 'text'}
                 placeholder={placeholder[key] || key}
                 onChange={(e) =>
                   setGitInfo({

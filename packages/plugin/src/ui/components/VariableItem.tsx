@@ -1,43 +1,48 @@
 import { Number } from '../icons/Number';
 import { String } from '../icons/String';
 import { Boolean } from '../icons/Boolean';
-import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-context-menu';
+import { Root, Portal, Content, Item, Trigger } from '@radix-ui/react-context-menu';
 import { VariableChangeType } from '../../types';
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import { Color } from '../icons/Color';
-
-const MotionTrigger = motion(Trigger);
+import { sendMessage } from '../../utils/message';
+import { useEffect } from 'react';
+import { ParsedValue } from './ParsedValue';
 
 export function VariableItem({
   variable,
   type,
   onClick,
   selected,
-  custom,
   allowDiscard = true,
 }: {
   variable: Variable;
   type: VariableChangeType;
   onClick?: (id: string) => void;
   selected?: boolean;
-  custom: number;
   allowDiscard?: boolean;
 }) {
-  const { id, name, resolvedType } = variable;
+  const { id, name, resolvedType, valuesByMode } = variable;
+
+  useEffect(() => {
+    const defaultMode = Object.keys(valuesByMode)[0];
+    const value = valuesByMode[defaultMode];
+
+    if (typeof value === 'object' && 'type' in value) {
+      sendMessage('RESOLVE_VARIABLE_VALUE', { variable, modeId: defaultMode });
+    }
+  }, []);
 
   const icon = () => {
     switch (resolvedType) {
       case 'COLOR':
         return (
-          <Color />
-          // <div className="[&>*]:p-0 [&>div]:rounded-none">
-          //   <ParsedValue
-          //     variable={variable}
-          //     modeId={Object.keys(variable.valuesByMode)[0]}
-          //     option={{ showLabel: false, allowCopy: false }}
-          //   />
-          // </div>
+          <div className="[&>*]:p-0 [&>div]:rounded-none">
+            <ParsedValue
+              variable={variable}
+              modeId={Object.keys(variable.valuesByMode)[0]}
+              option={{ showLabel: false, allowCopy: false }}
+            />
+          </div>
         );
       case 'FLOAT':
         return <Number />;
@@ -109,14 +114,10 @@ export function VariableItem({
 
   return (
     <Root>
-      <MotionTrigger
+      <Trigger
         disabled={!allowDiscard}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
         asChild
         // transition={{ duration: 0.4, delay: custom * 0.01, ease: ['linear'] }}
-        custom={custom}
       >
         {/* <Link key={id} href={`/variable/${id}`} className={styles.variableItem}> */}
         <div
@@ -131,20 +132,13 @@ export function VariableItem({
           <div className="ml-auto">{renderType(type)}</div>
         </div>
         {/* </Link> */}
-      </MotionTrigger>
+      </Trigger>
       <Portal>
         <Content className={'dropdown-content'} style={{ width: 200 }}>
           <Item
             className={'dropdown-item'}
             onClick={() => {
-              parent.postMessage(
-                {
-                  pluginMessage: { type: 'REVERT_VARIABLE_VALUE', payload: { variable, type } },
-                  pluginId: '*',
-                },
-                '*'
-              );
-              // emit<RevertVariableHandler>('REVERT_VARIABLE_VALUE', variable, type);
+              sendMessage('REVERT_VARIABLE_VALUE', { variable, type });
             }}
           >
             Discard changes
