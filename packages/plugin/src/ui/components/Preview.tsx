@@ -1,3 +1,7 @@
+import { IconWorld } from '@tabler/icons-react';
+import { GitHubLogo } from '../icons/GitHubLogo';
+import { SlackLogo } from '../icons/SlackLogo';
+
 const tutorials = [
   {
     label: 'Commit changes',
@@ -87,43 +91,14 @@ const tutorials = [
     ),
   },
   {
-    label: 'Sync to GitHub',
+    label: 'Set up sync tasks',
     url: 'https://figma-variable-history-docs.vercel.app/sync-variables/enable-github-sync',
     icon: (
-      <svg
-        width="33"
-        height="32"
-        viewBox="0 0 33 32"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <g clipPath="url(#clip0_1680_2255)">
-          <mask
-            id="mask0_1680_2255"
-            style={{ maskType: 'luminance' }}
-            maskUnits="userSpaceOnUse"
-            x="0"
-            y="0"
-            width="33"
-            height="32"
-          >
-            <path d="M32.25 0H0.25V32H32.25V0Z" fill="white" />
-          </mask>
-          <g mask="url(#mask0_1680_2255)">
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M16.2626 0.639984C7.61788 0.639984 0.629395 7.67998 0.629395 16.3895C0.629395 23.3513 5.10716 29.2444 11.319 31.3303C12.0956 31.4871 12.3801 30.9913 12.3801 30.5744C12.3801 30.2092 12.3545 28.9577 12.3545 27.6537C8.00572 28.5927 7.10012 25.7763 7.10012 25.7763C6.40124 23.9511 5.36572 23.4819 5.36572 23.4819C3.94236 22.5171 5.4694 22.5171 5.4694 22.5171C7.04828 22.6215 7.87676 24.1337 7.87676 24.1337C9.2742 26.5324 11.526 25.8547 12.432 25.4375C12.5612 24.4204 12.9756 23.7164 13.4156 23.3255C9.94716 22.9603 6.29788 21.6044 6.29788 15.5548C6.29788 13.8339 6.91868 12.4259 7.90236 11.3309C7.74716 10.9398 7.20348 9.32286 8.05788 7.1587C8.05788 7.1587 9.37788 6.74142 12.3542 8.77534C13.6285 8.4306 14.9426 8.25522 16.2626 8.25374C17.5826 8.25374 18.9282 8.43646 20.1708 8.77534C23.1474 6.74142 24.4674 7.1587 24.4674 7.1587C25.3218 9.32286 24.7778 10.9398 24.6226 11.3309C25.6322 12.4259 26.2274 13.8339 26.2274 15.5548C26.2274 21.6044 22.5782 22.934 19.0838 23.3255C19.6534 23.8208 20.1449 24.7593 20.1449 26.2457C20.1449 28.3577 20.1193 30.0528 20.1193 30.574C20.1193 30.9913 20.4041 31.4871 21.1804 31.3305C27.3922 29.2441 31.87 23.3513 31.87 16.3895C31.8956 7.67998 24.8816 0.639984 16.2626 0.639984Z"
-              fill="#24292F"
-            />
-          </g>
-        </g>
-        <defs>
-          <clipPath id="clip0_1680_2255">
-            <rect width="32" height="32" fill="white" transform="translate(0.25)" />
-          </clipPath>
-        </defs>
-      </svg>
+      <div className="flex gap-2 items-center">
+        <GitHubLogo size={22} />
+        <SlackLogo size={22} />
+        <IconWorld className="text-neutral-900 -ml-0.5" />
+      </div>
     ),
   },
 ];
@@ -145,7 +120,10 @@ export function Preview() {
             target="_blank"
             key={label}
             className="border rounded-lg grow py-6 text-center flex flex-col gap-3 items-center justify-center hover:bg-[color:var(--figma-color-bg-secondary)]"
-            style={{ color: 'var(--figma-color-text-secondary)' }}
+            style={{
+              color: 'var(--figma-color-text-secondary)',
+              borderColor: 'var(--figma-color-border)',
+            }}
           >
             {icon}
             {label}

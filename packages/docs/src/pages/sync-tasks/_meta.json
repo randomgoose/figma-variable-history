@@ -1,0 +1,7 @@
+{
+    "index": "Sync tasks",
+    "enable-github-sync": "Enable GitHub sync",
+    "sync-to-github": "Sync to GitHub",
+    "sync-to-slack": "Sync to Slack",
+    "custom-http-request": "Send custom HTTP request"
+}

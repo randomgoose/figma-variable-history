@@ -16,7 +16,7 @@
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.19",
     "esbuild": "^0.19.9",
-    "plugma": "^0.0.28",
+    "plugma": "^0.0.36",
     "postcss": "^8.4.39",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -41,7 +41,8 @@
           "https://api.github.com/",
           "https://s3-alpha.figma.com/",
           "https://fonts.gstatic.com/",
-          "https://fonts.googleapis.com/"
+          "https://fonts.googleapis.com/",
+          "*"
         ],
         "reasoning": "Internet access for fonts, image resources and GitHub API with the user's permissions."
       },
@@ -51,12 +52,16 @@
   "dependencies": {
     "@create-figma-plugin/utilities": "^3.2.0",
     "@radix-ui/react-accordion": "^1.1.2",
+    "@radix-ui/react-collapsible": "^1.1.0",
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.1",
+    "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-switch": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@tabler/icons-react": "^3.12.0",
+    "@xyflow/react": "^12.0.4",
     "clsx": "^2.1.1",
     "diff": "^5.2.0",
     "framer-motion": "^11.2.12",

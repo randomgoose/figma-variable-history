@@ -1,12 +1,10 @@
-import { Number } from '../icons/Number';
-import { String } from '../icons/String';
-import { Boolean } from '../icons/Boolean';
 import { Root, Portal, Content, Item, Trigger } from '@radix-ui/react-context-menu';
 import { VariableChangeType } from '../../types';
 import clsx from 'clsx';
 import { sendMessage } from '../../utils/message';
-import { useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { ParsedValue } from './ParsedValue';
+import { VariableIcon } from './VariableIcon';
 
 export function VariableItem({
   variable,
@@ -14,12 +12,14 @@ export function VariableItem({
   onClick,
   selected,
   allowDiscard = true,
+  slot,
 }: {
   variable: Variable;
-  type: VariableChangeType;
+  type?: VariableChangeType;
   onClick?: (id: string) => void;
   selected?: boolean;
   allowDiscard?: boolean;
+  slot?: ReactNode;
 }) {
   const { id, name, resolvedType, valuesByMode } = variable;
 
@@ -28,7 +28,7 @@ export function VariableItem({
     const value = valuesByMode[defaultMode];
 
     if (typeof value === 'object' && 'type' in value) {
-      sendMessage('RESOLVE_VARIABLE_VALUE', { variable, modeId: defaultMode });
+      sendMessage('RESOLVE_VARIABLE_VALUE', { id: variable.id, modeId: defaultMode });
     }
   }, []);
 
@@ -44,14 +44,8 @@ export function VariableItem({
             />
           </div>
         );
-      case 'FLOAT':
-        return <Number />;
-      case 'BOOLEAN':
-        return <Boolean />;
-      case 'STRING':
-        return <String />;
       default:
-        return null;
+        return <VariableIcon resolvedType={resolvedType} />;
     }
   };
 
@@ -121,6 +115,7 @@ export function VariableItem({
       >
         {/* <Link key={id} href={`/variable/${id}`} className={styles.variableItem}> */}
         <div
+          id={id}
           className={clsx(
             'flex h-8 p-2 cursor-default text-[color:var(--figma-color-text)] gap-2 rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)] hover:scale-[1.005] active:scale-[0.995]',
             selected ? 'bg-[color:var(--figma-color-bg-brand-tertiary)]' : 'bg-none'
@@ -129,7 +124,8 @@ export function VariableItem({
         >
           <div style={{ flexShrink: 0 }}>{icon()}</div>
           <div className="max-w-full text-ellipsis whitespace-nowrap overflow-hidden">{name}</div>
-          <div className="ml-auto">{renderType(type)}</div>
+          {type ? <div className="ml-auto">{renderType(type)}</div> : null}
+          {slot ? slot : null}
         </div>
         {/* </Link> */}
       </Trigger>

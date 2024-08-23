@@ -18,20 +18,25 @@ import { parseDate } from '../../utils/date';
 import { getVariableChangesGroupedByCollection } from '../../utils/variable';
 import { GroupedChanges } from '../components/GroupedChanges';
 import { VariableDetail } from '../components/VariableDetail';
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { copyText } from '../../utils/text';
 import { AppContext } from '../../AppContext';
+import { Profile } from '../components/Profile';
+import { sendMessage } from '../../utils/message';
+import { NoCommitPlaceholder } from '../components/NoCommitPlaceholder';
 
 export function Commits({ commits }: { commits: ICommit[] }) {
   const ref = useRef<HTMLAnchorElement>(null);
-  const [selected, setSelected] = useState('');
   const [selectedVariableId, setSelectedVariableId] = useState('');
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportModalContent, setExportModalContent] = useState('');
   const [searching, setSearching] = useState(false);
   const [keyword, setKeyword] = useState('');
-  const { groupedChanges: currentGroupedChanges, setTab } = useContext(AppContext);
+  const {
+    groupedChanges: currentGroupedChanges,
+    selectedCommitId,
+    setSelectedCommitId,
+  } = useContext(AppContext);
 
   const numOfChanges = Object.values(currentGroupedChanges).reduce(
     (acc, { added, modified, removed }) => acc + added.length + modified.length + removed.length,
@@ -39,54 +44,37 @@ export function Commits({ commits }: { commits: ICommit[] }) {
   );
 
   const selectedCommit = useMemo(() => {
-    return commits.find((c) => c.id === selected);
-  }, [selected]);
+    return commits.find((c) => c.id === selectedCommitId);
+  }, [selectedCommitId]);
+
+  useEffect(() => {
+    const selectedCommitDiv = document.getElementById(selectedCommitId + '');
+    selectedCommitDiv?.scrollIntoView();
+  }, [selectedCommitId]);
 
   useEffect(() => {
     addEventListener('message', (e) => {
       if (e.data.pluginMessage.type === 'CONVERT_VARIABLES_TO_CSS_DONE') {
-        setExportModalOpen(true);
         setExportModalContent(e.data.pluginMessage.payload);
       }
     });
   }, []);
-
-  useEffect(() => {
-    const selectedCommitDiv = document.getElementById(selected + '');
-    selectedCommitDiv?.scrollIntoView();
-  }, [selected]);
 
   const generateChangelog = useCallback(() => {
     parent.postMessage({ pluginMessage: { type: 'GENERATE_CHANGE_LOG' }, pluginId: '*' }, '*');
   }, []);
 
   const resetCommit = useCallback((commit: ICommit) => {
-    parent.postMessage(
-      {
-        pluginMessage: { type: 'RESET_COMMIT', payload: commit.id },
-        pluginId: '*',
-      },
-      '*'
-    );
+    sendMessage('RESET_COMMIT', commit.id);
   }, []);
-
   const convertCommitVariablesToCss = useCallback((commit: ICommit) => {
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: 'CONVERT_VARIABLES_TO_CSS',
-          payload: commit.id,
-        },
-        pluginId: '*',
-      },
-      '*'
-    );
+    sendMessage('CONVERT_VARIABLES_TO_CSS', commit.id);
   }, []);
 
   const decodedContent = decodeURIComponent(exportModalContent);
 
   const groupedChanges = useMemo(() => {
-    const index = commits.findIndex((c) => c.id === selected);
+    const index = commits.findIndex((c) => c.id === selectedCommitId);
     return index > -1
       ? getVariableChangesGroupedByCollection({
           current: {
@@ -99,7 +87,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
           },
         })
       : {};
-  }, [commits, selected]);
+  }, [commits, selectedCommitId]);
 
   useEffect(() => {
     // setSelected('');
@@ -119,8 +107,8 @@ export function Commits({ commits }: { commits: ICommit[] }) {
   }, [groupedChanges, setSelectedVariableId]);
 
   useEffect(() => {
-    if (commits) {
-      setSelected(commits[0]?.id);
+    if (commits && !selectedCommitId) {
+      setSelectedCommitId(commits[0]?.id);
     }
   }, []);
 
@@ -142,7 +130,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
 
       {commits.length > 0 ? (
         <>
-          <motion.div
+          <div
             className={clsx(
               'flex flex-col hover:w-60 transition-all duration-300 border-r border-[color:var(--figma-color-border)] shrink-0',
               searching ? 'w-60' : 'w-[38px]'
@@ -199,7 +187,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                           matchedVariables.length > 0 && (
                             <div
                               onClick={() => {
-                                setSelected(commit.id);
+                                setSelectedCommitId(commit.id);
                                 setSearching(false);
                                 setKeyword('');
                               }}
@@ -303,7 +291,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                     </Tooltip.Root>
                   </div>
                 </div>
-                <motion.div className="[&::-webkit-scrollbar]:w-0 h-full overflow-auto scroll-smooth">
+                <div className="[&::-webkit-scrollbar]:w-0 h-full overflow-auto scroll-smooth">
                   <div className="w-full">
                     {commits.map((commit) => {
                       const collaborator = commit.collaborators[0];
@@ -313,10 +301,12 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                           key={commit.id}
                           className={clsx(styles.commitItem, 'shrink-0 overflow-hidden')}
                           id={commit.id}
-                          onClick={() => setSelected(commit.id)}
+                          onClick={() => setSelectedCommitId(commit.id)}
                           style={{
                             background:
-                              commit.id === selected ? 'var(--figma-color-bg-selected)' : '',
+                              commit.id === selectedCommitId
+                                ? 'var(--figma-color-bg-selected)'
+                                : '',
                           }}
                         >
                           <div className={clsx(styles.commitItem__icon, 'shrink-0')} />
@@ -325,13 +315,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                               {commit.summary || 'Untitled commit'}
                             </div>
                             {collaborator ? (
-                              <div className={clsx(styles.commitItem__user, 'whitespace-nowrap')}>
-                                <img
-                                  className={styles.commitItem__avatar}
-                                  src={commit.collaborators[0]?.photoUrl || ''}
-                                />
-                                {commit.collaborators[0]?.name}
-                              </div>
+                              <Profile user={commit.collaborators[0]} className="mt-2" />
                             ) : null}
                             <div
                               className="mt-2 w-fit whitespace-nowrap"
@@ -344,14 +328,17 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                       );
                     })}
                   </div>
-                </motion.div>
+                </div>
               </>
             )}
-          </motion.div>
+          </div>
 
           {selectedCommit ? (
             <div className="w-full h-full flex flex-col">
-              <div className="border-b px-4 py-4 flex items-center">
+              <div
+                className="border-b px-4 py-4 flex items-center"
+                style={{ borderColor: 'var(--figma-color-border)' }}
+              >
                 <div>
                   <div className="font-semibold text-xs">
                     {selectedCommit?.summary || 'Untitled commit'}
@@ -375,25 +362,9 @@ export function Commits({ commits }: { commits: ICommit[] }) {
 
                 <Dialog.Root>
                   <Dialog.Trigger asChild>
-                    {numOfChanges > 0 ? (
-                      <Tooltip.Root>
-                        <Tooltip.Trigger asChild disabled={numOfChanges <= 0}>
-                          <button disabled={numOfChanges > 0} className="btn-outline ml-auto">
-                            Restore
-                          </button>
-                        </Tooltip.Trigger>
-                        <Tooltip.Portal>
-                          <Tooltip.Content className="tooltip-content">
-                            You have uncommited changes. Please commit or discard changes before
-                            restoring.
-                          </Tooltip.Content>
-                        </Tooltip.Portal>
-                      </Tooltip.Root>
-                    ) : (
-                      <button disabled={numOfChanges > 0} className="btn-outline ml-auto">
-                        Restore
-                      </button>
-                    )}
+                    <button disabled={numOfChanges > 0} className="btn-outline ml-auto">
+                      Restore
+                    </button>
                   </Dialog.Trigger>
                   <Dialog.Portal>
                     <Dialog.Overlay className="dialog-overlay" />
@@ -422,7 +393,10 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                   </Dialog.Portal>
                 </Dialog.Root>
                 <button
-                  onClick={() => convertCommitVariablesToCss(selectedCommit)}
+                  onClick={() => {
+                    setExportModalOpen(true);
+                    convertCommitVariablesToCss(selectedCommit);
+                  }}
                   className="btn-primary ml-2"
                 >
                   Export
@@ -451,28 +425,28 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                     {selectedVariableId ? (
                       <VariableDetail
                         current={commits
-                          .find((c) => c.id === selected)
+                          .find((c) => c.id === selectedCommitId)
                           ?.variables.find((v) => v.id === selectedVariableId)}
                         currentCollection={commits
-                          ?.find((c) => c.id === selected)
+                          ?.find((c) => c.id === selectedCommitId)
                           ?.collections.find(
                             (c) =>
                               c.id ===
                               commits
-                                .find((c) => c.id === selected)
+                                .find((c) => c.id === selectedCommitId)
                                 ?.variables.find((v) => v.id === selectedVariableId)
                                 ?.variableCollectionId
                           )}
                         prev={commits[
-                          commits.findIndex((c) => c.id === selected) + 1
+                          commits.findIndex((c) => c.id === selectedCommitId) + 1
                         ]?.variables.find((v) => v.id === selectedVariableId)}
                         prevCollection={commits[
-                          commits.findIndex((c) => c.id === selected) + 1
+                          commits.findIndex((c) => c.id === selectedCommitId) + 1
                         ]?.collections.find(
                           (c) =>
                             c.id ===
                             commits
-                              .find((c) => c.id === selected)
+                              .find((c) => c.id === selectedCommitId)
                               ?.variables.find((v) => v.id === selectedVariableId)
                               ?.variableCollectionId
                         )}
@@ -525,15 +499,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
           </Dialog.Root>
         </>
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center">
-          <h5 className="font-semibold">No commits yet</h5>
-          <div style={{ color: 'var(--figma-color-text-secondary)' }}>
-            Committed changes will show up here
-          </div>
-          <button className="btn-primary mt-2" onClick={() => setTab('changes')}>
-            View changes
-          </button>
-        </div>
+        <NoCommitPlaceholder />
       )}
     </div>
   );

@@ -1,6 +1,15 @@
 import { difference, union } from 'lodash-es';
 import groupBy from 'lodash-es/groupBy';
 
+export type VariableDiff = {
+  name?: [string, string];
+  description?: [string | undefined, string | undefined];
+  resolvedType?: [string, string];
+  scopes?: [string[], string[]];
+  codeSyntax?: [string, string];
+  valuesByMode?: { [modeId: string]: [VariableValue, VariableValue] };
+};
+
 export function isSameVariable(a: Variable, b: Variable): boolean {
   return a.id === b.id || (a.name === b.name && a.variableCollectionId === b.variableCollectionId);
 }
@@ -37,7 +46,7 @@ export function isSameVariableValue(a?: VariableValue, b?: VariableValue): boole
 export function diffVariables(
   a: { variable: Variable; collection?: VariableCollection },
   b: { variable: Variable; collection?: VariableCollection }
-) {
+): VariableDiff {
   const diff: any = {};
 
   if (a.variable.name !== b.variable.name) {
@@ -66,6 +75,10 @@ export function diffVariables(
     a.variable.codeSyntax.iOS !== b.variable.codeSyntax.iOS
   ) {
     diff.codeSyntax = [a.variable.codeSyntax, b.variable.codeSyntax];
+  }
+
+  if (a.variable.hiddenFromPublishing !== b.variable.hiddenFromPublishing) {
+    diff.hiddenFromPublishing = [a.variable.hiddenFromPublishing, b.variable.hiddenFromPublishing];
   }
 
   // Compare values by mode

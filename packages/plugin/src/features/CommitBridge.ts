@@ -6,10 +6,7 @@ import { jsonDiff, jsonPatch, jsonUnpatch } from '../utils/json-patch';
 import { figmaHelper } from '../utils/figma-helper';
 import { getVariableChanges } from '../utils/variable';
 import { updateObjectValues } from '../utils/object';
-import { PLUGIN_DATA_KEY_PREFIX } from '../config';
-
-const PLUGIN_DATA_KEY_HEAD = `${PLUGIN_DATA_KEY_PREFIX}HEAD`;
-const PLUGIN_DATA_KEY_COMMITS = `${PLUGIN_DATA_KEY_PREFIX}COMMITS`;
+import { PLUGIN_DATA_KEY_HEAD, PLUGIN_DATA_KEY_COMMITS } from '../config';
 
 type CommitInPluginData = Omit<ICommit, 'variables' | 'collections'> & {
   delta: { variables: Delta; collections: Delta };

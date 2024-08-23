@@ -41,15 +41,15 @@ body {
   }
 
   .dialog-content {
-    @apply bg-white min-w-[280px] max-w-[480px] h-full max-h-[calc(100vh-80px)] overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-sm data-[state=open]:animate-contentShow;
+    @apply bg-[color:var(--figma-color-bg)] min-w-[280px] max-w-[480px] h-full max-h-[calc(100vh-80px)] overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-sm data-[state=open]:animate-contentShow;
   }
 
   .dialog-title {
-    @apply h-10 pl-3 flex items-center font-semibold border-b;
+    @apply h-10 pl-3 flex items-center font-semibold border-b border-[color:var(--figma-color-border)];
   }
 
   .input {
-    @apply h-7 p-2 border border-[color:var(--figma-color-border)] rounded-sm text-[color:var(--figma-color-text)];
+    @apply h-7 p-2 border border-[color:var(--figma-color-border)] rounded-sm text-[color:var(--figma-color-text)] bg-[color:var(--figma-color-bg)];
   }
 
   .switch-root {

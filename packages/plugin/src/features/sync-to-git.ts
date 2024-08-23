@@ -5,7 +5,8 @@ export type SyncToGitStage =
   | 'create_branch'
   | 'update_file'
   | 'create_pr'
-  | 'success';
+  | 'success'
+  | 'error';
 export type SyncToGitResult = { success: boolean; message?: string; prURL?: string };
 
 export async function syncToGit({
@@ -16,6 +17,7 @@ export async function syncToGit({
   repository,
   pullRequest,
   onStageChange,
+  onSuccess,
 }: {
   branch: string;
   path: string;
@@ -27,6 +29,7 @@ export async function syncToGit({
   };
   repository: { owner: string; name: string; token: string };
   onStageChange: (stage: SyncToGitStage) => void;
+  onSuccess: (url: string) => void;
 }): Promise<SyncToGitResult> {
   const baseUrl = `https://api.github.com/repos/${repository.owner}/${repository.name}`;
   const headers = {
@@ -119,6 +122,7 @@ export async function syncToGit({
         },
       });
       response.prURL = html_url;
+      return response;
     } catch (error: any) {
       // status 422: branch already exists
       if (error.status === 422) {
@@ -130,13 +134,16 @@ export async function syncToGit({
   }
 
   try {
-    onStageChange('fetch_repo_info');
-    const { defaultBranch } = await checkoutNewBranch();
     onStageChange('create_branch');
-    await commitToBranch();
+    const { defaultBranch } = await checkoutNewBranch();
     onStageChange('update_file');
-    await createPullRequest(defaultBranch);
+    await commitToBranch();
     onStageChange('create_pr');
+    const response = await createPullRequest(defaultBranch);
+    if (response.success && response.prURL) {
+      onStageChange('success');
+      onSuccess(response.prURL);
+    }
   } catch (error) {
     return { success: false, message: (error as any)?.message || 'Failed to create pull request' };
   }

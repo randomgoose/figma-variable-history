@@ -1,3 +1,4 @@
+export type VariableChangeType = 'added' | 'removed' | 'modified';
+
 export * from './commit';
-export * from './handler';
 export * from './setting';

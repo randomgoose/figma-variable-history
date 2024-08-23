@@ -137,6 +137,7 @@ div:has(> .collectionList)::-webkit-scrollbar {
   border-radius: 9999px;
   position: relative;
   background-color: var(--figma-color-bg);
+  flex-shrink: 0;
 }
 
 .commitItem__content {
@@ -204,9 +205,9 @@ div:has(> .collectionList)::-webkit-scrollbar {
   background-color: #1e1e1e;
   border-radius: 2px;
   padding: 8px 0;
-  box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 0.5px 0px, rgba(0, 0, 0, 0.12) 0px 10px 16px 0px, rgba(0, 0, 0, 0.15) 0px 2px 5px 0px;
+  box-shadow: 0px 5px 17px 0px rgba(0, 0, 0, 0.12), 0px 2px 7px rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 0px 2px 5px 0px;
 }
-
+/* var(--elevation-400-menu-panel, 0px 5px 17px rgba(0, 0, 0, .2), 0px 2px 7px rgba(0, 0, 0, .15), inset 0 0 0 .5px var(--bg-overlay-inner-outline), 0 0 0 .5px var(--bg-overlay-outline)) */
 .dropdown__item {
   height: 24px;
   display: flex;
