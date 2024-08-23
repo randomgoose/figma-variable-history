@@ -20,12 +20,22 @@ export default {
           from: { opacity: '0', transform: 'translate(-50%, -10%) scale(0.96)' },
           to: { opacity: '1', transform: 'translate(-50%, -50%) scale(1)' },
         },
+        collapsibleSlideDown: {
+          from: { height: '0px' },
+          to: { height: 'var(--radix-collapsible-content-height)' },
+        },
+        collapsibleSlideUp: {
+          from: { height: 'var(--radix-collapsible-content-height)' },
+          to: { height: '0px' },
+        },
       },
       animation: {
         slideDown: 'slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1)',
         slideUp: 'slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1)',
         overlayShow: 'overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
         contentShow: 'contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        collapsibleSlideDown: 'collapsibleSlideDown 300ms cubic-bezier(0.87, 0, 0.13, 1)',
+        collapsibleSlideUp: 'collapsibleSlideUp 300ms cubic-bezier(0.87, 0, 0.13, 1)',
       },
     },
   },

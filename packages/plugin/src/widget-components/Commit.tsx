@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { getVariableChangesGroupedByCollection, isSameVariableValue } from '../utils/variable';
 import { ParsedValue } from './ParsedValue';
 import { ICommit } from '../types';

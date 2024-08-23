@@ -3,5 +3,7 @@
     "manage-changes": "Manage changes",
     "version-history": "Version history",
     "logging": "Logging changes",
-    "sync-variables": "Sync variables"
+    "variable-timeline": "Variable Timeline",
+    "node-graph": "Node Graph",
+    "sync-tasks": "Sync tasks"
 }

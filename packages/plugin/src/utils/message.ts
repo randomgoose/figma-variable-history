@@ -1,4 +1,4 @@
-export function sendMessage(type: string, payload: any) {
+export function sendMessage(type: string, payload?: any) {
   parent.postMessage(
     {
       pluginMessage: {

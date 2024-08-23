@@ -27,13 +27,15 @@ export function ParsedValue({
   // Resolve the value if it's an alias
   useEffect(() => {
     if (typeof value === 'object' && 'type' in value) {
-      sendMessage('RESOLVE_VARIABLE_VALUE', { variable, modeId });
+      sendMessage('RESOLVE_VARIABLE_VALUE', { id: value.id, modeId });
       sendMessage('GET_VARIABLE_BY_ID', value.id);
     }
   }, [value, variable]);
 
   const eleVariableNotDefined = (
-    <div style={{ color: 'var(--figma-color-text-secondary)' }}>Not defined</div>
+    <div className="px-1.5" style={{ color: 'var(--figma-color-text-secondary)' }}>
+      Not defined
+    </div>
   );
 
   const eleBooleanTrue = (
@@ -75,7 +77,10 @@ export function ParsedValue({
     const isAlias = 'id' in value;
     const alias = isAlias ? variableAliases[value.id] : '';
     const resolvedValue = isAlias
-      ? resolvedVariableValues[variable.id]?.valuesByMode[modeId]?.value
+      ? resolvedVariableValues[value.id]?.valuesByMode[modeId]?.value ||
+        resolvedVariableValues[value.id]?.valuesByMode?.[
+          Object.keys(resolvedVariableValues?.[value.id]?.valuesByMode)?.[0]
+        ]?.value
       : value;
 
     switch (variable.resolvedType) {

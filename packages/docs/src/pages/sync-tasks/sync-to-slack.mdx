@@ -1,0 +1,43 @@
+# Sync to Slack
+
+Variable History can notify people of variable commits by sending messages to a Slack channel. Follow the steps to enable this feature:
+
+## Set up Slack
+
+We need to first create a Slack App and grant it permissions to upload files and send messages:
+
+### 1. Create a Slack App
+
+1. Visit https://api.slack.com/apps, Click "Create an App" to generate a new Slack App.
+2. Select "From scratch", give your app a name (e.g. "Variable Bot") and pick a workspace you have admin access to.
+3. Click "Create App" and the browser will navigate to the app's settings page.
+
+<video src="/videos/create-slack-app.mp4" controls className="mt-8"/>
+
+### 2. Configure permissions and get a bot token
+
+1. Click **OAuth & Permissions** on the left sidebar.
+2. Go to **Scopes > Bot Token Scopes** and add the following scopes:
+    - `files:write`
+    - `files:read`
+    - `chat:write`
+3. Go to **OAuth Tokens** and click **Install to \{Your workspace\}**.
+4. Allow installation and you will get a Bot User OAuth token.
+
+<video src="/videos/get-bot-token.mp4" controls className="mt-8" />
+
+### 3. Add the app to a channel
+
+1. Go back to your Slack workspace and the app should already be in the **Apps** list.
+2. Right click the app, click **View app details** to open the detail dialog.
+3. Click **Add this app to a channel** and select a channel to send messages to.
+
+<video src="/videos/add-app-to-channel.mp4" controls className="mt-8"/>
+
+## Set up Variable History
+1. Go to **Settings > Synchronization** and click **Add Sync Task**.
+2. Select **Slack** to add a new Slack sync task.
+3. Fill in the channel ID, bot token and a file name. Save the sync task.
+(To get a channel ID, right click a channel, select **View channel details** can scroll down to the bottom of the detail modal.)
+
+You're all set! When you commit changes, the plugin will send commit information and a compiled CSS file to the Slack channel.

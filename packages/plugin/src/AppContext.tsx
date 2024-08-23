@@ -23,13 +23,18 @@ interface AppContext {
       removed: Variable[];
     };
   };
-  setColorFormat: (format: AppContext['colorFormat']) => void;
   tab: 'changes' | 'commits' | 'settings';
+  compiledVariables: { css: string };
+  selectedCommitId: string;
+  setColorFormat: (format: AppContext['colorFormat']) => void;
   setTab: (tab: AppContext['tab']) => void;
+  getCollectionName: (collectionId: string) => string;
+  setSelectedCommitId: (id: string) => void;
+  clearCompiledVariables: () => void;
 }
 
 export const AppContext = createContext<AppContext>({
-  setting: {},
+  setting: { syncTasks: [] },
   colorFormat: 'HEX',
   variables: [],
   collections: [],
@@ -37,13 +42,18 @@ export const AppContext = createContext<AppContext>({
   variableAliases: {},
   resolvedVariableValues: {},
   groupedChanges: {},
-  setColorFormat: () => null,
   tab: 'changes',
+  compiledVariables: { css: '' },
+  selectedCommitId: '',
+  getCollectionName: () => '',
+  setSelectedCommitId: () => null,
   setTab: () => null,
+  setColorFormat: () => null,
+  clearCompiledVariables: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
-  const [setting, setSetting] = useState<PluginSetting>({});
+  const [setting, setSetting] = useState<PluginSetting>({ syncTasks: [] });
   const [colorFormat, setColorFormat] = useState<AppContext['colorFormat']>('HEX');
   const [variables, setVariables] = useState<AppContext['variables']>([]);
   const [collections, setCollections] = useState<AppContext['collections']>([]);
@@ -54,6 +64,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   >({});
   const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
   const [tab, setTab] = useState<AppContext['tab']>('changes');
+  const [compiledVariables, setCompiledVariables] = useState<{ css: string }>({ css: '' });
+  const [selectedCommitId, setSelectedCommitId] = useState<string>('');
 
   const groupedChanges = useMemo(() => {
     return getVariableChangesGroupedByCollection({
@@ -94,9 +106,32 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         case 'PLUGIN_SETTING':
           setSetting(payload);
           break;
+        case 'CONVERT_VARIABLES_TO_CSS_DONE':
+          setCompiledVariables((prev) => ({ ...prev, css: decodeURIComponent(payload) }));
+          break;
       }
     };
   }, []);
+
+  const getCollectionName = (collectionId: string) => {
+    const existingCollection = collections.find((c) => c.id === collectionId);
+
+    if (existingCollection) {
+      return existingCollection.name;
+    } else {
+      const commit = commits.find(
+        (commit) =>
+          commit.collections.findIndex((collection) => collection.id === collectionId) >= 0
+      );
+
+      return (
+        commit?.collections.find((collection) => collection.id === collectionId)?.name ||
+        collectionId
+      );
+    }
+  };
+
+  const clearCompiledVariables = () => setCompiledVariables({ css: '' });
 
   const context = useMemo<AppContext>(() => {
     return {
@@ -107,10 +142,15 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       commits,
       variableAliases,
       resolvedVariableValues,
-      setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
       groupedChanges,
       tab,
       setTab,
+      setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
+      getCollectionName,
+      compiledVariables,
+      selectedCommitId,
+      setSelectedCommitId,
+      clearCompiledVariables: () => setCompiledVariables({ css: '' }),
     };
   }, [
     setting,
@@ -126,6 +166,11 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     groupedChanges,
     tab,
     setTab,
+    getCollectionName,
+    compiledVariables,
+    selectedCommitId,
+    setSelectedCommitId,
+    clearCompiledVariables,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

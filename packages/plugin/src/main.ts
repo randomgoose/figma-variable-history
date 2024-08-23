@@ -18,6 +18,7 @@ export default async function () {
         break;
       case 'COMMIT':
         await commitBridge.commit(msg.payload);
+        await commitBridge.emitData();
         break;
       case 'RESET_COMMIT':
         await commitBridge.reset(msg.payload);
@@ -31,7 +32,10 @@ export default async function () {
         await commitBridge.emitData();
         break;
       case 'CONVERT_VARIABLES_TO_CSS':
-        const commit = commitBridge.getCommitById(msg.payload);
+        const commit = msg.paylod
+          ? commitBridge.getCommitById(msg.payload)
+          : commitBridge.getCommits()?.[0];
+
         if (commit) {
           const content = await convertVariablesToCss(commit);
           figma.ui.postMessage({
@@ -46,14 +50,14 @@ export default async function () {
         break;
       case 'RESOLVE_VARIABLE_VALUE':
         const resolvedVariableValue = await figmaHelper.resolveVariableAlias(
-          msg.payload.variable,
+          msg.payload.id,
           msg.payload.modeId
         );
         if (resolvedVariableValue) {
           figma.ui.postMessage({
             type: 'RESOLVE_VARIABLE_VALUE_DONE',
             payload: {
-              id: msg.payload.variable.id,
+              id: msg.payload.id,
               modeId: msg.payload.modeId,
               value: resolvedVariableValue.value,
               resolvedType: resolvedVariableValue.resolvedType,
@@ -90,6 +94,10 @@ export default async function () {
           payload: figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING),
         });
         // emit<PluginSettingHandler>('PLUGIN_SETTING', figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING));
+        break;
+      case 'CLEAR_PLUGIN_DATA':
+        figmaHelper.clearPluginData();
+        await commitBridge.emitData();
         break;
     }
   };

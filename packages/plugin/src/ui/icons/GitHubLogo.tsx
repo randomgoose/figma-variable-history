@@ -6,6 +6,7 @@ export function GitHubLogo({ size = 24 }: { size?: number }) {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      className="shrink-0"
     >
       <g clipPath="url(#clip0_923_872)">
         <path

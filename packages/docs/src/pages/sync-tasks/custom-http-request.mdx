@@ -1,0 +1,32 @@
+# Send Custom HTTP request
+
+If you need to connect this plugin to other tools that are not yet supported or build your own automation, you can create a custom sync task and provide the plugin with an address.
+
+The plugin will send a `POST` request with a `formdata` object, which includes a CSS file and the `summary`, `description` and `date` of a commit.
+
+You need to create an HTTP endpoint to handle the request. The following is a simple Node.js + [Express](https://expressjs.com/) code example:
+
+```js
+const express = require('express')
+const bodyParser = require('body-parser')
+const multer = require('multer')
+const cors = require('cors')
+const upload = multer({ dest: 'uploads/'})
+
+const app = express()
+app.use(cors())
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+
+app.post('/upload', upload.single('file'), (req, res) => {
+  const { file, body } = req
+  const { summary, description, date } = body
+
+  // Your code to handle the data...
+
+  res.json({ message: 'success' })
+})
+
+app.listen(3000)
+```

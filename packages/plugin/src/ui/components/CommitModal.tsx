@@ -1,49 +1,134 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../AppContext';
-import { useSync } from '../../hooks/use-sync';
-import { Root, Trigger, Portal, Overlay, Content, Title, Close } from '@radix-ui/react-dialog';
-import { GitHubLogo } from '../icons/GitHubLogo';
+import { Root, Trigger, Portal, Overlay, Content, Title } from '@radix-ui/react-dialog';
 import { AnimatePresence } from 'framer-motion';
-import { SyncProgress } from './SyncProgress';
-import { SyncToGitStage } from '../../features/sync-to-git';
-import clsx from 'clsx';
-import * as Switch from '@radix-ui/react-switch';
+import { syncToGit } from '../../features/sync-to-git';
 import { sendMessage } from '../../utils/message';
-import { Feedback } from './Feedback';
+import { syncToSlackChannel } from '../../features/sync-to-slack-channel';
+import { CustomHTTPSyncConfig, GitHubSyncConfig, SlackSyncConfig } from '../../types';
+import { IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-react';
+import { sendCustomRequest } from '../../features/send-custom-request';
+import { SyncTaskIcon } from './SyncTaskIcon';
 
-const gitSyncProgessItems: { key: SyncToGitStage | 'compile'; label: string }[] = [
-  { key: 'compile', label: 'Compiling...' },
-  { key: 'fetch_repo_info', label: 'Fetching repository info...' },
-  { key: 'create_branch', label: 'Creating branch...' },
-  { key: 'update_file', label: 'Updating file...' },
-  { key: 'create_pr', label: 'Creating pull request...' },
-];
+const syncProgressMap: { [key: string]: ReactNode } = {
+  pending: 'Pending',
+  compile: 'Compiling...',
+  fetch: 'Fetching...',
+  fetch_repo_info: 'Fetching repository info...',
+  create_branch: 'Creating branch...',
+  update_file: 'Updating file...',
+  create_pr: 'Creating pull request...',
+  get_upload_url: 'Getting upload url...',
+  upload_file: 'Uploading file...',
+  finish_upload: 'Finishing upload...',
+  success: <IconCircleCheckFilled size={14} style={{ color: 'var(--figma-color-text-success)' }} />,
+  error: <IconCircleXFilled size={14} style={{ color: 'var(--figma-color-text-danger)' }} />,
+};
 
 export function CommitModal({ disabled }: { disabled: boolean }) {
   const [summary, setSummary] = useState('');
   const [description, setDescription] = useState('');
-  const [shouldSyncGit, setShouldSyncGit] = useState(false);
-
-  const { variables, collections, setting, commits, setTab } = useContext(AppContext);
-  const { syncGit, stage, setStage, cssContent, result } = useSync();
-
-  const hasMissingFields =
-    setting.git?.filePath === '' ||
-    setting.git?.repository === '' ||
-    setting.git?.token === '' ||
-    setting.git?.owner === '';
+  const [shouldSync, setShouldSync] = useState(false);
+  const [syncTaskStatus, setSyncTaskStatus] = useState<string[]>([]);
+  const [syncTaskResults, setSyncTaskResults] = useState<any[]>([]);
+  const {
+    variables,
+    collections,
+    setting,
+    commits,
+    setTab,
+    compiledVariables,
+    clearCompiledVariables,
+  } = useContext(AppContext);
+  const [view, setView] = useState<'commit' | 'sync'>('commit');
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (shouldSyncGit) {
-      const timestamp = +new Date();
+    clearCompiledVariables();
+  }, []);
 
-      if (setting?.git?.enabled && cssContent && !hasMissingFields) {
-        syncGit(timestamp + '', { ...setting?.git }).then(() => {
-          setShouldSyncGit(false);
-        });
-      }
+  useEffect(() => {
+    const commit = commits[0];
+
+    if (shouldSync && commit && compiledVariables.css) {
+      setShouldSync(false);
+      Promise.all(
+        setting?.syncTasks.map(async ({ type, config }, index) => {
+          switch (type) {
+            case 'github':
+              const {
+                filePath,
+                owner,
+                repository,
+                token: githubToken,
+              } = config as GitHubSyncConfig;
+              await syncToGit({
+                content: compiledVariables.css,
+                path: filePath,
+                repository: { owner, name: repository, token: githubToken },
+                branch: `figma-variable-${commit?.id}`,
+                commitMessage: `style: auto update css variables via Figma plugin accord to commit:${commit?.id}`,
+                pullRequest: {
+                  title: `[Figma Variable History] ${commit?.summary}`,
+                  body: `${commit?.description || 'No description'}
+                \n\nThis PR is created by Variable History plugin
+                `,
+                },
+                onStageChange: (stage) => {
+                  setSyncTaskStatus((prev) => {
+                    const status = [...prev];
+                    status[index] = stage;
+                    return status;
+                  });
+                },
+                onSuccess: (url) => {
+                  setSyncTaskResults((prev) => {
+                    const results = [...prev];
+                    results[index] = url;
+                    return results;
+                  });
+                },
+              });
+              break;
+            case 'slack':
+              const { filename, channelId, token } = config as SlackSyncConfig;
+              await syncToSlackChannel({
+                filename: filename,
+                channelId: channelId,
+                token: token,
+                content: compiledVariables.css,
+                commit,
+                onStageChange: (stage) => {
+                  setSyncTaskStatus((prev) => {
+                    const status = [...prev];
+                    status[index] = stage;
+                    return status;
+                  });
+                },
+              });
+              break;
+            case 'custom':
+              const { address } = config as CustomHTTPSyncConfig;
+              sendCustomRequest({
+                url: address,
+                commit: commits[0],
+                content: compiledVariables.css,
+                onStageChange: (stage) => {
+                  setSyncTaskStatus((prev) => {
+                    const status = [...prev];
+                    status[index] = stage;
+                    return status;
+                  });
+                },
+              });
+              break;
+          }
+        })
+      ).then(() => {
+        // console.log('Completed');
+      });
     }
-  }, [shouldSyncGit, cssContent]);
+  }, [shouldSync, compiledVariables.css, setting?.syncTasks, setSyncTaskStatus, commits]);
 
   const handleClick = useCallback(async () => {
     if (!summary) {
@@ -51,168 +136,139 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
     } else {
       const timestamp = +new Date();
 
-      parent.postMessage(
-        {
-          pluginMessage: {
-            type: 'COMMIT',
-            payload: {
-              id: `${timestamp}`,
-              date: timestamp,
-              summary,
-              description,
-              variables,
-              collections,
-              collaborators: [],
-            },
-          },
-          pluginId: '*',
-        },
-        '*'
-      );
+      sendMessage('COMMIT', {
+        id: `${timestamp}`,
+        date: timestamp,
+        summary,
+        description,
+        variables,
+        collections,
+        collaborators: [],
+      });
+      sendMessage('CONVERT_VARIABLES_TO_CSS');
+      setShouldSync(true);
 
-      if (setting?.git?.enabled) {
-        setStage('compile');
-        setShouldSyncGit(true);
+      if (setting?.syncTasks.length > 0) {
+        setView('sync');
       } else {
-        setStage('commit_success');
+        setOpen(false);
       }
 
-      parent.postMessage(
-        {
-          pluginMessage: { type: 'CONVERT_VARIABLES_TO_CSS', payload: commits?.[0]?.id },
-          pluginId: '*',
-        },
-        '*'
-      );
-
-      // Sync to GitHub
-      // if (setting?.git?.enabled) {
-      //   await syncGit(timestamp + '', { ...setting.git });
-      // }
-
-      // setModalOpen(false);
+      setSyncTaskStatus(setting?.syncTasks.map(() => 'pending'));
+      setSyncTaskResults(setting?.syncTasks.map(() => null));
     }
   }, [variables, collections, summary, description]);
 
-  const renderStage = (stage: SyncToGitStage | 'commit_success' | '' | 'compile') => {
-    if (stage === '') {
+  const renderStage = () => {
+    if (view === 'commit') {
       return (
         <>
-          <div
-            className={clsx(
-              'relative text-center',
-              'before:content-[""] before:inline-block before:w-[calc(50%-24px)] before:h-px before:bg-[color:var(--figma-color-border)] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2',
-              'after:content-[""] after:inline-block after:w-[calc(50%-24px)] after:h-px after:bg-[color:var(--figma-color-border)] after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2'
-            )}
-            style={{ color: 'var(--figma-color-text-tertiary)' }}
-          >
-            Sync
-          </div>
-          <div
-            className="p-3 rounded-sm flex items-center gap-2 font-medium w-full"
-            style={{ background: 'var(--figma-color-bg-secondary)' }}
-          >
-            <div className="shrink-0">
-              <GitHubLogo />
-            </div>
-            <div className="flex flex-col grow overflow-hidden">
-              <div>Sync to GitHub</div>
-              {setting.git?.enabled ? (
-                hasMissingFields ? (
-                  <div
-                    className="underline cursor-pointer"
-                    style={{ color: 'var(--figma-color-text-danger)' }}
-                    onClick={() => {
-                      setTab('settings');
-                    }}
-                  >
-                    Missing fields
-                  </div>
-                ) : (
-                  <div
-                    className="truncate font-normal"
-                    style={{ color: 'var(--figma-color-text-secondary)' }}
-                  >
-                    {setting?.git?.repository}
-                  </div>
-                )
-              ) : null}
-            </div>
-            <Switch.Root
-              className={clsx('switch-root ml-auto')}
-              checked={setting?.git?.enabled}
-              onCheckedChange={(checked) =>
-                sendMessage('SET_PLUGIN_SETTING', { git: { ...setting?.git, enabled: checked } })
-              }
+          {
+            <div
+              className="flex items-center gap-2 rounded-md p-2 font-medium"
+              style={{ background: 'var(--figma-color-bg-secondary)' }}
             >
-              <Switch.Thumb className="switch-thumb" />
-            </Switch.Root>
-          </div>
+              {/* <IconRefresh size={14} /> */}
+              {setting?.syncTasks?.slice(0, 3).map((task, index) => (
+                <div
+                  key={index}
+                  className="-ml-5 first:ml-0 p-1 rounded-full border"
+                  style={{
+                    background: 'var(--figma-color-bg)',
+                    borderColor: 'var(--figma-color-border)',
+                  }}
+                >
+                  <SyncTaskIcon type={task.type} />
+                </div>
+              ))}
+              <div style={{ color: 'var(--figma-color-text-secondary)' }}>
+                {setting?.syncTasks?.length > 0
+                  ? `${setting?.syncTasks.length} Sync tasks in queue`
+                  : 'No sync tasks'}
+              </div>
 
-          <button
-            className="btn-primary"
-            disabled={summary.length <= 0 || (setting?.git?.enabled && hasMissingFields)}
-            onClick={handleClick}
-          >
-            {setting?.git?.enabled ? 'Commit and sync' : 'Commit'}
+              <button
+                onClick={() => setTab('settings')}
+                className="ml-auto"
+                style={{ color: 'var(--figma-color-text-brand)' }}
+              >
+                {setting?.syncTasks?.length > 0 ? 'View tasks' : 'Set up tasks'}
+              </button>
+            </div>
+          }
+
+          <button className="btn-primary" disabled={summary.length <= 0} onClick={handleClick}>
+            {setting?.syncTasks?.length > 0 ? 'Commit and sync' : 'Commit'}
           </button>
         </>
       );
-    } else if (stage === 'success') {
-      return (
-        <div className="flex flex-col items-center">
-          <Feedback
-            title={"You're all set!"}
-            description={'The changes are commited and synced with the repository.'}
-          />
-
-          <a href={result?.prURL} target="_blank" className="btn-primary mt-4 w-full">
-            View the PR
-          </a>
-
-          <Close asChild>
-            <button className="btn-outline mt-2 w-full">Close</button>
-          </Close>
-        </div>
-      );
-    } else if (stage === 'commit_success') {
-      return (
-        <div>
-          <Feedback title={"You're all set!"} description={'The changes are commited.'} />
-
-          <button className="btn-primary mt-4 w-full" onClick={() => setTab('commits')}>
-            View commits
-          </button>
-          <Close asChild>
-            <button className="btn-outline mt-2 w-full">Close</button>
-          </Close>
-        </div>
-      );
     } else {
-      return <SyncProgress items={gitSyncProgessItems} activeKey={stage} />;
+      return (
+        <>
+          <div
+            className="p-3 py-1 max-w-full max-h-40 overflow-auto"
+            style={{
+              background: 'var(--figma-color-bg-secondary)',
+              color: 'var(--figma-color-text)',
+            }}
+          >
+            {setting?.syncTasks?.map((task, index) => (
+              <div key={index} className="flex items-center gap-2 h-8">
+                <SyncTaskIcon type={task.type} />
+                <div className="truncate max-w-full">
+                  {task.type === 'github'
+                    ? (task.config as GitHubSyncConfig).repository
+                    : task.type === 'slack'
+                    ? (task.config as SlackSyncConfig).channelId
+                    : task.type === 'custom'
+                    ? (task.config as CustomHTTPSyncConfig).address
+                    : null}
+                </div>
+                <div className="ml-auto flex items-center gap-1 underline w-fit whitespace-nowrap">
+                  {syncTaskResults[index] ? (
+                    <a href={syncTaskResults[index]} target="_blank">
+                      {task.type === 'github' ? 'View PR' : 'View'}
+                    </a>
+                  ) : null}
+                  {syncProgressMap[syncTaskStatus[index]]}
+                </div>
+              </div>
+            ))}
+          </div>
+          <button className="btn-outline" onClick={() => setOpen(false)}>
+            Close
+          </button>
+        </>
+      );
     }
   };
 
   return (
     <Root
-      onOpenChange={(open) => {
-        if (!open) {
-          setStage('');
-        }
+      open={open}
+      onOpenChange={() => {
+        setSummary('');
+        setDescription('');
+        setView('commit');
       }}
     >
       <Trigger asChild>
-        <button className="btn-primary" disabled={disabled}>
+        <button className="btn-primary" disabled={disabled} onClick={() => setOpen(true)}>
           Commit
         </button>
       </Trigger>
       <Portal>
-        <Overlay className="dialog-overlay" />
+        <Overlay
+          className="dialog-overlay"
+          onClick={() => {
+            setOpen(false);
+          }}
+        />
         <Content className="dialog-content h-fit">
-          <Title className="h-10 pl-3 flex items-center font-semibold border-b">Commit</Title>
+          <Title className="dialog-title">Commit</Title>
           <div className={'w-80 flex flex-col gap-3 p-3'}>
             <AnimatePresence>
-              {!stage ? (
+              {view === 'commit' ? (
                 <div className="w-full flex flex-col gap-3">
                   <input
                     className="input"
@@ -230,8 +286,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                 </div>
               ) : null}
             </AnimatePresence>
-            {renderStage(stage)}
-            {/* <Close asChild> */}
+            {renderStage()}
           </div>
         </Content>
       </Portal>

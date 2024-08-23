@@ -4,6 +4,7 @@ import { AppContext } from '../../AppContext';
 import { VariableItem } from './VariableItem';
 import { ChevronRight } from 'lucide-react';
 import { VariableChangeType } from '../../types';
+// import { VariableChangeType } from '../../types';
 
 export function GroupedChanges({
   groupedChanges,
@@ -21,7 +22,7 @@ export function GroupedChanges({
   keyword?: string;
 }) {
   const [collectionList, setCollectionList] = useState<VariableCollection['id'][]>([]);
-  const { collections, commits } = useContext(AppContext);
+  const { collections, getCollectionName } = useContext(AppContext);
 
   const toggleCollectionList = (id: string) => {
     if (collectionList.includes(id)) {
@@ -36,23 +37,6 @@ export function GroupedChanges({
   }, [collections]);
 
   // Find collection name from history commits
-  const findCollectionName = (collectionId: string) => {
-    const existingCollection = collections.find((c) => c.id === collectionId);
-
-    if (existingCollection) {
-      return existingCollection.name;
-    } else {
-      const commit = commits.find(
-        (commit) =>
-          commit.collections.findIndex((collection) => collection.id === collectionId) >= 0
-      );
-
-      return (
-        commit?.collections.find((collection) => collection.id === collectionId)?.name ||
-        collectionId
-      );
-    }
-  };
 
   return (
     <Root type="multiple" value={collectionList}>
@@ -64,7 +48,7 @@ export function GroupedChanges({
             style={{ background: 'var(--figma-color-bg)' }}
             value={collectionId}
             className={
-              'rounded-[4px] [&:not(:last-of-type)]:rounded-md [&:not(:last-of-type)]:mb-1.5'
+              'rounded-[4px] [&:not(:last-of-type)]:rounded-md [&:not(:last-of-type)]:mb-1.5 shadow-sm'
             }
             key={collectionId}
           >
@@ -77,7 +61,7 @@ export function GroupedChanges({
                   <ChevronRight size={11} />
                 </div>
                 <div className="overflow-hidden text-ellipsis whitespace-nowrap">
-                  {findCollectionName(collectionId) || collectionId}
+                  {getCollectionName(collectionId) || collectionId}
                 </div>
 
                 <div

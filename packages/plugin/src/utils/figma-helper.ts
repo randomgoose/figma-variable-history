@@ -1,10 +1,20 @@
 import { cloneObject } from '@create-figma-plugin/utilities';
-import { DISABLE_VARIABLE_NAME_PREFIX, PLUGIN_DATA_KEY_PREFIX } from '../config';
+import {
+  DISABLE_VARIABLE_NAME_PREFIX,
+  PLUGIN_DATA_KEY_COMMITS,
+  PLUGIN_DATA_KEY_HEAD,
+  PLUGIN_DATA_KEY_PREFIX,
+} from '../config';
 import { isSameVariable } from './variable';
 import { ICommit } from '../types';
 import { commitBridge } from '../features/CommitBridge';
 
 export const figmaHelper = {
+  clearPluginData() {
+    figma.root.setSharedPluginData(PLUGIN_DATA_KEY_PREFIX, PLUGIN_DATA_KEY_HEAD, '');
+    figma.root.setSharedPluginData(PLUGIN_DATA_KEY_PREFIX, PLUGIN_DATA_KEY_COMMITS, '');
+  },
+
   getPluginData(dataKey: string): any {
     const dataStr = figma.root.getSharedPluginData(PLUGIN_DATA_KEY_PREFIX, dataKey);
     try {
@@ -184,8 +194,8 @@ export const figmaHelper = {
     }
   },
 
-  async resolveVariableAlias(variable: Variable, modeId: string) {
-    const v = await this.getVariableByIdAsync(variable.id, { clone: false });
+  async resolveVariableAlias(id: Variable['id'], modeId: string) {
+    const v = await this.getVariableByIdAsync(id, { clone: false });
     const c = v
       ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
           ({ id }) => id === v.variableCollectionId
@@ -193,12 +203,13 @@ export const figmaHelper = {
       : null;
 
     if (v && c) {
-      if (c.modes.find((mode) => mode.modeId === modeId)) {
+      const _modeId = c.modes.find((mode) => mode.modeId === modeId)?.modeId || c.defaultModeId;
+      if (_modeId) {
         try {
           const consumer = figma.createFrame();
-          consumer.setExplicitVariableModeForCollection(c, modeId);
+          consumer.setExplicitVariableModeForCollection(c, _modeId);
           const resolvedVariableValue = v.resolveForConsumer(consumer);
-          consumer.name = modeId;
+          consumer.name = _modeId;
           consumer.remove();
           return resolvedVariableValue;
         } catch (err) {

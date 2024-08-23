@@ -3,7 +3,7 @@ import { VariableDetail } from '../components/VariableDetail';
 import { AppContext } from '../../AppContext';
 import { GroupedChanges } from '../components/GroupedChanges';
 import { CommitModal } from '../components/CommitModal';
-import { Search } from 'lucide-react';
+import { Search } from '../components/Search';
 import { AnimatePresence } from 'framer-motion';
 import { EmptyState } from '../components';
 import { Preview } from '../components/Preview';
@@ -48,20 +48,12 @@ export function Changes() {
 
   return (
     <div className="w-full flex" style={{ height: 'calc(100vh - 40px)' }}>
-      <div className={'flex flex-col border-r shrink-0 w-60'}>
+      <div
+        className={'flex flex-col border-r shrink-0 w-60'}
+        style={{ borderColor: 'var(--figma-color-border)' }}
+      >
         <div style={{ height: 'calc(100% - 57px)', background: 'var(--figma-color-bg-secondary)' }}>
-          <div className="relative">
-            <Search
-              className="absolute text-[color:var(--figma-color-icon-tertiary)] top-1/2 left-3 -translate-y-1/2"
-              size={13}
-            />
-            <input
-              placeholder="Search variables"
-              className="h-10 w-full flex-shrink-0 rounded-none border-b outline-none px-4 pl-8"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-            />
-          </div>
+          <Search value={keyword} onChange={setKeyword} />
           <div
             className="[&::-webkit-scrollbar]:w-0"
             style={{ padding: 6, height: 'calc(100% - 40px)', overflow: 'auto' }}
@@ -81,7 +73,10 @@ export function Changes() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-4 py-3 border-t">
+        <div
+          style={{ borderColor: 'var(--figma-color-border)' }}
+          className="flex items-center justify-between px-4 py-3 border-t"
+        >
           <div className="text-[color:var(--figma-color-text-secondary)]">
             {numOfChanges} changes
           </div>

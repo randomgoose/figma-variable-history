@@ -15,7 +15,10 @@ export function parseDate(timestamp: number, option: { relative?: boolean } = { 
     } else if (d < day) {
       return `${Math.floor(d / hour)} hours ago`;
     } else {
-      return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+      return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()} ${date
+        .getHours()
+        .toString()
+        .padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
     }
   }
 

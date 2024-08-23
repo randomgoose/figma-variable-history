@@ -2,11 +2,12 @@ import { convertRgbColorToHexColor } from '@create-figma-plugin/utilities';
 // import { SVGs } from './svg-strings';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { Text, AutoLayout, Rectangle, h, SVG } = figma.widget;
+const { Text, AutoLayout, Rectangle, useEffect } = figma.widget;
 
 export function ParsedValue({
   value,
   format = 'RGB',
+  variables,
 }: {
   value?: VariableValue;
   variables: Variable[];
@@ -32,7 +33,7 @@ export function ParsedValue({
       );
     case 'object':
       if ('type' in value) {
-        const target = figma.variables.getVariableById(value.id);
+        const target = variables.find((v) => v.id === value.id);
         return (v = target ? (
           <AutoLayout width={'fill-parent'}>
             <AutoLayout
