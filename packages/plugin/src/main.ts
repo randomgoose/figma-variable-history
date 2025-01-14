@@ -37,7 +37,10 @@ export default async function () {
           : commitBridge.getCommits()?.[0];
 
         if (commit) {
-          const content = await convertVariablesToCss(commit);
+          const content = await convertVariablesToCss(
+            commit,
+            figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING)?.colorFormat || 'RGB'
+          );
           figma.ui.postMessage({
             type: 'CONVERT_VARIABLES_TO_CSS_DONE',
             payload: encodeURIComponent(content),
@@ -66,19 +69,29 @@ export default async function () {
         }
         break;
       case 'GET_VARIABLE_BY_ID':
-        const variable =
-          (await figmaHelper.getVariableByIdAsync(msg.payload)) ||
-          commitBridge.findOneMatchedVariable(msg.payload);
-        if (variable) {
-          figma.ui.postMessage({
-            type: 'SET_VARIABLE_ALIAS',
-            payload: {
-              id: variable.id,
-              name: variable.name,
-            },
-          });
-          // emit<SetVariableAliasHandler>('SET_VARIABLE_ALIAS', { id: variable.id, name: variable.name });
+        // If the variable id includes a slash, it is considered a remote variable
+        // Import remote variables using importVariableByKeyAsync
+        if (msg.payload?.includes('/')) {
+          const key = msg.payload.split('/')[0].split(':')[1];
+          const variable = await figma.variables.importVariableByKeyAsync(key);
+          if (variable) {
+            figma.ui.postMessage({
+              type: 'SET_VARIABLE_ALIAS',
+              payload: { id: variable.id, name: variable.name },
+            });
+          }
+        } else {
+          const variable =
+            (await figmaHelper.getVariableByIdAsync(msg.payload)) ||
+            commitBridge.findOneMatchedVariable(msg.payload);
+          if (variable) {
+            figma.ui.postMessage({
+              type: 'SET_VARIABLE_ALIAS',
+              payload: { id: variable.id, name: variable.name },
+            });
+          }
         }
+
         break;
       case 'SET_PLUGIN_SETTING':
         const prevSetting = figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING);

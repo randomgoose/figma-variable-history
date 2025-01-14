@@ -9,6 +9,7 @@ import { IconSettings } from '@tabler/icons-react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Variables } from './ui/pages/Variables';
 import { sendMessage } from './utils/message';
+import { Editor } from './ui/pages/Editor';
 
 function Plugin() {
   const { commits, tab, setTab } = useContext(AppContext);
@@ -23,6 +24,10 @@ function Plugin() {
   }, []);
 
   const tabs = [
+    {
+      value: 'Canvas',
+      children: <Editor />,
+    },
     {
       value: 'changes',
       children: <Changes />,

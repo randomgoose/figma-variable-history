@@ -5,6 +5,7 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 import { GalleryHorizontalEnd, HistoryIcon, Search, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import * as Select from '@radix-ui/react-select';
 
 // reduce bundle size
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -24,6 +25,7 @@ import { AppContext } from '../../AppContext';
 import { Profile } from '../components/Profile';
 import { sendMessage } from '../../utils/message';
 import { NoCommitPlaceholder } from '../components/NoCommitPlaceholder';
+import { IconChevronDown } from '@tabler/icons-react';
 
 export function Commits({ commits }: { commits: ICommit[] }) {
   const ref = useRef<HTMLAnchorElement>(null);
@@ -36,6 +38,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
     groupedChanges: currentGroupedChanges,
     selectedCommitId,
     setSelectedCommitId,
+    setting,
   } = useContext(AppContext);
 
   const numOfChanges = Object.values(currentGroupedChanges).reduce(
@@ -67,9 +70,15 @@ export function Commits({ commits }: { commits: ICommit[] }) {
   const resetCommit = useCallback((commit: ICommit) => {
     sendMessage('RESET_COMMIT', commit.id);
   }, []);
+
   const convertCommitVariablesToCss = useCallback((commit: ICommit) => {
     sendMessage('CONVERT_VARIABLES_TO_CSS', commit.id);
   }, []);
+
+  useEffect(() => {
+    setExportModalContent('');
+    selectedCommit && convertCommitVariablesToCss(selectedCommit);
+  }, [selectedCommit, setting?.colorFormat]);
 
   const decodedContent = decodeURIComponent(exportModalContent);
 
@@ -351,12 +360,21 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                       />
                       {selectedCommit?.collaborators[0]?.name}
                     </div>
-                    <div
-                      className="pl-5 mt-1 line-clamp-2 max-w-96"
-                      style={{ color: 'var(--figma-color-text-secondary)' }}
-                    >
-                      {selectedCommit?.description || 'No description'}
-                    </div>
+                    <Tooltip.Root>
+                      <Tooltip.Trigger asChild>
+                        <div
+                          className="pl-5 mt-1 line-clamp-2 max-w-96"
+                          style={{ color: 'var(--figma-color-text-secondary)' }}
+                        >
+                          {selectedCommit?.description || 'No description'}
+                        </div>
+                      </Tooltip.Trigger>
+                      <Tooltip.Portal>
+                        <Tooltip.Content side="bottom" className="tooltip-content">
+                          {selectedCommit?.description || 'No description'}
+                        </Tooltip.Content>
+                      </Tooltip.Portal>
+                    </Tooltip.Root>
                   </div>
                 </div>
 
@@ -472,12 +490,43 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                   className="p-3 flex flex-col gap-3 overflow-auto"
                   style={{ height: 'calc(100% - 40px)' }}
                 >
+                  <div className="flex items-center gap-2">
+                    Color format:
+                    <Select.Root
+                      value={setting?.colorFormat || 'RGB'}
+                      onValueChange={(value) => {
+                        sendMessage('SET_PLUGIN_SETTING', { colorFormat: value });
+                      }}
+                    >
+                      <Select.Trigger className="w-fit flex items-center">
+                        <Select.Value placeholder="Select color format" />
+                        <Select.Icon>
+                          <IconChevronDown size={12} />
+                        </Select.Icon>
+                      </Select.Trigger>
+                      <Select.Portal>
+                        <Select.Content className="dropdown-content">
+                          <Select.Viewport>
+                            <Select.Item className="dropdown-item" value="RGB">
+                              <Select.ItemText>RGB</Select.ItemText>
+                            </Select.Item>
+                            <Select.Item className="dropdown-item" value="HEX">
+                              <Select.ItemText>HEX</Select.ItemText>
+                            </Select.Item>
+                            <Select.Item className="dropdown-item" value="HSL">
+                              <Select.ItemText>HSL</Select.ItemText>
+                            </Select.Item>
+                          </Select.Viewport>
+                        </Select.Content>
+                      </Select.Portal>
+                    </Select.Root>
+                  </div>
                   <SyntaxHighlighter
                     style={docco}
                     customStyle={{ height: '100%', margin: 0, overflow: 'auto' }}
                     language="CSS"
                   >
-                    {decodedContent}
+                    {decodedContent || 'Resolving variables...'}
                   </SyntaxHighlighter>
                   {/* {decodeURIComponent(exportModalContent)} */}
                   <div className="flex items-center gap-2 w-full">

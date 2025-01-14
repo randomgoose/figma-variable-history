@@ -92,7 +92,7 @@ const tutorials = [
   },
   {
     label: 'Set up sync tasks',
-    url: 'https://figma-variable-history-docs.vercel.app/sync-variables/enable-github-sync',
+    url: 'https://figma-variable-history-docs.vercel.app/sync-tasks',
     icon: (
       <div className="flex gap-2 items-center">
         <GitHubLogo size={22} />

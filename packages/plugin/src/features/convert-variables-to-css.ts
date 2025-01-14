@@ -1,8 +1,15 @@
 import { ICommit } from '../types';
-import { convertFigmaRGBtoString } from '../utils/color';
+import {
+  convertFigmaRGBtoHexString,
+  convertFigmaRGBtoHSLString,
+  convertFigmaRGBtoString,
+} from '../utils/color';
 import { figmaHelper } from '../utils/figma-helper';
 
-export async function convertVariablesToCss(commit: ICommit) {
+export async function convertVariablesToCss(
+  commit: ICommit,
+  colorFormat: 'HEX' | 'RGB' | 'HSL' = 'RGB'
+) {
   const { variables, collections } = commit;
   const modes = [];
 
@@ -26,12 +33,26 @@ export async function convertVariablesToCss(commit: ICommit) {
               switch (typeof value) {
                 case 'object':
                   if ('type' in value) {
-                    const alias = (
-                      await figmaHelper.getVariableByIdAsync(value.id)
-                    )?.name.replaceAll('/', '-');
-                    alias && (cssValue = `var(--${alias})`);
+                    if (value.id.includes('/')) {
+                      const key = value.id.split('/')[0].split(':')[1];
+                      const alias = (
+                        await figma.variables.importVariableByKeyAsync(key)
+                      )?.name.replaceAll('/', '-');
+                      alias && (cssValue = `var(--${alias})`);
+                    } else {
+                      const alias = (
+                        await figmaHelper.getVariableByIdAsync(value.id)
+                      )?.name.replaceAll('/', '-');
+                      alias && (cssValue = `var(--${alias})`);
+                    }
                   } else if ('r' in value) {
-                    cssValue = convertFigmaRGBtoString(value);
+                    if (colorFormat === 'RGB') {
+                      cssValue = convertFigmaRGBtoString(value);
+                    } else if (colorFormat === 'HSL') {
+                      cssValue = convertFigmaRGBtoHSLString(value);
+                    } else {
+                      cssValue = convertFigmaRGBtoHexString(value);
+                    }
                   }
                   break;
                 default:

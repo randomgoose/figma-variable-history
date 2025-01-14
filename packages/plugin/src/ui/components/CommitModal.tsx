@@ -29,7 +29,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
   const [summary, setSummary] = useState('');
   const [description, setDescription] = useState('');
   const [shouldSync, setShouldSync] = useState(false);
-  const [syncTaskStatus, setSyncTaskStatus] = useState<string[]>([]);
+  const [syncTaskStatus, setSyncTaskStatus] = useState<{ type: string; message: string }[]>([]);
   const [syncTaskResults, setSyncTaskResults] = useState<any[]>([]);
   const {
     variables,
@@ -74,10 +74,10 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                 \n\nThis PR is created by Variable History plugin
                 `,
                 },
-                onStageChange: (stage) => {
+                onStageChange: (stage, message) => {
                   setSyncTaskStatus((prev) => {
                     const status = [...prev];
-                    status[index] = stage;
+                    status[index] = { type: stage, message: message || '' };
                     return status;
                   });
                 },
@@ -98,10 +98,10 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                 token: token,
                 content: compiledVariables.css,
                 commit,
-                onStageChange: (stage) => {
+                onStageChange: (stage, message) => {
                   setSyncTaskStatus((prev) => {
                     const status = [...prev];
-                    status[index] = stage;
+                    status[index] = { type: stage, message: message || '' };
                     return status;
                   });
                 },
@@ -116,7 +116,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                 onStageChange: (stage) => {
                   setSyncTaskStatus((prev) => {
                     const status = [...prev];
-                    status[index] = stage;
+                    status[index] = { type: stage, message: '' };
                     return status;
                   });
                 },
@@ -154,7 +154,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
         setOpen(false);
       }
 
-      setSyncTaskStatus(setting?.syncTasks.map(() => 'pending'));
+      setSyncTaskStatus(setting?.syncTasks.map(() => ({ type: 'pending', message: '' })));
       setSyncTaskResults(setting?.syncTasks.map(() => null));
     }
   }, [variables, collections, summary, description]);
@@ -230,7 +230,8 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                       {task.type === 'github' ? 'View PR' : 'View'}
                     </a>
                   ) : null}
-                  {syncProgressMap[syncTaskStatus[index]]}
+                  {syncTaskStatus[index]?.message || ''}
+                  {syncProgressMap[syncTaskStatus[index].type]}
                 </div>
               </div>
             ))}

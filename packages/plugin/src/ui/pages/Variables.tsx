@@ -56,6 +56,7 @@ export function Variables() {
   const handleClick = (variable: Variable) => {
     setSelectedVariable(variable);
   };
+
   const collection = useMemo(
     () => collections.find((c) => c.id === selectedVariable?.variableCollectionId),
     [selectedVariable, collections]

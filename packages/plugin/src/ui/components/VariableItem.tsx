@@ -55,7 +55,7 @@ export function VariableItem({
         return (
           <div
             className={
-              'w-4 h-4 flex items-center justify-center rounded-sm text-[color:var(--figma-color-text-success)] bg-[#F0FDF4]'
+              'w-4 h-4 flex items-center justify-center rounded-sm text-[color:var(--figma-color-text-success)] bg-[--bg-added]'
             }
           >
             <svg
@@ -72,7 +72,7 @@ export function VariableItem({
       case 'modified':
         return (
           <div
-            className={'w-4 h-4 flex items-center justify-center rounded-sm bg-[#FEFCE8]'}
+            className={'w-4 h-4 flex items-center justify-center rounded-sm bg-[--bg-modified]'}
             style={{
               color: 'var(--figma-color-text-warning)',
               fontSize: 10,
@@ -85,7 +85,7 @@ export function VariableItem({
       case 'removed':
         return (
           <div
-            className={'w-4 h-4 flex items-center justify-center rounded-sm bg-[#FEF2F2]'}
+            className={'w-4 h-4 flex items-center justify-center rounded-sm bg-[--bg-removed]'}
             style={{
               color: 'var(--figma-color-text-danger)',
             }}

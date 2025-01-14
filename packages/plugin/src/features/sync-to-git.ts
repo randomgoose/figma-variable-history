@@ -28,7 +28,7 @@ export async function syncToGit({
     body: string;
   };
   repository: { owner: string; name: string; token: string };
-  onStageChange: (stage: SyncToGitStage) => void;
+  onStageChange: (type: SyncToGitStage, message?: string) => void;
   onSuccess: (url: string) => void;
 }): Promise<SyncToGitResult> {
   const baseUrl = `https://api.github.com/repos/${repository.owner}/${repository.name}`;
@@ -58,7 +58,6 @@ export async function syncToGit({
       defaultBranchSha1 = sha;
       defaultBranch = default_branch;
     } catch (error) {
-      console.error('Error fetching sha1 of repository base branch:', error);
       throw error;
     }
 
@@ -75,7 +74,6 @@ export async function syncToGit({
     } catch (error: any) {
       // status 422: branch already exists
       if (error.status !== 422) {
-        console.error(`Error creating branch ${branch}:`, error);
         throw error;
       }
     }
@@ -103,7 +101,6 @@ export async function syncToGit({
         },
       });
     } catch (error) {
-      console.error('Error creating/updating file:', error);
       throw error;
     }
   };
@@ -128,7 +125,6 @@ export async function syncToGit({
       if (error.status === 422) {
         error.message = `A pull request already exists for ${repository.name}/${branch}`;
       }
-      console.error(`Error creating pull request ${pullRequest.title}:`, error);
       throw error;
     }
   }
@@ -145,6 +141,7 @@ export async function syncToGit({
       onSuccess(response.prURL);
     }
   } catch (error) {
+    onStageChange('error', (error as any)?.message || 'Failed to create pull request');
     return { success: false, message: (error as any)?.message || 'Failed to create pull request' };
   }
 

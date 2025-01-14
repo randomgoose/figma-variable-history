@@ -1,23 +1,29 @@
 import { useState } from 'react';
 import { Synchronization } from './Synchronization';
-import { IconRefresh } from '@tabler/icons-react';
+import { IconRefresh, IconSettings2 } from '@tabler/icons-react';
 import clsx from 'clsx';
+import { VariablesSettings } from './VariableSettings';
 
 const settingConfig = [
+  // {
+  //   label: 'General',
+  //   component: <div>General</div>,
+  //   icon: <IconSettings size={14} className="mr-2" />,
+  // },
+  {
+    label: 'Variables',
+    component: <VariablesSettings />,
+    icon: <IconSettings2 size={14} className="mr-2" />,
+  },
   {
     label: 'Synchronization',
     component: <Synchronization />,
     icon: <IconRefresh size={14} className="mr-2" />,
   },
-  // {
-  //   label: 'Language',
-  //   component: <div>hi</div>,
-  //   icon: <IconWorld size={14} className='mr-2' />
-  // }
 ];
 
 export function Settings() {
-  const [page, setPage] = useState('Synchronization');
+  const [page, setPage] = useState('Variables');
 
   return (
     <div style={{ height: 'calc(100% - 40px)' }}>
@@ -34,7 +40,7 @@ export function Settings() {
             <div
               key={label}
               className={clsx(
-                'cursor-default h-10 flex items-center px-3 text-xs rounded-md hover:bg-[color:var(--figma-color-bg)] mt-1 first:mt-0 active:scale-[99%] transition-all',
+                'cursor-default h-8 flex items-center px-3 text-xs rounded-md hover:bg-[color:var(--figma-color-bg)] mt-1 first:mt-0 active:scale-[99%] transition-all',
                 page === label
                   ? 'bg-[color:var(--figma-color-bg)] text-[color:var(--figma-color-text)] shadow-sm'
                   : 'text-[color:var(--figma-color-text-secondary)]'

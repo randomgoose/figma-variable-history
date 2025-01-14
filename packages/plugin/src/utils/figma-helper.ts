@@ -195,25 +195,47 @@ export const figmaHelper = {
   },
 
   async resolveVariableAlias(id: Variable['id'], modeId: string) {
-    const v = await this.getVariableByIdAsync(id, { clone: false });
-    const c = v
-      ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
-          ({ id }) => id === v.variableCollectionId
-        )
-      : null;
+    if (id.includes('/')) {
+      const key = id.split('/')?.[0].split(':')?.[1];
+      const v = await figma.variables.importVariableByKeyAsync(key);
+      const c = v && (await figma.variables.getVariableCollectionByIdAsync(v.variableCollectionId));
 
-    if (v && c) {
-      const _modeId = c.modes.find((mode) => mode.modeId === modeId)?.modeId || c.defaultModeId;
-      if (_modeId) {
-        try {
-          const consumer = figma.createFrame();
-          consumer.setExplicitVariableModeForCollection(c, _modeId);
-          const resolvedVariableValue = v.resolveForConsumer(consumer);
-          consumer.name = _modeId;
-          consumer.remove();
-          return resolvedVariableValue;
-        } catch (err) {
-          console.error(`Failed to resolve variable alias\n`, err);
+      if (v && c) {
+        const _modeId = c.modes.find((mode) => mode.modeId === modeId)?.modeId || c.defaultModeId;
+        if (_modeId) {
+          try {
+            const consumer = figma.createFrame();
+            consumer.setExplicitVariableModeForCollection(c, _modeId);
+            const resolvedVariableValue = v.resolveForConsumer(consumer);
+            consumer.name = _modeId;
+            consumer.remove();
+            return resolvedVariableValue;
+          } catch (err) {
+            console.error(`Failed to resolve variable alias\n`, err);
+          }
+        }
+      }
+    } else {
+      const v = await this.getVariableByIdAsync(id, { clone: false });
+      const c = v
+        ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
+            ({ id }) => id === v.variableCollectionId
+          )
+        : null;
+
+      if (v && c) {
+        const _modeId = c.modes.find((mode) => mode.modeId === modeId)?.modeId || c.defaultModeId;
+        if (_modeId) {
+          try {
+            const consumer = figma.createFrame();
+            consumer.setExplicitVariableModeForCollection(c, _modeId);
+            const resolvedVariableValue = v.resolveForConsumer(consumer);
+            consumer.name = _modeId;
+            consumer.remove();
+            return resolvedVariableValue;
+          } catch (err) {
+            console.error(`Failed to resolve variable alias\n`, err);
+          }
         }
       }
     }

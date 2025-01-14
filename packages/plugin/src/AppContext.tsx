@@ -5,7 +5,6 @@ import { getVariableChangesGroupedByCollection } from './utils/variable';
 
 interface AppContext {
   setting: PluginSetting;
-  colorFormat: 'RGB' | 'HEX';
   variables: Variable[];
   collections: VariableCollection[];
   commits: ICommit[];
@@ -26,7 +25,6 @@ interface AppContext {
   tab: 'changes' | 'commits' | 'settings';
   compiledVariables: { css: string };
   selectedCommitId: string;
-  setColorFormat: (format: AppContext['colorFormat']) => void;
   setTab: (tab: AppContext['tab']) => void;
   getCollectionName: (collectionId: string) => string;
   setSelectedCommitId: (id: string) => void;
@@ -34,8 +32,7 @@ interface AppContext {
 }
 
 export const AppContext = createContext<AppContext>({
-  setting: { syncTasks: [] },
-  colorFormat: 'HEX',
+  setting: { syncTasks: [], colorFormat: 'RGB' },
   variables: [],
   collections: [],
   commits: [],
@@ -48,13 +45,11 @@ export const AppContext = createContext<AppContext>({
   getCollectionName: () => '',
   setSelectedCommitId: () => null,
   setTab: () => null,
-  setColorFormat: () => null,
   clearCompiledVariables: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
   const [setting, setSetting] = useState<PluginSetting>({ syncTasks: [] });
-  const [colorFormat, setColorFormat] = useState<AppContext['colorFormat']>('HEX');
   const [variables, setVariables] = useState<AppContext['variables']>([]);
   const [collections, setCollections] = useState<AppContext['collections']>([]);
   const [commits, setCommits] = useState<AppContext['commits']>([]);
@@ -136,7 +131,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const context = useMemo<AppContext>(() => {
     return {
       setting,
-      colorFormat,
       variables,
       collections,
       commits,
@@ -145,7 +139,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       groupedChanges,
       tab,
       setTab,
-      setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
       getCollectionName,
       compiledVariables,
       selectedCommitId,
@@ -154,7 +147,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     };
   }, [
     setting,
-    colorFormat,
     variables,
     collections,
     commits,
@@ -162,7 +154,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     resolvedVariableValues,
     enableGitHubSync,
     setEnableGitHubSync,
-    setColorFormat,
     groupedChanges,
     tab,
     setTab,

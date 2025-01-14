@@ -1,5 +1,9 @@
 import { convertRgbColorToHexColor } from '@create-figma-plugin/utilities';
-import { convertFigmaRGBtoString, formatPercentage } from '../../utils/color';
+import {
+  convertFigmaRGBtoHSLString,
+  convertFigmaRGBtoString,
+  formatPercentage,
+} from '../../utils/color';
 import { useContext, useEffect } from 'react';
 import { AppContext } from '../../AppContext';
 import { VariablePill } from './VariablePill';
@@ -16,7 +20,7 @@ export function ParsedValue({
   variable: Variable;
   modeId: string;
   option?: {
-    format?: 'RGB' | 'HEX';
+    format?: 'RGB' | 'HEX' | 'HSL';
     showLabel?: boolean;
     allowCopy?: boolean;
   };
@@ -102,14 +106,26 @@ export function ParsedValue({
         );
       case 'COLOR':
         if (typeof resolvedValue === 'object' && 'r' in resolvedValue) {
-          const parsedValue =
-            option?.format === 'RGB'
-              ? convertFigmaRGBtoString(resolvedValue)
-              : 'a' in resolvedValue
-              ? `#${convertRgbColorToHexColor(resolvedValue)} ${
-                  resolvedValue.a === 1 ? '' : parseFloat(formatPercentage(resolvedValue.a)) + '%'
-                }`
-              : `#${convertRgbColorToHexColor(resolvedValue)}`;
+          let parsedValue = '';
+
+          switch (option?.format) {
+            case 'RGB':
+              parsedValue = convertFigmaRGBtoString(resolvedValue);
+              break;
+            case 'HEX':
+              parsedValue =
+                'a' in resolvedValue
+                  ? `#${convertRgbColorToHexColor(resolvedValue)} ${
+                      resolvedValue.a === 1
+                        ? ''
+                        : parseFloat(formatPercentage(resolvedValue.a)) + '%'
+                    }`
+                  : `#${convertRgbColorToHexColor(resolvedValue)}`;
+              break;
+            case 'HSL':
+              parsedValue = convertFigmaRGBtoHSLString(resolvedValue);
+              break;
+          }
 
           return (
             <CopyTextWrapper text={isAlias ? alias : parsedValue}>
