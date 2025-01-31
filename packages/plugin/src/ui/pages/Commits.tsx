@@ -23,23 +23,26 @@ import clsx from 'clsx';
 import { copyText } from '../../utils/text';
 import { AppContext } from '../../AppContext';
 import { Profile } from '../components/Profile';
-import { sendMessage } from '../../utils/message';
+import { MESSAGE_TYPE, sendMessage } from '../../utils/message';
 import { NoCommitPlaceholder } from '../components/NoCommitPlaceholder';
 import { IconChevronDown } from '@tabler/icons-react';
+import { useTranslation } from '../../hooks/useTranslation';
 
-export function Commits({ commits }: { commits: ICommit[] }) {
+export function Commits() {
+  const {
+    commits,
+    groupedChanges: currentGroupedChanges,
+    selectedCommitId,
+    setSelectedCommitId,
+    setting,
+  } = useContext(AppContext);
   const ref = useRef<HTMLAnchorElement>(null);
   const [selectedVariableId, setSelectedVariableId] = useState('');
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportModalContent, setExportModalContent] = useState('');
   const [searching, setSearching] = useState(false);
   const [keyword, setKeyword] = useState('');
-  const {
-    groupedChanges: currentGroupedChanges,
-    selectedCommitId,
-    setSelectedCommitId,
-    setting,
-  } = useContext(AppContext);
+  const { t } = useTranslation();
 
   const numOfChanges = Object.values(currentGroupedChanges).reduce(
     (acc, { added, modified, removed }) => acc + added.length + modified.length + removed.length,
@@ -57,7 +60,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
 
   useEffect(() => {
     addEventListener('message', (e) => {
-      if (e.data.pluginMessage.type === 'CONVERT_VARIABLES_TO_CSS_DONE') {
+      if (e.data.pluginMessage.type === MESSAGE_TYPE.CONVERT_VARIABLES_TO_CSS_DONE) {
         setExportModalContent(e.data.pluginMessage.payload);
       }
     });
@@ -247,7 +250,10 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                                 className="mt-2"
                                 style={{ color: 'var(--figma-color-text-secondary)' }}
                               >
-                                {parseDate(commit.date)}
+                                {parseDate(commit.date, {
+                                  language: setting?.language,
+                                  relative: true,
+                                })}
                               </div>
                             </div>
                           )
@@ -265,7 +271,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                         size={16}
                         className="text-[color:var(--figma-color-text-tertiary)] shrink-0"
                       />
-                      History
+                      {t('history')}
                     </h3>
 
                     <Tooltip.Root>
@@ -330,7 +336,10 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                               className="mt-2 w-fit whitespace-nowrap"
                               style={{ color: 'var(--figma-color-text-secondary)' }}
                             >
-                              {parseDate(commit.date)}
+                              {parseDate(commit.date, {
+                                language: setting?.language,
+                                relative: true,
+                              })}
                             </div>
                           </div>
                         </div>
@@ -366,12 +375,12 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                           className="pl-5 mt-1 line-clamp-2 max-w-96"
                           style={{ color: 'var(--figma-color-text-secondary)' }}
                         >
-                          {selectedCommit?.description || 'No description'}
+                          {selectedCommit?.description || t('no_description')}
                         </div>
                       </Tooltip.Trigger>
                       <Tooltip.Portal>
                         <Tooltip.Content side="bottom" className="tooltip-content">
-                          {selectedCommit?.description || 'No description'}
+                          {selectedCommit?.description || t('no_description')}
                         </Tooltip.Content>
                       </Tooltip.Portal>
                     </Tooltip.Root>
@@ -381,29 +390,29 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                 <Dialog.Root>
                   <Dialog.Trigger asChild>
                     <button disabled={numOfChanges > 0} className="btn-outline ml-auto">
-                      Restore
+                      {t('restore')}
                     </button>
                   </Dialog.Trigger>
                   <Dialog.Portal>
                     <Dialog.Overlay className="dialog-overlay" />
                     <Dialog.Content className="dialog-content h-fit">
                       <Dialog.Title className="dialog-title">
-                        Restore to {selectedCommit.summary}
+                        {t('restore_to')} {selectedCommit.summary}
                       </Dialog.Title>
                       <div className="p-4">
-                        <p>Are you sure you want to restore to this commit?</p>
+                        <p>{t('restore_confirmation')}</p>
                       </div>
 
                       <div className="flex gap-2 justify-end p-[10px]">
                         <Dialog.Close autoFocus asChild>
-                          <button className="btn-outline">Cancel</button>
+                          <button className="btn-outline">{t('cancel')}</button>
                         </Dialog.Close>
                         <Dialog.Close asChild>
                           <button
                             className="btn-primary"
                             onClick={() => resetCommit(selectedCommit)}
                           >
-                            Confirm
+                            {t('confirm')}
                           </button>
                         </Dialog.Close>
                       </div>
@@ -417,7 +426,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                   }}
                   className="btn-primary ml-2"
                 >
-                  Export
+                  {t('export')}
                 </button>
               </div>
               <div className="grow flex overflow-hidden">
@@ -480,7 +489,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
             <Dialog.Portal>
               <Dialog.Overlay className="dialog-overlay" />
               <Dialog.Content className="dialog-content">
-                <Dialog.Title className="dialog-title">Export Variables</Dialog.Title>
+                <Dialog.Title className="dialog-title">{t('export_variables')}</Dialog.Title>
                 <Dialog.Close asChild>
                   <button className="w-8 h-8 absolute top-1 right-1 rounded-sm hover:bg-[color:var(--figma-color-bg-secondary)] text-[color:var(--figma-color-icon-secondary)] flex items-center justify-center">
                     <X size={16} />
@@ -491,7 +500,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                   style={{ height: 'calc(100% - 40px)' }}
                 >
                   <div className="flex items-center gap-2">
-                    Color format:
+                    {t('color_format')}:
                     <Select.Root
                       value={setting?.colorFormat || 'RGB'}
                       onValueChange={(value) => {
@@ -536,10 +545,10 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                         copyText(decodedContent);
                       }}
                     >
-                      Copy
+                      {t('copy')}
                     </button>
                     <button className="btn-primary grow" onClick={onExport}>
-                      Export
+                      {t('export')}
                     </button>
                   </div>
                 </div>
@@ -548,7 +557,10 @@ export function Commits({ commits }: { commits: ICommit[] }) {
           </Dialog.Root>
         </>
       ) : (
-        <NoCommitPlaceholder />
+        <NoCommitPlaceholder
+          title={t('no_commit_yet')}
+          description={t('no_commit_yet_description')}
+        />
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useContext } from 'react';
+import { useContext } from 'react';
 import { Commits } from './ui/pages/Commits';
 import { AppContext, AppContextProvider } from './AppContext';
 import { Changes } from './ui/pages/Changes';
@@ -8,25 +8,15 @@ import { Toaster } from 'sonner';
 import { IconSettings } from '@tabler/icons-react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Variables } from './ui/pages/Variables';
-import { sendMessage } from './utils/message';
-import { Editor } from './ui/pages/Editor';
+import HtmlEditor from './ui/pages/HtmlEditor';
 
 function Plugin() {
-  const { commits, tab, setTab } = useContext(AppContext);
-
-  useEffect(() => {
-    // Refresh the variables when the plugin is focused
-    addEventListener('focus', () => {
-      sendMessage('REFRESH');
-    });
-
-    parent.postMessage({ pluginMessage: { type: 'INIT' }, pluginId: '*' }, '*');
-  }, []);
+  const { tab, setTab } = useContext(AppContext);
 
   const tabs = [
     {
-      value: 'Canvas',
-      children: <Editor />,
+      value: 'editor',
+      children: <HtmlEditor />,
     },
     {
       value: 'changes',
@@ -34,7 +24,7 @@ function Plugin() {
     },
     {
       value: 'commits',
-      children: <Commits commits={commits} />,
+      children: <Commits />,
     },
     {
       value: 'variables',
@@ -44,10 +34,7 @@ function Plugin() {
 
   return (
     <Root value={tab} onValueChange={(value) => setTab(value as any)}>
-      <List
-        className="px-2 h-10 flex items-center border-b"
-        style={{ borderColor: 'var(--figma-color-border)' }}
-      >
+      <List className="tabs-list" style={{ borderColor: 'var(--figma-color-border)' }}>
         {tabs.map(({ value }) => (
           <Trigger
             className="cursor-default text-[color:var(--figma-color-text-secondary)] data-[state=active]:font-semibold data-[state=active]:text-[color:var(--figma-color-text)] px-2 capitalize"

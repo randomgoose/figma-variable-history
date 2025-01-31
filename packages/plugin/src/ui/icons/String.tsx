@@ -1,17 +1,11 @@
 export function String() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      style={{ fill: 'var(--figma-color-text)' }}
-    >
+    <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
       <path
-        fillOpacity=".5"
+        fill="var(--figma-color-icon)"
         fillRule="evenodd"
-        stroke="none"
-        d="M3 3h10v3h-1V4H8.5v8H10v1H6v-1h1.5V4H4v2H3V3z"
+        d="M8 7h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1M6 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2zm3.5 1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 1 0V10h1.5v4H11a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-.5v-4H14v.5a.5.5 0 0 0 1 0v-1a.5.5 0 0 0-.5-.5z"
+        clipRule="evenodd"
       />
     </svg>
   );

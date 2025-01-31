@@ -2,6 +2,7 @@ import { createContext, useMemo, useState, ReactNode, useEffect } from 'react';
 
 import type { ICommit, PluginSetting } from './types';
 import { getVariableChangesGroupedByCollection } from './utils/variable';
+import { ClipboardItem } from './types/clipboard';
 
 interface AppContext {
   setting: PluginSetting;
@@ -22,13 +23,27 @@ interface AppContext {
       removed: Variable[];
     };
   };
-  tab: 'changes' | 'commits' | 'settings';
+  tab: 'changes' | 'commits' | 'settings' | 'editor';
   compiledVariables: { css: string };
   selectedCommitId: string;
   setTab: (tab: AppContext['tab']) => void;
   getCollectionName: (collectionId: string) => string;
   setSelectedCommitId: (id: string) => void;
   clearCompiledVariables: () => void;
+  zoom: number;
+  setZoom: (zoom: number) => void;
+  // Selected variables in Editor
+  selection: string[];
+  setSelection: (selection: string[]) => void;
+  clipboard: ClipboardItem[];
+  setClipboard: (clipboard: ClipboardItem[]) => void;
+  cmdkOpen: boolean;
+  setCMDKOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  search: string;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  // Selected variables in Changes
+  checkedVariableIds: string[];
+  setCheckedVariableIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -39,13 +54,25 @@ export const AppContext = createContext<AppContext>({
   variableAliases: {},
   resolvedVariableValues: {},
   groupedChanges: {},
-  tab: 'changes',
+  tab: 'editor',
   compiledVariables: { css: '' },
   selectedCommitId: '',
   getCollectionName: () => '',
   setSelectedCommitId: () => null,
   setTab: () => null,
   clearCompiledVariables: () => null,
+  zoom: 1,
+  setZoom: () => null,
+  selection: [],
+  setSelection: () => null,
+  clipboard: [],
+  setClipboard: () => null,
+  cmdkOpen: false,
+  setCMDKOpen: () => null,
+  search: '',
+  setSearch: () => null,
+  checkedVariableIds: [],
+  setCheckedVariableIds: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -58,10 +85,13 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     AppContext['resolvedVariableValues']
   >({});
   const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
-  const [tab, setTab] = useState<AppContext['tab']>('changes');
+  const [tab, setTab] = useState<AppContext['tab']>('editor');
   const [compiledVariables, setCompiledVariables] = useState<{ css: string }>({ css: '' });
   const [selectedCommitId, setSelectedCommitId] = useState<string>('');
-
+  const [zoom, setZoom] = useState<number>(1);
+  const [selection, setSelection] = useState<string[]>([]);
+  const [clipboard, setClipboard] = useState<ClipboardItem[]>([]);
+  const [checkedVariableIds, setCheckedVariableIds] = useState<string[]>([]);
   const groupedChanges = useMemo(() => {
     return getVariableChangesGroupedByCollection({
       prev: {
@@ -71,6 +101,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       current: { variables, collections },
     });
   }, [commits, variables]);
+  const [cmdkOpen, setCMDKOpen] = useState<boolean>(false);
+  const [search, setSearch] = useState<string>('');
 
   useEffect(() => {
     onmessage = async (e) => {
@@ -80,6 +112,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         case 'IMPORT_VARIABLES':
           setVariables(payload.variables);
           setCollections(payload.collections);
+          setCheckedVariableIds(payload.variables.map((v: Variable) => v.id));
           break;
         case 'IMPORT_LOCAL_COMMITS':
           setCommits(payload);
@@ -103,6 +136,20 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
           break;
         case 'CONVERT_VARIABLES_TO_CSS_DONE':
           setCompiledVariables((prev) => ({ ...prev, css: decodeURIComponent(payload) }));
+          break;
+        case 'VARIABLE_ALIAS_RESOLVED':
+          setResolvedVariableValues((prev) => {
+            const values = { ...prev };
+            payload.forEach((v: any) => {
+              values[v.id] = {
+                valuesByMode: {
+                  ...values[v.id]?.valuesByMode,
+                  [v.modeId]: { value: v.value, resolvedType: v.resolvedType },
+                },
+              };
+            });
+            return values;
+          });
           break;
       }
     };
@@ -137,13 +184,25 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       variableAliases,
       resolvedVariableValues,
       groupedChanges,
+      selection,
       tab,
       setTab,
       getCollectionName,
       compiledVariables,
       selectedCommitId,
+      zoom,
+      setZoom,
       setSelectedCommitId,
+      setSelection,
+      clipboard,
+      setClipboard,
       clearCompiledVariables: () => setCompiledVariables({ css: '' }),
+      cmdkOpen,
+      setCMDKOpen,
+      search,
+      setSearch,
+      checkedVariableIds,
+      setCheckedVariableIds,
     };
   }, [
     setting,
@@ -162,6 +221,16 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     selectedCommitId,
     setSelectedCommitId,
     clearCompiledVariables,
+    selection,
+    setSelection,
+    clipboard,
+    setClipboard,
+    cmdkOpen,
+    setCMDKOpen,
+    search,
+    setSearch,
+    checkedVariableIds,
+    setCheckedVariableIds,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

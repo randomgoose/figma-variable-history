@@ -3,10 +3,12 @@ import { IconChevronDown } from '@tabler/icons-react';
 import { useContext } from 'react';
 import { AppContext } from '../../../AppContext';
 import { sendMessage } from '../../../utils/message';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 export function VariablesSettings() {
   // const [colorFormat, setColorFormat] = useState('hex');
   const { setting } = useContext(AppContext);
+  const { t } = useTranslation();
 
   const colorFormatOptions = [
     { value: 'HEX', label: 'HEX' },
@@ -15,14 +17,14 @@ export function VariablesSettings() {
   ];
 
   return (
-    <div className="w-full ">
-      <h3 className="font-semibold text-[13px] mt-1">Variables</h3>
+    <div className="w-full">
+      <h3 className="settingPage-title">{t('variables')}</h3>
 
       <div className="mt-6 flex items-start justify-between">
         <div>
-          <div>Color format</div>
+          <div className="settingItem-title">{t('color_format')}</div>
           <div className="settingItem-description text-[11px] text-neutral-500">
-            This applies to variable export and synchronization.
+            {t('color_format_description')}
           </div>
         </div>
 

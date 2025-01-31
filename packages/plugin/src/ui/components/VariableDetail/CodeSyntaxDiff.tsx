@@ -1,7 +1,10 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 export function CodeSyntaxDiff({ current, prev }: { current: Variable; prev?: Variable }) {
+  const { t } = useTranslation();
+
   const showCodeSyntax =
     (prev &&
       (prev.codeSyntax.ANDROID !== current.codeSyntax.ANDROID ||
@@ -17,7 +20,7 @@ export function CodeSyntaxDiff({ current, prev }: { current: Variable; prev?: Va
         display: 'block',
       }}
     >
-      {text || 'No code syntax'}
+      {text || t('no_code_syntax')}
     </div>
   );
 
@@ -25,7 +28,7 @@ export function CodeSyntaxDiff({ current, prev }: { current: Variable; prev?: Va
 
   return !showCodeSyntax ? null : (
     <div className={'variableDetail-section'}>
-      <h3 className={'variableDetail-sectionTitle'}>Code Syntax</h3>
+      <h3 className={'variableDetail-sectionTitle'}>{t('code_syntax')}</h3>
       {prev
         ? Object.keys({ ...prev.codeSyntax, ...current.codeSyntax }).map((platform) => {
             const prevSyntax = prev.codeSyntax[platform as CodeSyntaxPlatform];

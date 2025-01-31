@@ -1,4 +1,5 @@
 import { IconSearch, IconX } from '@tabler/icons-react';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface SearchProps {
   value: string;
@@ -7,6 +8,8 @@ interface SearchProps {
 }
 
 export function Search({ value, onChange, onClear }: SearchProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative">
       <IconSearch
@@ -14,7 +17,7 @@ export function Search({ value, onChange, onClear }: SearchProps) {
         size={13}
       />
       <input
-        placeholder="Search variables"
+        placeholder={t('search_variables')}
         className="h-10 w-full flex-shrink-0 rounded-none border-b outline-none px-4 pl-8 bg-[color:var(--figma-color-bg)] border-[color:var(--figma-color-border)]"
         value={value}
         onChange={(e) => onChange(e.target.value)}

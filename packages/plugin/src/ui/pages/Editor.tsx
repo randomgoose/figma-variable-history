@@ -1,16 +1,9 @@
-import { useContext } from 'react';
-import { AppContext } from '../../AppContext';
+import { useState } from 'react';
+import { Map } from './Map';
+import { Table } from './Table';
 
 export function Editor() {
-  const { variables } = useContext(AppContext);
+  const [mode] = useState<'map' | 'table'>('table');
 
-  return (
-    <div>
-      <div className="flex flex-col gap-2">
-        {variables.map((v) => (
-          <div key={v.id}>{v.name}</div>
-        ))}
-      </div>
-    </div>
-  );
+  return <div className="w-full h-full relative">{mode === 'map' ? <Map /> : <Table />}</div>;
 }

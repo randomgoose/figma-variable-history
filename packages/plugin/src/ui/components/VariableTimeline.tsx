@@ -20,6 +20,8 @@ import styles from '../styles.module.css';
 import { CopyTextWrapper } from './CopyWrapper';
 import { ICommit } from '../../types';
 import * as Dropdown from '@radix-ui/react-dropdown-menu';
+import { useTranslation } from '../../hooks/useTranslation';
+import { useNavigate } from 'react-router';
 
 const diffKeys = [
   'name',
@@ -29,14 +31,7 @@ const diffKeys = [
   'scopes',
   'hiddenFromPublishing',
 ];
-const diffKeyLabelMap: Record<string, string> = {
-  name: 'Name',
-  description: 'Description',
-  valuesByMode: 'Value',
-  hiddenFromPublishing: 'Visibility',
-  codeSyntax: 'Code syntax',
-  scopes: 'Scopes',
-};
+
 const diffKeyIconMap: Record<string, ReactNode> = {
   name: <IconForms size={14} />,
   description: <IconMessage2Plus size={14} />,
@@ -57,7 +52,8 @@ function DiffItem({
   className?: string;
   commitId?: string;
 }) {
-  const { setSelectedCommitId, setTab } = useContext(AppContext);
+  const { setSelectedCommitId } = useContext(AppContext);
+  const navigate = useNavigate();
 
   return (
     <div className={clsx(styles.commitItem, 'group max-h-12', className)}>
@@ -70,7 +66,7 @@ function DiffItem({
       <button
         className=" shadow-sm border absolute opacity-0 group-hover:opacity-100 right-0 group-hover:right-3 top-1/2 -translate-y-1/2 bg-white border-gray-200 w-7 h-7 rounded-md flex items-center justify-center transition-all"
         onClick={() => {
-          setTab('commits');
+          navigate(`/commits`);
           commitId && setSelectedCommitId(commitId);
         }}
       >
@@ -83,10 +79,23 @@ function DiffItem({
 export function VariableTimeline({ variableId }: { variableId: string }) {
   const { commits } = useContext(AppContext);
   const [selectedDiffKeys, setSelectedDiffKeys] = useState(diffKeys);
+  const { t } = useTranslation();
 
   const commitsIncludingVariable = useMemo(() => {
     return commits.filter((c) => c.variables.find((v) => v.id === variableId));
   }, [commits, variableId]);
+
+  const diffKeyLabelMap: Record<string, string> = useMemo(
+    () => ({
+      name: t('name'),
+      description: t('description'),
+      valuesByMode: t('values'),
+      hiddenFromPublishing: t('visibility'),
+      codeSyntax: t('code_syntax'),
+      scopes: t('scopes'),
+    }),
+    [t]
+  );
 
   const foldedCommits = useMemo(() => {
     const result = [];
@@ -128,9 +137,9 @@ export function VariableTimeline({ variableId }: { variableId: string }) {
   return (
     <>
       <div className="flex px-3 py-3 items-center justify-between">
-        <h5 className="font-semibold">History</h5>
+        <h5 className="font-semibold">{t('history')}</h5>
         <Dropdown.Root>
-          <Dropdown.Trigger className="h-7 px-3 border rounded-md">Filter</Dropdown.Trigger>
+          <Dropdown.Trigger className="h-7 px-3 border rounded-md">{t('filter')}</Dropdown.Trigger>
           <Dropdown.Portal>
             <Dropdown.Content className="dropdown-content" align="end" sideOffset={4}>
               {diffKeys.map((key) => (
@@ -208,6 +217,7 @@ function CommitItem({
   className?: string;
 }) {
   const { collections } = useContext(AppContext);
+  const { t } = useTranslation();
 
   const renderDiff = (current: Variable, prev: Variable) => {
     const prevCollection = collections.find((c) => c.id === prev.variableCollectionId);
@@ -226,7 +236,8 @@ function CommitItem({
             return (
               <DiffItem commitId={commit.id} icon={<IconForms size={14} />} key={key}>
                 <div>
-                  Renamed <span className="font-semibold">"{value[0]}"</span> to{' '}
+                  {t('renamed')} <span className="font-semibold">"{value[0]}"</span>{' '}
+                  {t('renamed_to')}
                   <span className="font-semibold">"{value[1]}"</span>
                 </div>
               </DiffItem>
@@ -236,18 +247,27 @@ function CommitItem({
               return (
                 <DiffItem key={key} commitId={commit.id} icon={<IconMessage2Plus size={14} />}>
                   <div>
-                    Added description <span className="font-semibold">"{value[1]}"</span>
+                    {t('added_description')} <span className="font-semibold">"{value[1]}"</span>
                   </div>
                 </DiffItem>
               );
             } else if (!value[1]) {
               return (
                 <DiffItem key={key} commitId={commit.id} icon={<IconMessage2Off size={14} />}>
-                  <div key={key}>Removed description</div>
+                  <div key={key}>{t('removed_description')}</div>
                 </DiffItem>
               );
             } else {
-              return <div key={key}></div>;
+              return (
+                <DiffItem key={key} commitId={commit.id} icon={<IconMessage2Off size={14} />}>
+                  <div>
+                    {t('changed_description_from')}{' '}
+                    <span className="font-semibold">"{value[0]}"</span>{' '}
+                    {t('changed_description_to')}
+                    <span className="font-semibold">"{value[1]}"</span>
+                  </div>
+                </DiffItem>
+              );
             }
           case 'valuesByMode':
             return Object.entries(value).map(([modeId]) => {
@@ -255,7 +275,11 @@ function CommitItem({
                 currentCollection?.modes.find((m) => m.modeId === modeId) ||
                 prevCollection?.modes.find((m) => m.modeId === modeId);
               return (
-                <DiffItem key={key} commitId={commit.id} icon={<IconHash size={14} />}>
+                <DiffItem
+                  key={`${key}-${modeId}`}
+                  commitId={commit.id}
+                  icon={<IconHash size={14} />}
+                >
                   <div className="variableDetail-item w-full">
                     <div className="flex self-center">{mode?.name || 'Removed mode'}</div>
                     <div>
@@ -324,11 +348,11 @@ function CommitItem({
             return (
               <DiffItem key={key} commitId={commit.id} icon={<IconEdit size={14} />}>
                 <div>
-                  Changed scopes from{' '}
+                  {t('changed_scopes_from')}{' '}
                   <span className="font-semibold">
                     {value[0].map((s) => s.toLowerCase().replaceAll('_', ' ')).join(', ')}{' '}
                   </span>
-                  to{' '}
+                  {t('changed_scopes_to')}
                   <span className="font-semibold">
                     {value[1].map((s) => s.toLowerCase().replaceAll('_', ' ')).join(', ')}
                   </span>
@@ -346,7 +370,7 @@ function CommitItem({
   ) : (
     <DiffItem icon={<IconCirclePlus size={14} />} commitId={commit.id}>
       <div>
-        Created <span className="font-semibold">{current?.name}</span>
+        {t('created')} <span className="font-semibold">{current?.name}</span>
       </div>
     </DiffItem>
   );

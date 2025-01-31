@@ -1,11 +1,39 @@
 import { generateChangeLog } from './features/generate-change-log';
-import { convertVariablesToCss } from './features';
+import { convertVariablesToCss, updateVariableValue } from './features';
 import { commitBridge } from './features/CommitBridge';
 import { figmaHelper } from './utils/figma-helper';
 import { PLUGIN_DATA_KEY_SETTING } from './config';
+import { MESSAGE_TYPE } from './utils/message';
 
 export default async function () {
+  figma.notify('Resolving variable aliases...');
+  const variables = await figma.variables.getLocalVariablesAsync();
+  const collections = await figma.variables.getLocalVariableCollectionsAsync();
+
+  const consumer = figma.createFrame();
+
+  const results = await Promise.all(
+    variables.map(async (v) => {
+      const collection = collections.find((c) => c.id === v.variableCollectionId);
+      const modeId = collection?.defaultModeId || Object.keys(v.valuesByMode)[0];
+      const resolvedVariable = await figmaHelper.resolveVariableAlias(v.id, modeId, consumer);
+
+      return {
+        id: v.id,
+        modeId,
+        value: resolvedVariable?.value,
+        resolvedType: resolvedVariable?.resolvedType,
+      };
+    })
+  );
+
   figma.showUI(__html__, { width: 720, height: 480, themeColors: true });
+  // figma.showUI(__html__, { width: 1440, height: 960, themeColors: true });
+
+  figma.ui.postMessage({
+    type: MESSAGE_TYPE.VARIABLE_ALIAS_RESOLVED,
+    payload: results,
+  });
 
   figma.ui.onmessage = async (msg) => {
     switch (msg.type) {
@@ -27,7 +55,7 @@ export default async function () {
       case 'REFRESH':
         await commitBridge.emitData();
         break;
-      case 'REVERT_VARIABLE_VALUE':
+      case MESSAGE_TYPE.REVERT_VARIABLE_VALUE:
         await commitBridge.revertVariable(msg.payload.variable, msg.payload.type);
         await commitBridge.emitData();
         break;
@@ -52,9 +80,11 @@ export default async function () {
         figma.viewport.center = { x: container.x, y: container.y };
         break;
       case 'RESOLVE_VARIABLE_VALUE':
+        const consumer = figma.createFrame();
         const resolvedVariableValue = await figmaHelper.resolveVariableAlias(
           msg.payload.id,
-          msg.payload.modeId
+          msg.payload.modeId,
+          consumer
         );
         if (resolvedVariableValue) {
           figma.ui.postMessage({
@@ -66,6 +96,8 @@ export default async function () {
               resolvedType: resolvedVariableValue.resolvedType,
             },
           });
+
+          consumer.remove();
         }
         break;
       case 'GET_VARIABLE_BY_ID':
@@ -112,6 +144,26 @@ export default async function () {
         figmaHelper.clearPluginData();
         await commitBridge.emitData();
         break;
+      case MESSAGE_TYPE.AUTOCOMPLETE_CODE_SYNTAX:
+        await figmaHelper.autoCompleteCodeSyntax();
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.UPDATE_VARIABLE_VALUE:
+        const { id, modeId, value } = msg.payload;
+        await updateVariableValue(id, modeId, value);
+        figma.commitUndo();
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.UPDATE_VARIABLE:
+        await figmaHelper.setVariable(msg.payload.id, msg.payload);
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.UPDATE_VARIABLE_GROUP:
+        await figmaHelper.updateVariableGroup(msg.payload);
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.REVERT_ALL_VARIABLE_CHANGES:
+      // TODO: Drop all changes
     }
   };
 }

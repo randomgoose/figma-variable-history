@@ -1,6 +1,9 @@
 import * as Diff from 'diff';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 export function DescriptionDiff({ current, prev }: { current: Variable; prev?: Variable }) {
+  const { t } = useTranslation();
+
   const content = prev
     ? Diff.diffWords(prev.description, current.description).map((part, index) =>
         part.added ? (
@@ -25,7 +28,7 @@ export function DescriptionDiff({ current, prev }: { current: Variable; prev?: V
   return prev?.description === current.description ? null : (
     <div className={'variableDetail-section'} style={{ paddingBottom: 12 }}>
       <div style={{ flexDirection: 'column' }}>
-        <h3 className={'variableDetail-sectionTitle'}>Description</h3>
+        <h3 className={'variableDetail-sectionTitle'}>{t('description')}</h3>
 
         <div
           style={{
@@ -36,7 +39,7 @@ export function DescriptionDiff({ current, prev }: { current: Variable; prev?: V
           }}
         >
           {content || (
-            <span style={{ color: 'var(--figma-color-text-tertiary)' }}>No description</span>
+            <span style={{ color: 'var(--figma-color-text-tertiary)' }}>{t('no_description')}</span>
           )}
         </div>
       </div>

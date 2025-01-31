@@ -7,12 +7,14 @@ import { Search } from '../components/Search';
 import { AnimatePresence } from 'framer-motion';
 import { EmptyState } from '../components';
 import { Preview } from '../components/Preview';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export function Changes() {
   const [, setCollectionList] = useState<VariableCollection['id'][]>([]);
   const [keyword, setKeyword] = useState('');
   const [selected, setSelected] = useState<string>('');
 
+  const { t } = useTranslation();
   const { groupedChanges, collections, variables, commits } = useContext(AppContext);
 
   useEffect(() => {
@@ -65,6 +67,7 @@ export function Changes() {
                   selected={selected}
                   groupedChanges={groupedChanges}
                   onClickVariableItem={(id) => setSelected(id)}
+                  checkbox={true}
                 />
               ) : (
                 <EmptyState />
@@ -78,7 +81,7 @@ export function Changes() {
           className="flex items-center justify-between px-4 py-3 border-t"
         >
           <div className="text-[color:var(--figma-color-text-secondary)]">
-            {numOfChanges} changes
+            {numOfChanges} {t('num_of_changes')}
           </div>
 
           <CommitModal disabled={disabled} />

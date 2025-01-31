@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import styles from '../../styles.module.css';
 import { difference, intersection } from 'lodash-es';
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 function ScopeCheckbox({
   label,
@@ -21,48 +22,57 @@ function ScopeCheckbox({
 }
 
 export function VariableScopesDiff({ current, prev }: { current: Variable; prev?: Variable }) {
+  const { t } = useTranslation();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const renderScopeGroups = () => {
     let scopeGroups: { label: string; sub?: boolean; scopes: VariableScope[] }[] = [];
     switch (current.resolvedType) {
       case 'STRING':
         scopeGroups = [
-          { label: 'All', scopes: ['ALL_SCOPES'] },
-          { label: 'Text content', scopes: ['ALL_SCOPES', 'TEXT_CONTENT'] },
-          { label: 'Font family', scopes: ['ALL_SCOPES', 'FONT_FAMILY'] },
-          { label: 'Font style', scopes: ['ALL_SCOPES', 'FONT_STYLE'] },
+          { label: t('scoping_all'), scopes: ['ALL_SCOPES'] },
+          { label: t('scoping_text_content'), scopes: ['ALL_SCOPES', 'TEXT_CONTENT'] },
+          { label: t('scoping_font_family'), scopes: ['ALL_SCOPES', 'FONT_FAMILY'] },
+          { label: t('scoping_font_style'), scopes: ['ALL_SCOPES', 'FONT_STYLE'] },
         ];
         break;
       case 'BOOLEAN':
-        scopeGroups = [{ label: '', scopes: ['ALL_SCOPES'] }];
+        scopeGroups = [{ label: t('scoping_all'), scopes: ['ALL_SCOPES'] }];
         break;
       case 'FLOAT':
         scopeGroups = [
-          { label: 'All', scopes: ['ALL_SCOPES'] },
-          { label: 'Corner radius', scopes: ['ALL_SCOPES', 'CORNER_RADIUS'] },
-          { label: 'Width and height', scopes: ['ALL_SCOPES', 'WIDTH_HEIGHT'] },
-          { label: 'Gap', scopes: ['ALL_SCOPES', 'GAP'] },
-          { label: 'Text content', scopes: ['ALL_SCOPES', 'TEXT_CONTENT'] },
-          { label: 'Stroke', scopes: ['ALL_SCOPES', 'STROKE_FLOAT'] },
-          { label: 'Layer opacity', scopes: ['ALL_SCOPES', 'OPACITY'] },
-          { label: 'Effects', scopes: ['ALL_SCOPES', 'EFFECT_FLOAT'] },
-          { label: 'Font weight', scopes: ['ALL_SCOPES', 'FONT_WEIGHT'] },
-          { label: 'Font size', scopes: ['ALL_SCOPES', 'FONT_SIZE'] },
-          { label: 'Line height', scopes: ['ALL_SCOPES', 'LINE_HEIGHT'] },
-          { label: 'Letter spacing', scopes: ['ALL_SCOPES', 'LETTER_SPACING'] },
-          { label: 'Paragraph spacing', scopes: ['ALL_SCOPES', 'PARAGRAPH_SPACING'] },
-          { label: 'Paragraph indent', scopes: ['ALL_SCOPES', 'PARAGRAPH_INDENT'] },
+          { label: t('scoping_all'), scopes: ['ALL_SCOPES'] },
+          { label: t('scoping_corner_radius'), scopes: ['ALL_SCOPES', 'CORNER_RADIUS'] },
+          { label: t('scoping_width_height'), scopes: ['ALL_SCOPES', 'WIDTH_HEIGHT'] },
+          { label: t('scoping_gap'), scopes: ['ALL_SCOPES', 'GAP'] },
+          { label: t('scoping_text_content'), scopes: ['ALL_SCOPES', 'TEXT_CONTENT'] },
+          { label: t('scoping_stroke'), scopes: ['ALL_SCOPES', 'STROKE_FLOAT'] },
+          { label: t('scoping_layer_opacity'), scopes: ['ALL_SCOPES', 'OPACITY'] },
+          { label: t('scoping_effects'), scopes: ['ALL_SCOPES', 'EFFECT_FLOAT'] },
+          { label: t('scoping_font_weight'), scopes: ['ALL_SCOPES', 'FONT_WEIGHT'] },
+          { label: t('scoping_font_size'), scopes: ['ALL_SCOPES', 'FONT_SIZE'] },
+          { label: t('scoping_line_height'), scopes: ['ALL_SCOPES', 'LINE_HEIGHT'] },
+          { label: t('scoping_letter_spacing'), scopes: ['ALL_SCOPES', 'LETTER_SPACING'] },
+          { label: t('scoping_paragraph_spacing'), scopes: ['ALL_SCOPES', 'PARAGRAPH_SPACING'] },
+          { label: t('scoping_paragraph_indent'), scopes: ['ALL_SCOPES', 'PARAGRAPH_INDENT'] },
         ];
         break;
       default:
         scopeGroups = [
-          { label: 'All', scopes: ['ALL_SCOPES'] },
-          { label: 'Fill', scopes: ['ALL_SCOPES', 'ALL_FILLS'] },
-          { label: 'Frame', scopes: ['ALL_SCOPES', 'ALL_FILLS', 'FRAME_FILL'], sub: true },
-          { label: 'Shape', scopes: ['ALL_SCOPES', 'ALL_FILLS', 'SHAPE_FILL'], sub: true },
-          { label: 'Text', scopes: ['ALL_SCOPES', 'ALL_FILLS', 'TEXT_FILL'], sub: true },
-          { label: 'Stroke', scopes: ['ALL_SCOPES', 'STROKE_COLOR'] },
-          { label: 'Effect', scopes: ['ALL_SCOPES', 'EFFECT_COLOR'] },
+          { label: t('scoping_all'), scopes: ['ALL_SCOPES'] },
+          { label: t('scoping_fill'), scopes: ['ALL_SCOPES', 'ALL_FILLS'] },
+          {
+            label: t('scoping_frame'),
+            scopes: ['ALL_SCOPES', 'ALL_FILLS', 'FRAME_FILL'],
+            sub: true,
+          },
+          {
+            label: t('scoping_shape'),
+            scopes: ['ALL_SCOPES', 'ALL_FILLS', 'SHAPE_FILL'],
+            sub: true,
+          },
+          { label: t('scoping_text'), scopes: ['ALL_SCOPES', 'ALL_FILLS', 'TEXT_FILL'], sub: true },
+          { label: t('scoping_stroke'), scopes: ['ALL_SCOPES', 'STROKE_COLOR'] },
+          { label: t('scoping_effects'), scopes: ['ALL_SCOPES', 'EFFECT_COLOR'] },
         ];
         break;
     }
@@ -76,7 +86,7 @@ export function VariableScopesDiff({ current, prev }: { current: Variable; prev?
     return (
       <div>
         <h3 className={clsx(styles.variableDetail__sectionTitle, 'capitalize')}>
-          {current.resolvedType.toLowerCase()} Scoping
+          {t(`${current.resolvedType.toLowerCase()}_scoping`)}
         </h3>
         <div className="grid" style={{ gridTemplateColumns: 'minmax(0, 1fr) 40px minmax(0, 1fr)' }}>
           {prev ? (

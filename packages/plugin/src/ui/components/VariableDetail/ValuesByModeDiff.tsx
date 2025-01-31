@@ -7,6 +7,7 @@ import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-dropdown-m
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { union } from 'lodash-es';
 import { sendMessage } from '../../../utils/message';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface ValuesByModeDiffProps {
   current: Variable;
@@ -21,6 +22,7 @@ export function ValuesByModeDiff({
   currentCollection,
   prevCollection,
 }: ValuesByModeDiffProps) {
+  const { t } = useTranslation();
   const { setting } = useContext(AppContext);
 
   const unionedModeIds = prev
@@ -56,7 +58,7 @@ export function ValuesByModeDiff({
     <div className={'variableDetail-section'}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <h3 className={'variableDetail-sectionTitle'} style={{ margin: 0 }}>
-          Values
+          {t('values')}
         </h3>
         {showColorFormatPicker ? (
           <Root>

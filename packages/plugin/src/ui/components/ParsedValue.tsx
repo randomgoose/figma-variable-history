@@ -8,7 +8,6 @@ import { useContext, useEffect } from 'react';
 import { AppContext } from '../../AppContext';
 import { VariablePill } from './VariablePill';
 import clsx from 'clsx';
-import { sendMessage } from '../../utils/message';
 import { parsedValue } from '../styles.module.css';
 import { CopyTextWrapper } from './CopyWrapper';
 
@@ -31,8 +30,8 @@ export function ParsedValue({
   // Resolve the value if it's an alias
   useEffect(() => {
     if (typeof value === 'object' && 'type' in value) {
-      sendMessage('RESOLVE_VARIABLE_VALUE', { id: value.id, modeId });
-      sendMessage('GET_VARIABLE_BY_ID', value.id);
+      // sendMessage('RESOLVE_VARIABLE_VALUE', { id: value.id, modeId });
+      // sendMessage('GET_VARIABLE_BY_ID', value.id);
     }
   }, [value, variable]);
 
@@ -80,12 +79,17 @@ export function ParsedValue({
   if (value && typeof value === 'object') {
     const isAlias = 'id' in value;
     const alias = isAlias ? variableAliases[value.id] : '';
-    const resolvedValue = isAlias
-      ? resolvedVariableValues[value.id]?.valuesByMode[modeId]?.value ||
+    let resolvedValue;
+
+    if (isAlias) {
+      resolvedValue =
+        resolvedVariableValues[value.id]?.valuesByMode[modeId]?.value ||
         resolvedVariableValues[value.id]?.valuesByMode?.[
           Object.keys(resolvedVariableValues?.[value.id]?.valuesByMode)?.[0]
-        ]?.value
-      : value;
+        ]?.value;
+    } else {
+      resolvedValue = value;
+    }
 
     switch (variable.resolvedType) {
       case 'BOOLEAN':

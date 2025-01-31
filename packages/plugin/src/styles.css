@@ -15,6 +15,10 @@ body {
   font-size: 11px;
 }
 
+[cmdk-item] {
+  @apply h-8 text-[var(--figma-color-text)] hover:bg-[var(--figma-color-bg-hover)] flex items-center rounded-[5px] cursor-default pr-2;
+}
+
 .figma-light body {
   --bg-added: #F0FDF4;
   --bg-modified: #FEFCE8;
@@ -26,6 +30,13 @@ body {
   --bg-modified: #422006;
   --bg-removed: #450a0a;
 }
+
+.react-flow__node-group {
+    background-color: var(--figma-color-bg-brand-tertiary);
+    border: 1px dashed var(--figma-color-border-brand);
+    border-radius: 13px;
+}
+ 
 
 @layer components {
   .btn-primary {
@@ -48,12 +59,16 @@ body {
     @apply flex justify-center items-center rounded-md hover:bg-[color:var(--figma-color-bg-secondary)];
   }
 
+  .btn-icon {
+    @apply flex justify-center items-center rounded-[5px] hover:bg-[color:var(--figma-color-bg-secondary)] w-6 h-6;
+  }
+
   .dialog-overlay {
     @apply fixed inset-0 bg-black/70;
   }
 
   .dialog-content {
-    @apply bg-[color:var(--figma-color-bg)] min-w-[280px] max-w-[480px] h-full max-h-[calc(100vh-80px)] overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-sm data-[state=open]:animate-contentShow;
+    @apply bg-[color:var(--figma-color-bg)] min-w-[280px] max-w-[480px] h-full max-h-[calc(100vh-80px)] overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[13px] data-[state=open]:animate-contentShow;
   }
 
   .dialog-title {
@@ -61,7 +76,11 @@ body {
   }
 
   .input {
-    @apply h-7 p-2 border border-[color:var(--figma-color-border)] rounded-sm text-[color:var(--figma-color-text)] bg-[color:var(--figma-color-bg)];
+    @apply h-6 border border-[var(--figma-color-border)] rounded-[5px] px-2 focus:outline focus:outline-[var(--figma-color-border-brand-strong)];
+  }
+  
+  .input-filled {
+    @apply h-6 bg-[var(--figma-color-bg-secondary)] rounded-[5px] px-2 focus:outline focus:outline-[var(--figma-color-border-brand-strong)];
   }
 
   .switch-root {
@@ -73,11 +92,11 @@ body {
   }
 
   .dropdown-content {
-    @apply bg-[color:#1e1e1e] rounded-sm py-2 shadow-sm;
+    @apply w-[280px] bg-[color:#1e1e1e] rounded-[13px] p-2 shadow-sm;
   }
 
   .dropdown-item {
-    @apply h-6 flex items-center text-[color:var(--figma-color-text-oncomponent)] px-4 cursor-default;
+    @apply h-6 flex items-center text-[color:var(--figma-color-text-oncomponent)] px-2 cursor-default rounded-[5px];
   }
 
   .dropdown-item:hover {
@@ -112,6 +131,10 @@ body {
     @apply h-8 leading-8 text-[11px] font-semibold;
   }
 
+  .settingPage-title {
+    @apply text-[13px] font-semibold mt-1;
+  }
+
   .settingItem-title {
     @apply text-[11px] font-medium text-neutral-900;
   } 
@@ -119,4 +142,67 @@ body {
   .settingItem-description {
     @apply text-[11px] text-neutral-500;
   }
+
+  .tabs-list {
+    @apply px-2 h-10 flex items-center;
+  }
+
+  .tabs-trigger {
+    @apply cursor-default px-2 capitalize rounded-[5px] h-6 flex items-center text-[color:var(--figma-color-text-secondary)] data-[state=active]:font-semibold data-[state=active]:text-[color:var(--figma-color-text)] data-[state=active]:bg-[var(--figma-color-bg-secondary)];
+  }
+
+  .checkbox-root {
+    @apply w-4 h-4 rounded-[5px] bg-[color:var(--figma-color-bg-secondary)] border border-[color:var(--figma-color-border)] shrink-0;
+  }
+
+  .checkbox-indicator {
+    @apply text-[var(--figma-color-icon)] flex items-center justify-center;
+  }
+
+  
 }
+
+
+.active-animation {
+  background-image: linear-gradient(90deg, blue 50%, transparent 50%), linear-gradient(90deg, blue 50%, transparent 50%), linear-gradient(0deg, blue 50%, transparent 50%), linear-gradient(0deg, blue 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 4px 1px, 4px 1px, 1px 4px, 1px 4px;
+  background-position: left top, right bottom, left bottom, right top;
+  animation: border-dance 1s infinite linear;
+  }
+  
+  @keyframes border-dance {
+  0% {
+      background-position: left top, right bottom, left bottom, right top;
+  }
+  
+  100% {
+      background-position: left 15px top, right 15px bottom, left bottom 15px, right top 15px;
+  }
+  }
+
+  .react-colorful__saturation {
+    border-radius: 0 !important;
+    border: 0px !important;
+  }
+
+  .react-colorful__pointer {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .react-colorful__hue {
+    height: 16px !important;
+    border-radius: 9999px !important;
+    margin-top: 16px !important;
+    margin-left: 24px !important;
+    margin-right: 24px !important;
+  }
+
+  .react-colorful__alpha {
+    height: 16px !important;
+    border-radius: 9999px !important;
+    margin-top: 8px !important;
+    margin-left: 24px !important;
+    margin-right: 24px !important;
+  }

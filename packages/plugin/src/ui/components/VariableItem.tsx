@@ -1,10 +1,12 @@
 import { Root, Portal, Content, Item, Trigger } from '@radix-ui/react-context-menu';
 import { VariableChangeType } from '../../types';
 import clsx from 'clsx';
-import { sendMessage } from '../../utils/message';
+import { MESSAGE_TYPE, sendMessage } from '../../utils/message';
 import { ReactNode, useEffect } from 'react';
 import { ParsedValue } from './ParsedValue';
 import { VariableIcon } from './VariableIcon';
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { IconCheck } from '@tabler/icons-react';
 
 export function VariableItem({
   variable,
@@ -13,6 +15,9 @@ export function VariableItem({
   selected,
   allowDiscard = true,
   slot,
+  checkbox,
+  checked,
+  onCheck,
 }: {
   variable: Variable;
   type?: VariableChangeType;
@@ -20,6 +25,9 @@ export function VariableItem({
   selected?: boolean;
   allowDiscard?: boolean;
   slot?: ReactNode;
+  checkbox?: boolean;
+  checked?: boolean;
+  onCheck?: (checked: boolean) => void;
 }) {
   const { id, name, resolvedType, valuesByMode } = variable;
 
@@ -86,9 +94,7 @@ export function VariableItem({
         return (
           <div
             className={'w-4 h-4 flex items-center justify-center rounded-sm bg-[--bg-removed]'}
-            style={{
-              color: 'var(--figma-color-text-danger)',
-            }}
+            style={{ color: 'var(--figma-color-text-danger)' }}
           >
             <svg
               width="8"
@@ -117,11 +123,20 @@ export function VariableItem({
         <div
           id={id}
           className={clsx(
-            'flex h-8 p-2 cursor-default text-[color:var(--figma-color-text)] gap-2 rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)] hover:scale-[1.005] active:scale-[0.995]',
-            selected ? 'bg-[color:var(--figma-color-bg-brand-tertiary)]' : 'bg-none'
+            'flex items-center h-7 p-2 cursor-default text-[color:var(--figma-color-text)] rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)] hover:scale-[1.005] active:scale-[0.995]',
+            selected ? 'bg-[color:var(--figma-color-bg-brand-tertiary)]' : 'bg-none',
+            resolvedType === 'COLOR' ? 'gap-2' : checkbox ? 'gap-1' : 'gap-1',
+            checkbox ? 'pl-1' : resolvedType === 'COLOR' ? 'pl-2' : 'pl-1'
           )}
           onClick={() => onClick && onClick(id)}
         >
+          {checkbox ? (
+            <Checkbox.Root className="checkbox-root" checked={checked} onCheckedChange={onCheck}>
+              <Checkbox.Indicator className="checkbox-indicator">
+                <IconCheck size={12} />
+              </Checkbox.Indicator>
+            </Checkbox.Root>
+          ) : null}
           <div style={{ flexShrink: 0 }}>{icon()}</div>
           <div className="max-w-full text-ellipsis whitespace-nowrap overflow-hidden">{name}</div>
           {type ? <div className="ml-auto">{renderType(type)}</div> : null}
@@ -134,7 +149,7 @@ export function VariableItem({
           <Item
             className={'dropdown-item'}
             onClick={() => {
-              sendMessage('REVERT_VARIABLE_VALUE', { variable, type });
+              sendMessage(MESSAGE_TYPE.REVERT_VARIABLE_VALUE, { variable, type });
             }}
           >
             Discard changes

@@ -55,11 +55,14 @@ export async function convertVariablesToCss(
                     }
                   }
                   break;
+                case 'number':
+                  cssValue = value.toString() + 'px';
+                  break;
                 default:
                   break;
               }
 
-              return cssValue ? `  --${name.replaceAll('/', '-').toLowerCase()}: ${cssValue};` : '';
+              return cssValue ? `  --${name.replaceAll('/', '-')}: ${cssValue};` : '';
             })
           )
         ).filter(Boolean);

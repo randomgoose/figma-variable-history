@@ -21,6 +21,7 @@ import { Search } from '../components/Search';
 import { VariableTimeline } from '../components/VariableTimeline';
 import { VariableIcon } from '../components/VariableIcon';
 import { NoCommitPlaceholder } from '../components/NoCommitPlaceholder';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const viewOptions = [
   { id: 'timeline', icon: <History size={12} /> },
@@ -34,6 +35,7 @@ export function Variables() {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedVariable, setSelectedVariable] = useState<Variable | null>(variables[0]);
   const [keyword, setKeyword] = useState<string>('');
+  const { t } = useTranslation();
 
   const modeMap = useMemo(() => {
     return Object.fromEntries(
@@ -286,7 +288,7 @@ export function Variables() {
           </div>
         </>
       ) : (
-        <NoCommitPlaceholder description="Make your first commit to view variable timeline here." />
+        <NoCommitPlaceholder title={t('no_commit_yet')} description={t('make_your_first_commit')} />
       )}
     </div>
   );

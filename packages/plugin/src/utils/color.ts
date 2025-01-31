@@ -104,3 +104,42 @@ export function formatPercentage(num: number) {
 
   return percentage;
 }
+
+export function convertHexColorToFigmaRGBA(hex: string) {
+  // Remove # if present
+  hex = hex.replace('#', '');
+
+  // Parse hex values based on string length
+  let r,
+    g,
+    b,
+    a = 1;
+
+  if (hex.length === 8) {
+    // #RRGGBBAA
+    r = parseInt(hex.slice(0, 2), 16) / 255;
+    g = parseInt(hex.slice(2, 4), 16) / 255;
+    b = parseInt(hex.slice(4, 6), 16) / 255;
+    a = parseInt(hex.slice(6, 8), 16) / 255;
+  } else if (hex.length === 6) {
+    // #RRGGBB
+    r = parseInt(hex.slice(0, 2), 16) / 255;
+    g = parseInt(hex.slice(2, 4), 16) / 255;
+    b = parseInt(hex.slice(4, 6), 16) / 255;
+  } else if (hex.length === 4) {
+    // #RGBA
+    r = parseInt(hex[0] + hex[0], 16) / 255;
+    g = parseInt(hex[1] + hex[1], 16) / 255;
+    b = parseInt(hex[2] + hex[2], 16) / 255;
+    a = parseInt(hex[3] + hex[3], 16) / 255;
+  } else if (hex.length === 3) {
+    // #RGB
+    r = parseInt(hex[0] + hex[0], 16) / 255;
+    g = parseInt(hex[1] + hex[1], 16) / 255;
+    b = parseInt(hex[2] + hex[2], 16) / 255;
+  } else {
+    throw new Error('Invalid hex color format');
+  }
+
+  return { r, g, b, a };
+}

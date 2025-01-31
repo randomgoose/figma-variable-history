@@ -38,4 +38,5 @@ export interface PluginSetting {
     enabled: boolean;
   }[];
   colorFormat?: 'RGB' | 'HEX' | 'HSL';
+  language?: 'en-US' | 'zh-CN';
 }

@@ -9,6 +9,8 @@ import { CustomHTTPSyncConfig, GitHubSyncConfig, SlackSyncConfig } from '../../t
 import { IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-react';
 import { sendCustomRequest } from '../../features/send-custom-request';
 import { SyncTaskIcon } from './SyncTaskIcon';
+import { useTranslation } from '../../hooks/useTranslation';
+import { useNavigate } from 'react-router';
 
 const syncProgressMap: { [key: string]: ReactNode } = {
   pending: 'Pending',
@@ -31,17 +33,12 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
   const [shouldSync, setShouldSync] = useState(false);
   const [syncTaskStatus, setSyncTaskStatus] = useState<{ type: string; message: string }[]>([]);
   const [syncTaskResults, setSyncTaskResults] = useState<any[]>([]);
-  const {
-    variables,
-    collections,
-    setting,
-    commits,
-    setTab,
-    compiledVariables,
-    clearCompiledVariables,
-  } = useContext(AppContext);
+  const { variables, collections, setting, commits, compiledVariables, clearCompiledVariables } =
+    useContext(AppContext);
   const [view, setView] = useState<'commit' | 'sync'>('commit');
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     clearCompiledVariables();
@@ -53,7 +50,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
     if (shouldSync && commit && compiledVariables.css) {
       setShouldSync(false);
       Promise.all(
-        setting?.syncTasks.map(async ({ type, config }, index) => {
+        setting?.syncTasks?.map(async ({ type, config }, index) => {
           switch (type) {
             case 'github':
               const {
@@ -148,14 +145,14 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
       sendMessage('CONVERT_VARIABLES_TO_CSS');
       setShouldSync(true);
 
-      if (setting?.syncTasks.length > 0) {
+      if (setting?.syncTasks?.length > 0) {
         setView('sync');
       } else {
         setOpen(false);
       }
 
-      setSyncTaskStatus(setting?.syncTasks.map(() => ({ type: 'pending', message: '' })));
-      setSyncTaskResults(setting?.syncTasks.map(() => null));
+      setSyncTaskStatus(setting?.syncTasks?.map(() => ({ type: 'pending', message: '' })));
+      setSyncTaskResults(setting?.syncTasks?.map(() => null));
     }
   }, [variables, collections, summary, description]);
 
@@ -188,7 +185,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
               </div>
 
               <button
-                onClick={() => setTab('settings')}
+                onClick={() => navigate('/settings')}
                 className="ml-auto"
                 style={{ color: 'var(--figma-color-text-brand)' }}
               >
@@ -198,7 +195,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
           }
 
           <button className="btn-primary" disabled={summary.length <= 0} onClick={handleClick}>
-            {setting?.syncTasks?.length > 0 ? 'Commit and sync' : 'Commit'}
+            {setting?.syncTasks?.length > 0 ? 'Commit and sync' : t('commit')}
           </button>
         </>
       );
@@ -255,7 +252,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
     >
       <Trigger asChild>
         <button className="btn-primary" disabled={disabled} onClick={() => setOpen(true)}>
-          Commit
+          {t('commit')}
         </button>
       </Trigger>
       <Portal>
@@ -266,7 +263,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
           }}
         />
         <Content className="dialog-content h-fit">
-          <Title className="dialog-title">Commit</Title>
+          <Title className="dialog-title">{t('commit')}</Title>
           <div className={'w-80 flex flex-col gap-3 p-3'}>
             <AnimatePresence>
               {view === 'commit' ? (
@@ -275,7 +272,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                     className="input"
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
-                    placeholder="Summary"
+                    placeholder={t('summary')}
                   />
                   <textarea
                     className="input"
