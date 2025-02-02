@@ -21,7 +21,6 @@ import { CopyTextWrapper } from './CopyWrapper';
 import { ICommit } from '../../types';
 import * as Dropdown from '@radix-ui/react-dropdown-menu';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useNavigate } from 'react-router';
 
 const diffKeys = [
   'name',
@@ -53,7 +52,7 @@ function DiffItem({
   commitId?: string;
 }) {
   const { setSelectedCommitId } = useContext(AppContext);
-  const navigate = useNavigate();
+  const { setTab } = useContext(AppContext);
 
   return (
     <div className={clsx(styles.commitItem, 'group max-h-12', className)}>
@@ -66,7 +65,7 @@ function DiffItem({
       <button
         className=" shadow-sm border absolute opacity-0 group-hover:opacity-100 right-0 group-hover:right-3 top-1/2 -translate-y-1/2 bg-white border-gray-200 w-7 h-7 rounded-md flex items-center justify-center transition-all"
         onClick={() => {
-          navigate(`/commits`);
+          setTab('commits');
           commitId && setSelectedCommitId(commitId);
         }}
       >

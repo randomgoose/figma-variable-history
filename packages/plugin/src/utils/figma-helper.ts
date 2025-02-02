@@ -1,4 +1,3 @@
-import { cloneObject } from '@create-figma-plugin/utilities';
 import {
   DISABLE_VARIABLE_NAME_PREFIX,
   PLUGIN_DATA_KEY_COMMITS,
@@ -8,6 +7,7 @@ import {
 import { isSameVariable } from './variable';
 import { ICommit } from '../types';
 import { commitBridge } from '../features/CommitBridge';
+import { cloneObject } from './object';
 
 export const figmaHelper = {
   clearPluginData() {

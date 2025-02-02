@@ -4,7 +4,6 @@ import {
   convertFigmaRGBtoHSLString,
   convertFigmaRGBtoString,
 } from '../utils/color';
-import { figmaHelper } from '../utils/figma-helper';
 
 export async function convertVariablesToCss(
   commit: ICommit,
@@ -33,18 +32,24 @@ export async function convertVariablesToCss(
               switch (typeof value) {
                 case 'object':
                   if ('type' in value) {
-                    if (value.id.includes('/')) {
-                      const key = value.id.split('/')[0].split(':')[1];
-                      const alias = (
-                        await figma.variables.importVariableByKeyAsync(key)
-                      )?.name.replaceAll('/', '-');
-                      alias && (cssValue = `var(--${alias})`);
-                    } else {
-                      const alias = (
-                        await figmaHelper.getVariableByIdAsync(value.id)
-                      )?.name.replaceAll('/', '-');
-                      alias && (cssValue = `var(--${alias})`);
-                    }
+                    const alias = (
+                      await figma.variables.getVariableByIdAsync(value.id)
+                    )?.name.replaceAll('/', '-');
+                    alias && (cssValue = `var(--${alias})`);
+                    // Remove this code because both remote and local variables can be imported with getVariableByIdAsync
+
+                    // if (value.id.includes('/')) {
+                    //   const key = value.id.split('/')[0].split(':')[1];
+                    //   const alias = (
+                    //     await figma.variables.importVariableByKeyAsync(key)
+                    //   )?.name.replaceAll('/', '-');
+                    //   alias && (cssValue = `var(--${alias})`);
+                    // } else {
+                    //   const alias = (
+                    //     await figma.variables.getVariableByIdAsync(value.id)
+                    //   )?.name.replaceAll('/', '-');
+                    //   alias && (cssValue = `var(--${alias})`);
+                    // }
                   } else if ('r' in value) {
                     if (colorFormat === 'RGB') {
                       cssValue = convertFigmaRGBtoString(value);

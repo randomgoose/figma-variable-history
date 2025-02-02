@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "plugma dev",
     "build": "plugma build",
-    "preview": "plugma preview"
+    "preview": "plugma preview",
+    "release": "plugma release"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.88.0",
@@ -17,7 +18,7 @@
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.19",
     "esbuild": "^0.19.9",
-    "plugma": "1.0.0-24",
+    "plugma": "1.2.8",
     "postcss": "^8.4.39",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -28,6 +29,7 @@
   },
   "plugma": {
     "manifest": {
+      "name": "Variable History",
       "id": "1401484559876783981",
       "main": "src/main.ts",
       "ui": "src/ui.tsx",
@@ -45,13 +47,16 @@
           "https://fonts.googleapis.com/",
           "*"
         ],
+        "devAllowedDomains": [
+          "http://localhost:*",
+          "ws://localhost:9001"
+        ],
         "reasoning": "This plugin does not restrict network access to support synchronization to other tools. Feel free to contact me if you need a version that limits network access for internal use."
       },
       "documentAccess": "dynamic-page"
     }
   },
   "dependencies": {
-    "@create-figma-plugin/utilities": "^3.2.0",
     "@dagrejs/dagre": "^1.1.4",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-checkbox": "^1.1.3",

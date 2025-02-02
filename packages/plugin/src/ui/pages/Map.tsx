@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,10 +33,9 @@ interface Group {
 }
 
 export function Map() {
-  const navigate = useNavigate();
   const { collectionId } = useParams();
   const { zoom, setZoom } = useContext(AppContext);
-  const { collections, variables } = useContext(AppContext);
+  const { collections, variables, setTab } = useContext(AppContext);
   const viewerRef = useRef<InfiniteViewer>(null);
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [openVariablePanel, setOpenVariablePanel] = useState(false);
@@ -138,7 +137,7 @@ export function Map() {
           <BreadcrumbLink
             className="text-[var(--figma-color-text-secondary)] hover:text-[var(--figma-color-text)] cursor-pointer"
             onClick={() => {
-              navigate('/editor');
+              setTab('editor');
             }}
           >
             All variables
@@ -158,7 +157,7 @@ export function Map() {
                       key={c.id}
                       className="dropdown-item"
                       onClick={() => {
-                        navigate(`/editor/${c.id}`);
+                        setTab('editor');
                       }}
                     >
                       {c.name}

@@ -92,7 +92,7 @@ body {
   }
 
   .dropdown-content {
-    @apply w-[280px] bg-[color:#1e1e1e] rounded-[13px] p-2 shadow-sm;
+    @apply w-[280px] bg-[color:#1e1e1e] rounded-[13px] p-2 shadow-sm rounded-[13px];
   }
 
   .dropdown-item {

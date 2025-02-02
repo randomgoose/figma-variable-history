@@ -54,7 +54,7 @@ export function Changes() {
         className={'flex flex-col border-r shrink-0 w-60'}
         style={{ borderColor: 'var(--figma-color-border)' }}
       >
-        <div style={{ height: 'calc(100% - 57px)', background: 'var(--figma-color-bg-secondary)' }}>
+        <div className="bg-[var(--figma-color-bg-secondary)] flex-1">
           <Search value={keyword} onChange={setKeyword} />
           <div
             className="[&::-webkit-scrollbar]:w-0"

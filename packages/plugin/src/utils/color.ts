@@ -143,3 +143,18 @@ export function convertHexColorToFigmaRGBA(hex: string) {
 
   return { r, g, b, a };
 }
+
+export function convertRgbColorToHexColor(rgbColor: RGB): null | string {
+  // Helper function to convert a single RGB value to hex
+  const toHex = (value: number): string => {
+    const hex = Math.round(value * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+
+  // Convert each RGB component to hex
+  const r = toHex(rgbColor.r);
+  const g = toHex(rgbColor.g);
+  const b = toHex(rgbColor.b);
+
+  return `#${r}${g}${b}`;
+}

@@ -1,7 +1,7 @@
-import { convertRgbColorToHexColor } from '@create-figma-plugin/utilities';
 import {
   convertFigmaRGBtoHSLString,
   convertFigmaRGBtoString,
+  convertRgbColorToHexColor,
   formatPercentage,
 } from '../../utils/color';
 import { useContext, useEffect } from 'react';
@@ -10,6 +10,7 @@ import { VariablePill } from './VariablePill';
 import clsx from 'clsx';
 import { parsedValue } from '../styles.module.css';
 import { CopyTextWrapper } from './CopyWrapper';
+import { sendMessage } from '../../utils/message';
 
 export function ParsedValue({
   variable,
@@ -30,8 +31,13 @@ export function ParsedValue({
   // Resolve the value if it's an alias
   useEffect(() => {
     if (typeof value === 'object' && 'type' in value) {
-      // sendMessage('RESOLVE_VARIABLE_VALUE', { id: value.id, modeId });
-      // sendMessage('GET_VARIABLE_BY_ID', value.id);
+      if (!resolvedVariableValues[value.id]) {
+        sendMessage('RESOLVE_VARIABLE_VALUE', { id: value.id, modeId });
+      }
+
+      if (!variableAliases[value.id]) {
+        sendMessage('GET_VARIABLE_BY_ID', value.id);
+      }
     }
   }, [value, variable]);
 

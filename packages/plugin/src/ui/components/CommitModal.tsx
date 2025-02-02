@@ -10,7 +10,6 @@ import { IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-react';
 import { sendCustomRequest } from '../../features/send-custom-request';
 import { SyncTaskIcon } from './SyncTaskIcon';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useNavigate } from 'react-router';
 
 const syncProgressMap: { [key: string]: ReactNode } = {
   pending: 'Pending',
@@ -33,12 +32,18 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
   const [shouldSync, setShouldSync] = useState(false);
   const [syncTaskStatus, setSyncTaskStatus] = useState<{ type: string; message: string }[]>([]);
   const [syncTaskResults, setSyncTaskResults] = useState<any[]>([]);
-  const { variables, collections, setting, commits, compiledVariables, clearCompiledVariables } =
-    useContext(AppContext);
+  const {
+    variables,
+    collections,
+    setting,
+    commits,
+    compiledVariables,
+    clearCompiledVariables,
+    setTab,
+  } = useContext(AppContext);
   const [view, setView] = useState<'commit' | 'sync'>('commit');
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   useEffect(() => {
     clearCompiledVariables();
@@ -185,7 +190,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
               </div>
 
               <button
-                onClick={() => navigate('/settings')}
+                onClick={() => setTab('settings')}
                 className="ml-auto"
                 style={{ color: 'var(--figma-color-text-brand)' }}
               >
@@ -234,7 +239,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
             ))}
           </div>
           <button className="btn-outline" onClick={() => setOpen(false)}>
-            Close
+            {t('close')}
           </button>
         </>
       );

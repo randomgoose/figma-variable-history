@@ -129,7 +129,7 @@ export function Synchronization() {
                     {data?.type === 'github'
                       ? (data?.config as GitHubSyncConfig).repository
                       : data?.type === 'slack'
-                      ? `Channel ID: ${(data?.config as SlackSyncConfig).channelId}`
+                      ? `${t('channel_id')}: ${(data?.config as SlackSyncConfig).channelId}`
                       : data?.type === 'custom'
                       ? (data.config as CustomHTTPSyncConfig).address
                       : null}
@@ -142,7 +142,7 @@ export function Synchronization() {
                         sendMessage('SET_PLUGIN_SETTING', { syncTasks: newOptions });
                       }}
                     >
-                      Remove
+                      {t('remove')}
                     </button>
                   </div>
                 </Dialog.Trigger>

@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState } from 'react';
 import { AppContext } from '../../AppContext';
-import { useNavigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import * as Select from '@radix-ui/react-select';
 import { ChevronDown, MessageSquarePlus } from 'lucide-react';
 import {
@@ -27,8 +27,7 @@ type TreeNode = {
 };
 
 export function Table() {
-  const navigate = useNavigate();
-  const { variables, collections } = useContext(AppContext);
+  const { variables, collections, setTab } = useContext(AppContext);
   const { collectionId } = useParams();
   const currentCollection = collections.find((c) => c.id === collectionId);
 
@@ -249,8 +248,8 @@ export function Table() {
         <div className="p-2">
           <Select.Root
             value={collectionId}
-            onValueChange={(id) => {
-              navigate(`/editor/${id}`);
+            onValueChange={() => {
+              setTab('editor');
             }}
           >
             <Select.Trigger className="w-full h-6 pl-2 pr-1 border border-[var(--figma-color-border)] rounded-[5px] flex items-center justify-between">

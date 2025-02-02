@@ -10,7 +10,7 @@ export function VariablePill(props: VariablePillProps) {
   const { type, value } = props;
 
   const styles = {
-    backgroundColor: 'var(--figma-color-bg-secondary)',
+    backgroundColor: 'var(--figma-color-bg)',
     color: 'var(--figma-color-text-primary)',
     border: '1px solid var(--figma-color-border)',
   };

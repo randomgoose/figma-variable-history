@@ -32,7 +32,7 @@ export function Settings() {
   ];
 
   return (
-    <div style={{ height: 'calc(100% - 40px)' }}>
+    <div style={{ height: 'calc(100vh - 40px)' }} className="w-full h-full flex flex-col">
       <div
         className="h-10 px-4 flex items-center border-b"
         style={{ borderColor: 'var(--figma-color-border)' }}

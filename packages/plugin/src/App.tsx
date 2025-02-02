@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { Commits } from './ui/pages/Commits';
 import { AppContext, AppContextProvider } from './AppContext';
 import { Changes } from './ui/pages/Changes';
@@ -8,40 +8,58 @@ import { Toaster } from 'sonner';
 import { IconSettings } from '@tabler/icons-react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Variables } from './ui/pages/Variables';
-import HtmlEditor from './ui/pages/HtmlEditor';
+import { sendMessage } from './utils/message';
+import { useTranslation } from './hooks/useTranslation';
 
 function Plugin() {
   const { tab, setTab } = useContext(AppContext);
+  const { t } = useTranslation();
 
-  const tabs = [
-    {
-      value: 'editor',
-      children: <HtmlEditor />,
-    },
-    {
-      value: 'changes',
-      children: <Changes />,
-    },
-    {
-      value: 'commits',
-      children: <Commits />,
-    },
-    {
-      value: 'variables',
-      children: <Variables />,
-    },
-  ];
+  useEffect(() => {
+    // Refresh the variables when the plugin is focused
+    addEventListener('focus', () => {
+      sendMessage('REFRESH');
+    });
+
+    sendMessage('INIT');
+  }, []);
+
+  const tabs = useMemo(
+    () => [
+      // {
+      //   value: 'editor',
+      //   children: <HtmlEditor />,
+      // },
+      {
+        value: 'changes',
+        children: <Changes />,
+      },
+      {
+        value: 'commits',
+        children: <Commits />,
+      },
+      {
+        value: 'variables',
+        children: <Variables />,
+      },
+    ],
+    []
+  );
 
   return (
-    <Root value={tab} onValueChange={(value) => setTab(value as any)}>
-      <List className="tabs-list" style={{ borderColor: 'var(--figma-color-border)' }}>
+    <Root
+      className="overflow-hidden w-full h-screen flex flex-col"
+      value={tab}
+      onValueChange={(value) => setTab(value as any)}
+    >
+      <List className="tabs-list border-b border-[var(--figma-color-border)] shrink-0 h-10 flex">
         {tabs.map(({ value }) => (
           <Trigger
-            className="cursor-default text-[color:var(--figma-color-text-secondary)] data-[state=active]:font-semibold data-[state=active]:text-[color:var(--figma-color-text)] px-2 capitalize"
+            className="h-10 cursor-default text-[color:var(--figma-color-text-secondary)] data-[state=active]:font-semibold data-[state=active]:text-[color:var(--figma-color-text)] px-2 capitalize"
             key={value}
             value={value}
           >
-            {value}
+            {t(value)}
           </Trigger>
         ))}
 
@@ -52,8 +70,9 @@ function Plugin() {
           <IconSettings size={14} />
         </Trigger>
       </List>
+
       {tabs.map(({ value, children }) => (
-        <Content value={value} key={value}>
+        <Content className="grow" value={value} key={value}>
           {children}
         </Content>
       ))}

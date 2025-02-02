@@ -59,6 +59,13 @@ export const translations: Record<string, Record<string, string>> = {
   changed_scopes_from: { 'en-US': 'Changed scopes from', 'zh-CN': '将使用范围从' },
   changed_scopes_to: { 'en-US': 'to', 'zh-CN': '改为 ' },
   values: { 'en-US': 'Values', 'zh-CN': '值' },
+  search_variables_in_commits: { 'en-US': 'Search variables in commits', 'zh-CN': '搜索变量' },
+  search: { 'en-US': 'Search', 'zh-CN': '搜索' },
+  generate_changelog: { 'en-US': 'Generate changelog', 'zh-CN': '生成更新日志' },
+  generate_changelog_not_available: {
+    'en-US': 'Generate changelog is not available',
+    'zh-CN': '生成更新日志暂不可用',
+  },
   // Variables
   filter: { 'en-US': 'Filter', 'zh-CN': '筛选' },
   // Timeline
@@ -122,9 +129,17 @@ export const translations: Record<string, Record<string, string>> = {
   repository_owner_username: { 'en-US': 'Repository Owner Username', 'zh-CN': '仓库拥有者用户名' },
   css_variable_file_path: { 'en-US': 'CSS Variable File Path', 'zh-CN': 'CSS变量文件路径' },
   address: { 'en-US': 'Address', 'zh-CN': '地址' },
+  close: { 'en-US': 'Close', 'zh-CN': '关闭' },
   // Slack sync
   slack_bot_token_or_user_token: {
     'en-US': 'Slack Bot Token or User Token',
     'zh-CN': 'Slack机器人令牌或用户令牌',
   },
+  remove: { 'en-US': 'Remove', 'zh-CN': '移除' },
+  channel_id: { 'en-US': 'Channel ID', 'zh-CN': '频道 ID' },
+  channelId: { 'en-US': 'Channel ID', 'zh-CN': '频道 ID' },
+  filename: { 'en-US': 'Filename', 'zh-CN': '文件名' },
+  token: { 'en-US': 'Token', 'zh-CN': '令牌' },
+  owner: { 'en-US': 'Owner', 'zh-CN': '拥有者' },
+  filePath: { 'en-US': 'File Path', 'zh-CN': '文件路径' },
 };

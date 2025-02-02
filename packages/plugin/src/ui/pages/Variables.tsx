@@ -178,7 +178,7 @@ export function Variables() {
   }, [selectedVariable, variables]);
 
   return (
-    <div style={{ height: 'calc(100% - 40px)' }} className="w-full h-full flex">
+    <div style={{ height: 'calc(100vh - 40px)' }} className="w-full h-full flex">
       {commits.length > 0 ? (
         <>
           <div

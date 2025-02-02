@@ -156,7 +156,7 @@ export function Commits() {
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                     className="h-7 pl-1 grow"
-                    placeholder="Search variables in commits"
+                    placeholder={t('search_variables_in_commits')}
                   />
                   <button
                     className="btn-ghost w-6 h-6 rounded-full"
@@ -276,13 +276,17 @@ export function Commits() {
 
                     <Tooltip.Root>
                       <Tooltip.Trigger asChild>
-                        <button className="btn-ghost w-7 h-7 ml-auto" onClick={generateChangelog}>
+                        <button
+                          className="btn-ghost w-7 h-7 ml-auto hover:bg-none opacity-30 cursor-not-allowed"
+                          onClick={generateChangelog}
+                          disabled
+                        >
                           <GalleryHorizontalEnd size={12} />
                         </button>
                       </Tooltip.Trigger>
                       <Tooltip.Portal>
                         <Tooltip.Content side="bottom" className="tooltip-content">
-                          Generate changelog
+                          {t('generate_changelog_not_available')}
                         </Tooltip.Content>
                       </Tooltip.Portal>
                     </Tooltip.Root>
@@ -300,7 +304,7 @@ export function Commits() {
                       </Tooltip.Trigger>
                       <Tooltip.Portal>
                         <Tooltip.Content side="bottom" className="tooltip-content">
-                          Search
+                          {t('search')}
                         </Tooltip.Content>
                       </Tooltip.Portal>
                     </Tooltip.Root>

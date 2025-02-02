@@ -1,10 +1,8 @@
 import { useContext } from 'react';
 import { AppContext } from '../../AppContext';
-import { useNavigate } from 'react-router';
 
 export default function HtmlEditor() {
-  const navigate = useNavigate();
-  const { collections, variables } = useContext(AppContext);
+  const { collections, variables, setTab } = useContext(AppContext);
 
   return (
     <div className="grid grid-cols-3 gap-4 p-4">
@@ -15,7 +13,7 @@ export default function HtmlEditor() {
           <div
             key={id}
             className="flex-grow overflow-hidden rounded-3xl bg-gray-100 border border-transparent hover:border-[var(--figma-color-border)] cursor-default p-8"
-            onClick={() => navigate(`/editor/${id}`)}
+            onClick={() => setTab('editor')}
           >
             <div className="text-2xl font-bold">{name}</div>
             <div className="text-sm text-gray-500">

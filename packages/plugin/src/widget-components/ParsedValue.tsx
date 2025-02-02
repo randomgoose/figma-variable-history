@@ -1,5 +1,6 @@
-import { convertRgbColorToHexColor } from '@create-figma-plugin/utilities';
 // import { SVGs } from './svg-strings';
+
+import { convertRgbColorToHexColor } from '../utils/color';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { Text, AutoLayout, Rectangle, useEffect } = figma.widget;

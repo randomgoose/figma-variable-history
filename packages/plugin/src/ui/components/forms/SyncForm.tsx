@@ -87,7 +87,7 @@ export function SyncForm({ onSubmit, defaultData, type }: GitSttingsProps) {
             onSubmit(data);
           }}
         >
-          Confirm
+          {t('confirm')}
         </button>
       </Close>
     </div>
