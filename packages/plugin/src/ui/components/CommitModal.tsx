@@ -185,8 +185,8 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
               ))}
               <div style={{ color: 'var(--figma-color-text-secondary)' }}>
                 {setting?.syncTasks?.length > 0
-                  ? `${setting?.syncTasks.length} Sync tasks in queue`
-                  : 'No sync tasks'}
+                  ? `${setting?.syncTasks.length} ${t('sync_tasks_in_queue')}`
+                  : t('no_sync_tasks')}
               </div>
 
               <button
@@ -194,13 +194,13 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                 className="ml-auto"
                 style={{ color: 'var(--figma-color-text-brand)' }}
               >
-                {setting?.syncTasks?.length > 0 ? 'View tasks' : 'Set up tasks'}
+                {setting?.syncTasks?.length > 0 ? t('view_tasks') : t('set_up_tasks')}
               </button>
             </div>
           }
 
           <button className="btn-primary" disabled={summary.length <= 0} onClick={handleClick}>
-            {setting?.syncTasks?.length > 0 ? 'Commit and sync' : t('commit')}
+            {setting?.syncTasks?.length > 0 ? t('commit_and_sync') : t('commit')}
           </button>
         </>
       );
@@ -280,10 +280,10 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                     placeholder={t('summary')}
                   />
                   <textarea
-                    className="input"
+                    className="input pt-1"
                     onChange={(e) => setDescription(e.target.value)}
                     value={description}
-                    placeholder="Description (optional)"
+                    placeholder={t('description_placeholder')}
                     style={{ height: 96 }}
                   />
                 </div>

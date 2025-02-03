@@ -53,6 +53,12 @@ export const translations: Record<string, Record<string, string>> = {
   export: { 'en-US': 'Export', 'zh-CN': '导出' },
   name: { 'en-US': 'Name', 'zh-CN': '名称' },
   description: { 'en-US': 'Description', 'zh-CN': '描述' },
+  description_placeholder: { 'en-US': 'Description (optional)', 'zh-CN': '描述（可选）' },
+  // Sync tasks
+  view_tasks: { 'en-US': 'View tasks', 'zh-CN': '查看任务' },
+  set_up_tasks: { 'en-US': 'Set up tasks', 'zh-CN': '设置任务' },
+  sync_tasks_in_queue: { 'en-US': 'Sync tasks in queue', 'zh-CN': '同步任务队列' },
+  commit_and_sync: { 'en-US': 'Commit and sync', 'zh-CN': '提交并同步' },
   no_description: { 'en-US': 'No description', 'zh-CN': '无描述' },
   changed_description_from: { 'en-US': 'Changed description from', 'zh-CN': '将描述从' },
   changed_description_to: { 'en-US': 'to', 'zh-CN': '改为 ' },

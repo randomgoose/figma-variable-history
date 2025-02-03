@@ -1,3 +1,4 @@
+import { isUndefined } from 'lodash-es';
 import { ICommit } from '../types';
 import {
   convertFigmaRGBtoHexString,
@@ -24,7 +25,7 @@ export async function convertVariablesToCss(
         const variableCSSStatements = (
           await Promise.all(
             variables.map(async ({ name, valuesByMode }) => {
-              if (!valuesByMode[modeId]) return '';
+              if (isUndefined(valuesByMode[modeId])) return '';
 
               const value = valuesByMode[modeId];
               let cssValue = '';

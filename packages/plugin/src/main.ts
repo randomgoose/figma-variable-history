@@ -50,7 +50,7 @@ export default async function () {
 
   consumer.remove();
 
-  figma.showUI(__html__, { width: 720, height: 480, themeColors: true });
+  figma.showUI(__html__, { width: 720, height: 520, themeColors: true });
   // // figma.showUI(__html__, { width: 1440, height: 960, themeColors: true });
 
   figma.ui.postMessage({

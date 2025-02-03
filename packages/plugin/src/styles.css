@@ -40,7 +40,7 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply flex justify-center items-center px-[8px] py-2 max-h-6 rounded-md bg-[color:var(--figma-color-bg-brand)] text-white font-medium;
+    @apply text-nowrap flex-nowrap flex justify-center items-center px-[8px] py-2 max-h-6 rounded-md bg-[color:var(--figma-color-bg-brand)] text-white font-medium;
   }
 
   .btn-primary:disabled {

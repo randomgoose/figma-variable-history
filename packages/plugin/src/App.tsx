@@ -54,11 +54,7 @@ function Plugin() {
     >
       <List className="tabs-list border-b border-[var(--figma-color-border)] shrink-0 h-10 flex">
         {tabs.map(({ value }) => (
-          <Trigger
-            className="h-10 cursor-default text-[color:var(--figma-color-text-secondary)] data-[state=active]:font-semibold data-[state=active]:text-[color:var(--figma-color-text)] px-2 capitalize"
-            key={value}
-            value={value}
-          >
+          <Trigger className="tabs-trigger" key={value} value={value}>
             {t(value)}
           </Trigger>
         ))}
