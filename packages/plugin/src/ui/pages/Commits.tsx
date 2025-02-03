@@ -5,6 +5,7 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 import { GalleryHorizontalEnd, HistoryIcon, Search, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import * as Select from '@radix-ui/react-select';
 
 // reduce bundle size
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -22,21 +23,26 @@ import clsx from 'clsx';
 import { copyText } from '../../utils/text';
 import { AppContext } from '../../AppContext';
 import { Profile } from '../components/Profile';
-import { sendMessage } from '../../utils/message';
+import { MESSAGE_TYPE, sendMessage } from '../../utils/message';
 import { NoCommitPlaceholder } from '../components/NoCommitPlaceholder';
+import { IconChevronDown } from '@tabler/icons-react';
+import { useTranslation } from '../../hooks/useTranslation';
 
-export function Commits({ commits }: { commits: ICommit[] }) {
+export function Commits() {
+  const {
+    commits,
+    groupedChanges: currentGroupedChanges,
+    selectedCommitId,
+    setSelectedCommitId,
+    setting,
+  } = useContext(AppContext);
   const ref = useRef<HTMLAnchorElement>(null);
   const [selectedVariableId, setSelectedVariableId] = useState('');
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportModalContent, setExportModalContent] = useState('');
   const [searching, setSearching] = useState(false);
   const [keyword, setKeyword] = useState('');
-  const {
-    groupedChanges: currentGroupedChanges,
-    selectedCommitId,
-    setSelectedCommitId,
-  } = useContext(AppContext);
+  const { t } = useTranslation();
 
   const numOfChanges = Object.values(currentGroupedChanges).reduce(
     (acc, { added, modified, removed }) => acc + added.length + modified.length + removed.length,
@@ -54,7 +60,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
 
   useEffect(() => {
     addEventListener('message', (e) => {
-      if (e.data.pluginMessage.type === 'CONVERT_VARIABLES_TO_CSS_DONE') {
+      if (e.data.pluginMessage.type === MESSAGE_TYPE.CONVERT_VARIABLES_TO_CSS_DONE) {
         setExportModalContent(e.data.pluginMessage.payload);
       }
     });
@@ -67,9 +73,15 @@ export function Commits({ commits }: { commits: ICommit[] }) {
   const resetCommit = useCallback((commit: ICommit) => {
     sendMessage('RESET_COMMIT', commit.id);
   }, []);
+
   const convertCommitVariablesToCss = useCallback((commit: ICommit) => {
     sendMessage('CONVERT_VARIABLES_TO_CSS', commit.id);
   }, []);
+
+  useEffect(() => {
+    setExportModalContent('');
+    selectedCommit && convertCommitVariablesToCss(selectedCommit);
+  }, [selectedCommit, setting?.colorFormat]);
 
   const decodedContent = decodeURIComponent(exportModalContent);
 
@@ -144,7 +156,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                     className="h-7 pl-1 grow"
-                    placeholder="Search variables in commits"
+                    placeholder={t('search_variables_in_commits')}
                   />
                   <button
                     className="btn-ghost w-6 h-6 rounded-full"
@@ -238,7 +250,10 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                                 className="mt-2"
                                 style={{ color: 'var(--figma-color-text-secondary)' }}
                               >
-                                {parseDate(commit.date)}
+                                {parseDate(commit.date, {
+                                  language: setting?.language,
+                                  relative: true,
+                                })}
                               </div>
                             </div>
                           )
@@ -256,18 +271,22 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                         size={16}
                         className="text-[color:var(--figma-color-text-tertiary)] shrink-0"
                       />
-                      History
+                      {t('history')}
                     </h3>
 
                     <Tooltip.Root>
                       <Tooltip.Trigger asChild>
-                        <button className="btn-ghost w-7 h-7 ml-auto" onClick={generateChangelog}>
+                        <button
+                          className="btn-ghost w-7 h-7 ml-auto hover:bg-none opacity-30 cursor-not-allowed"
+                          onClick={generateChangelog}
+                          disabled
+                        >
                           <GalleryHorizontalEnd size={12} />
                         </button>
                       </Tooltip.Trigger>
                       <Tooltip.Portal>
                         <Tooltip.Content side="bottom" className="tooltip-content">
-                          Generate changelog
+                          {t('generate_changelog_not_available')}
                         </Tooltip.Content>
                       </Tooltip.Portal>
                     </Tooltip.Root>
@@ -285,7 +304,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                       </Tooltip.Trigger>
                       <Tooltip.Portal>
                         <Tooltip.Content side="bottom" className="tooltip-content">
-                          Search
+                          {t('search')}
                         </Tooltip.Content>
                       </Tooltip.Portal>
                     </Tooltip.Root>
@@ -321,7 +340,10 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                               className="mt-2 w-fit whitespace-nowrap"
                               style={{ color: 'var(--figma-color-text-secondary)' }}
                             >
-                              {parseDate(commit.date)}
+                              {parseDate(commit.date, {
+                                language: setting?.language,
+                                relative: true,
+                              })}
                             </div>
                           </div>
                         </div>
@@ -351,41 +373,50 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                       />
                       {selectedCommit?.collaborators[0]?.name}
                     </div>
-                    <div
-                      className="pl-5 mt-1 line-clamp-2 max-w-96"
-                      style={{ color: 'var(--figma-color-text-secondary)' }}
-                    >
-                      {selectedCommit?.description || 'No description'}
-                    </div>
+                    <Tooltip.Root>
+                      <Tooltip.Trigger asChild>
+                        <div
+                          className="pl-5 mt-1 line-clamp-2 max-w-96"
+                          style={{ color: 'var(--figma-color-text-secondary)' }}
+                        >
+                          {selectedCommit?.description || t('no_description')}
+                        </div>
+                      </Tooltip.Trigger>
+                      <Tooltip.Portal>
+                        <Tooltip.Content side="bottom" className="tooltip-content">
+                          {selectedCommit?.description || t('no_description')}
+                        </Tooltip.Content>
+                      </Tooltip.Portal>
+                    </Tooltip.Root>
                   </div>
                 </div>
 
                 <Dialog.Root>
                   <Dialog.Trigger asChild>
                     <button disabled={numOfChanges > 0} className="btn-outline ml-auto">
-                      Restore
+                      {t('restore')}
                     </button>
                   </Dialog.Trigger>
                   <Dialog.Portal>
                     <Dialog.Overlay className="dialog-overlay" />
                     <Dialog.Content className="dialog-content h-fit">
                       <Dialog.Title className="dialog-title">
-                        Restore to {selectedCommit.summary}
+                        {t('restore_to')} {selectedCommit.summary}
                       </Dialog.Title>
                       <div className="p-4">
-                        <p>Are you sure you want to restore to this commit?</p>
+                        <p>{t('restore_confirmation')}</p>
                       </div>
 
                       <div className="flex gap-2 justify-end p-[10px]">
                         <Dialog.Close autoFocus asChild>
-                          <button className="btn-outline">Cancel</button>
+                          <button className="btn-outline">{t('cancel')}</button>
                         </Dialog.Close>
                         <Dialog.Close asChild>
                           <button
                             className="btn-primary"
                             onClick={() => resetCommit(selectedCommit)}
                           >
-                            Confirm
+                            {t('confirm')}
                           </button>
                         </Dialog.Close>
                       </div>
@@ -399,7 +430,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                   }}
                   className="btn-primary ml-2"
                 >
-                  Export
+                  {t('export')}
                 </button>
               </div>
               <div className="grow flex overflow-hidden">
@@ -462,7 +493,7 @@ export function Commits({ commits }: { commits: ICommit[] }) {
             <Dialog.Portal>
               <Dialog.Overlay className="dialog-overlay" />
               <Dialog.Content className="dialog-content">
-                <Dialog.Title className="dialog-title">Export Variables</Dialog.Title>
+                <Dialog.Title className="dialog-title">{t('export_variables')}</Dialog.Title>
                 <Dialog.Close asChild>
                   <button className="w-8 h-8 absolute top-1 right-1 rounded-sm hover:bg-[color:var(--figma-color-bg-secondary)] text-[color:var(--figma-color-icon-secondary)] flex items-center justify-center">
                     <X size={16} />
@@ -472,12 +503,43 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                   className="p-3 flex flex-col gap-3 overflow-auto"
                   style={{ height: 'calc(100% - 40px)' }}
                 >
+                  <div className="flex items-center gap-2">
+                    {t('color_format')}:
+                    <Select.Root
+                      value={setting?.colorFormat || 'RGB'}
+                      onValueChange={(value) => {
+                        sendMessage('SET_PLUGIN_SETTING', { colorFormat: value });
+                      }}
+                    >
+                      <Select.Trigger className="w-fit flex items-center">
+                        <Select.Value placeholder="Select color format" />
+                        <Select.Icon>
+                          <IconChevronDown size={12} />
+                        </Select.Icon>
+                      </Select.Trigger>
+                      <Select.Portal>
+                        <Select.Content className="dropdown-content">
+                          <Select.Viewport>
+                            <Select.Item className="dropdown-item" value="RGB">
+                              <Select.ItemText>RGB</Select.ItemText>
+                            </Select.Item>
+                            <Select.Item className="dropdown-item" value="HEX">
+                              <Select.ItemText>HEX</Select.ItemText>
+                            </Select.Item>
+                            <Select.Item className="dropdown-item" value="HSL">
+                              <Select.ItemText>HSL</Select.ItemText>
+                            </Select.Item>
+                          </Select.Viewport>
+                        </Select.Content>
+                      </Select.Portal>
+                    </Select.Root>
+                  </div>
                   <SyntaxHighlighter
                     style={docco}
                     customStyle={{ height: '100%', margin: 0, overflow: 'auto' }}
                     language="CSS"
                   >
-                    {decodedContent}
+                    {decodedContent || 'Resolving variables...'}
                   </SyntaxHighlighter>
                   {/* {decodeURIComponent(exportModalContent)} */}
                   <div className="flex items-center gap-2 w-full">
@@ -487,10 +549,10 @@ export function Commits({ commits }: { commits: ICommit[] }) {
                         copyText(decodedContent);
                       }}
                     >
-                      Copy
+                      {t('copy')}
                     </button>
                     <button className="btn-primary grow" onClick={onExport}>
-                      Export
+                      {t('export')}
                     </button>
                   </div>
                 </div>
@@ -499,7 +561,10 @@ export function Commits({ commits }: { commits: ICommit[] }) {
           </Dialog.Root>
         </>
       ) : (
-        <NoCommitPlaceholder />
+        <NoCommitPlaceholder
+          title={t('no_commit_yet')}
+          description={t('no_commit_yet_description')}
+        />
       )}
     </div>
   );

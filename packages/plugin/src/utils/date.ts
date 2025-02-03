@@ -1,6 +1,11 @@
+import { translations } from '../translation';
+
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export function parseDate(timestamp: number, option: { relative?: boolean } = { relative: true }) {
+export function parseDate(
+  timestamp: number,
+  option: { relative?: boolean; language?: string } = { relative: true, language: 'en-US' }
+) {
   const d = Date.now() - timestamp;
   const minute = 1000 * 60;
   const hour = minute * 60;
@@ -9,11 +14,13 @@ export function parseDate(timestamp: number, option: { relative?: boolean } = { 
 
   if (option.relative) {
     if (d < minute) {
-      return 'Just now';
+      return translations['just_now'][option?.language || 'en-US'];
     } else if (d < hour) {
-      return `${Math.floor(d / minute)} minutes ago`;
+      return `${Math.floor(d / minute)} ${
+        translations['minutes_ago'][option?.language || 'en-US']
+      }`;
     } else if (d < day) {
-      return `${Math.floor(d / hour)} hours ago`;
+      return `${Math.floor(d / hour)} ${translations['hours_ago'][option?.language || 'en-US']}`;
     } else {
       return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()} ${date
         .getHours()

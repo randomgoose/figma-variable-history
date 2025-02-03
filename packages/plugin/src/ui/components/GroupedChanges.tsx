@@ -4,7 +4,8 @@ import { AppContext } from '../../AppContext';
 import { VariableItem } from './VariableItem';
 import { ChevronRight } from 'lucide-react';
 import { VariableChangeType } from '../../types';
-// import { VariableChangeType } from '../../types';
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { IconCheck, IconMinus } from '@tabler/icons-react';
 
 export function GroupedChanges({
   groupedChanges,
@@ -12,6 +13,7 @@ export function GroupedChanges({
   selected,
   disableInteraction = false,
   keyword = '',
+  checkbox = false,
 }: {
   groupedChanges: {
     [key: string]: { added: Variable[]; modified: Variable[]; removed: Variable[] };
@@ -20,9 +22,11 @@ export function GroupedChanges({
   selected?: string;
   disableInteraction?: boolean;
   keyword?: string;
+  checkbox?: boolean;
 }) {
   const [collectionList, setCollectionList] = useState<VariableCollection['id'][]>([]);
-  const { collections, getCollectionName } = useContext(AppContext);
+  const { collections, getCollectionName, checkedVariableIds, setCheckedVariableIds } =
+    useContext(AppContext);
 
   const toggleCollectionList = (id: string) => {
     if (collectionList.includes(id)) {
@@ -42,6 +46,7 @@ export function GroupedChanges({
     <Root type="multiple" value={collectionList}>
       {Object.entries(groupedChanges).map(([collectionId, { added, modified, removed }]) => {
         const hasChanges = added.length + modified.length + removed.length > 0;
+        const allChanges = [...added, ...modified, ...removed];
 
         return hasChanges ? (
           <Item
@@ -57,9 +62,40 @@ export function GroupedChanges({
                 className={'w-full p-2 pr-3 flex items-center font-semibold gap-2 group'}
                 onClick={() => toggleCollectionList(collectionId)}
               >
-                <div className="shrink-0 group-data-[state=open]:rotate-90 transition-all">
-                  <ChevronRight size={11} />
-                </div>
+                {checkbox ? (
+                  <Checkbox.Root
+                    className="checkbox-root"
+                    checked={
+                      allChanges.every((v) => checkedVariableIds?.includes(v.id))
+                        ? true
+                        : allChanges.some((v) => !checkedVariableIds?.includes(v.id))
+                        ? 'indeterminate'
+                        : false
+                    }
+                    onCheckedChange={(checked) => {
+                      if (checked === 'indeterminate') {
+                        setCheckedVariableIds((prev) =>
+                          allChanges.filter((v) => prev?.includes(v.id)).map((v) => v.id)
+                        );
+                      } else if (checked) {
+                        setCheckedVariableIds((prev) => [...prev, ...allChanges.map((v) => v.id)]);
+                      } else {
+                        setCheckedVariableIds((prev) =>
+                          prev.filter((v) => !allChanges.map((v) => v.id).includes(v))
+                        );
+                      }
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Checkbox.Indicator className="checkbox-indicator">
+                      {allChanges.every((v) => checkedVariableIds?.includes(v.id)) ? (
+                        <IconCheck size={10} />
+                      ) : allChanges.some((v) => checkedVariableIds?.includes(v.id)) ? (
+                        <IconMinus size={10} />
+                      ) : null}
+                    </Checkbox.Indicator>
+                  </Checkbox.Root>
+                ) : null}
                 <div className="overflow-hidden text-ellipsis whitespace-nowrap">
                   {getCollectionName(collectionId) || collectionId}
                 </div>
@@ -72,6 +108,10 @@ export function GroupedChanges({
                   }}
                 >
                   {added.length + modified.length + removed.length}
+                </div>
+
+                <div className="shrink-0 group-data-[state=open]:rotate-90 transition-all">
+                  <ChevronRight size={11} />
                 </div>
               </Trigger>
             </Header>
@@ -93,6 +133,13 @@ export function GroupedChanges({
                       selected={v.id === selected}
                       onClick={(id) => onClickVariableItem(id)}
                       allowDiscard={!disableInteraction}
+                      checkbox={checkbox}
+                      checked={checkedVariableIds?.includes(v.id)}
+                      onCheck={(checked) =>
+                        checked
+                          ? setCheckedVariableIds((prev) => [...prev, v.id])
+                          : setCheckedVariableIds((prev) => prev.filter((c) => c !== v.id))
+                      }
                     />
                   ))}
                 {/* </AnimatePresence> */}

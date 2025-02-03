@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Close } from '@radix-ui/react-dialog';
 import { SyncTaskType } from '../../../types';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface GitSttingsProps {
   defaultData?: { repository: string; owner: string; token: string; filePath: string };
@@ -37,13 +38,14 @@ const defaultDataMap = {
 
 export function SyncForm({ onSubmit, defaultData, type }: GitSttingsProps) {
   const [data, setData] = useState(defaultData || defaultDataMap[type]);
+  const { t } = useTranslation();
 
   const placeholder: Record<string, string> = {
-    token: type === 'github' ? 'GitHub User Token' : 'Slack Bot Token or User Token',
-    repository: 'Repository Name',
-    owner: 'Repository Owner Username',
-    filePath: 'CSS Variable File Path',
-    address: 'Address',
+    token: type === 'github' ? t('github_user_token') : t('slack_bot_token_or_user_token'),
+    repository: t('repository_name'),
+    owner: t('repository_owner_username'),
+    filePath: t('css_variable_file_path'),
+    address: t('address'),
   };
 
   const hasEmptyValues = Object.values(data).some((value) => !value);
@@ -59,7 +61,7 @@ export function SyncForm({ onSubmit, defaultData, type }: GitSttingsProps) {
                 className="capitalize mb-1"
                 style={{ color: 'var(--figma-color-text-secondary)' }}
               >
-                {key}
+                {t(key)}
               </div>
               <input
                 className="input w-full"
@@ -85,7 +87,7 @@ export function SyncForm({ onSubmit, defaultData, type }: GitSttingsProps) {
             onSubmit(data);
           }}
         >
-          Confirm
+          {t('confirm')}
         </button>
       </Close>
     </div>

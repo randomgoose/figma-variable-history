@@ -281,7 +281,11 @@ export class CommitBridge {
     } else if (type === 'modified') {
       const v = lastCommit.variables.find((v) => v.id === variable.id);
       if (v)
-        figmaHelper.updateVariable({ data: v, variableId: variable.id, commitId: lastCommit.id });
+        await figmaHelper.updateVariable({
+          data: v,
+          variableId: variable.id,
+          commitId: lastCommit.id,
+        });
     } else {
       const idChangeMap: Record<string, string> = {};
       const newVariable = await figmaHelper.updateVariable({

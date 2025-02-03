@@ -2,7 +2,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '../../AppContext';
 import { groupBy } from 'lodash-es';
 import { Content, Header, Item, Root, Trigger } from '@radix-ui/react-accordion';
-import { ChevronRight, CornerDownLeft, History } from 'lucide-react';
+import { ChevronRight, CornerDownLeft } from 'lucide-react';
 import {
   Background,
   BackgroundVariant,
@@ -15,25 +15,27 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { VariableItem } from '../components/VariableItem';
-import clsx from 'clsx';
+// import clsx from 'clsx';
 import { VariableNode } from '../components/nodes/VariableNode';
 import { Search } from '../components/Search';
 import { VariableTimeline } from '../components/VariableTimeline';
 import { VariableIcon } from '../components/VariableIcon';
 import { NoCommitPlaceholder } from '../components/NoCommitPlaceholder';
+import { useTranslation } from '../../hooks/useTranslation';
 
-const viewOptions = [
-  { id: 'timeline', icon: <History size={12} /> },
-  { id: 'node-graph', icon: <CornerDownLeft size={12} /> },
-];
+// const viewOptions = [
+//   { id: 'timeline', icon: <History size={12} /> },
+//   { id: 'node-graph', icon: <CornerDownLeft size={12} /> },
+// ];
 
 export function Variables() {
   const { variables, collections, getCollectionName, commits } = useContext(AppContext);
-  const [view, setView] = useState<'timeline' | 'node-graph'>('timeline');
+  const [view] = useState<'timeline' | 'node-graph'>('timeline');
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedVariable, setSelectedVariable] = useState<Variable | null>(variables[0]);
   const [keyword, setKeyword] = useState<string>('');
+  const { t } = useTranslation();
 
   const modeMap = useMemo(() => {
     return Object.fromEntries(
@@ -56,6 +58,7 @@ export function Variables() {
   const handleClick = (variable: Variable) => {
     setSelectedVariable(variable);
   };
+
   const collection = useMemo(
     () => collections.find((c) => c.id === selectedVariable?.variableCollectionId),
     [selectedVariable, collections]
@@ -73,7 +76,9 @@ export function Variables() {
         {selectedVariable?.name}
       </div>
 
-      <div
+      {/* Taken down for now, will be added back in the canvas editor */}
+
+      {/* <div
         className="w-fit flex rounded-md p-0.5"
         style={{ background: 'var(--figma-color-bg-secondary)' }}
       >
@@ -95,7 +100,7 @@ export function Variables() {
             {option.icon}
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 
@@ -175,7 +180,7 @@ export function Variables() {
   }, [selectedVariable, variables]);
 
   return (
-    <div style={{ height: 'calc(100% - 40px)' }} className="w-full h-full flex">
+    <div style={{ height: 'calc(100vh - 40px)' }} className="w-full h-full flex">
       {commits.length > 0 ? (
         <>
           <div
@@ -285,7 +290,7 @@ export function Variables() {
           </div>
         </>
       ) : (
-        <NoCommitPlaceholder description="Make your first commit to view variable timeline here." />
+        <NoCommitPlaceholder title={t('no_commit_yet')} description={t('make_your_first_commit')} />
       )}
     </div>
   );

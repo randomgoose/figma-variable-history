@@ -4,7 +4,8 @@ export type SyncToSlackChannelStage =
   | 'get_upload_url'
   | 'upload_file'
   | 'finish_upload'
-  | 'success';
+  | 'success'
+  | 'error';
 
 export async function syncToSlackChannel({
   filename,
@@ -19,7 +20,7 @@ export async function syncToSlackChannel({
   token: string;
   content: string;
   commit: ICommit;
-  onStageChange: (stage: SyncToSlackChannelStage) => void;
+  onStageChange: (type: SyncToSlackChannelStage, message?: string) => void;
 }) {
   const blob = new Blob([content], { type: 'text/css' });
   const file = new File([blob], filename, { type: 'text/css' });
@@ -37,13 +38,16 @@ export async function syncToSlackChannel({
         redirect: 'follow',
         body: formData,
       });
-      const { ok, upload_url, file_id } = await response.json();
+      const data = await response.json();
 
-      if (ok) {
+      if (data.ok) {
         return {
-          upload_url,
-          file_id,
+          upload_url: data.upload_url,
+          file_id: data.file_id,
         };
+      } else {
+        onStageChange('error', data.error);
+        console.error(data);
       }
     } catch (error) {
       console.error(error);
@@ -64,25 +68,6 @@ export async function syncToSlackChannel({
     });
     return res.status;
   };
-
-  // const sendMessage = async () => {
-  //     const baseUrl = `https://slack.com/api/chat.postMessage`
-
-  //     const formData = new FormData()
-  //     formData.append('token', token)
-  //     formData.append('channel', channelId)
-  //     formData.append('text', 'Hello world')
-
-  //     try {
-  //         const response = await fetch(baseUrl, {
-  //             method: 'POST',
-  //             redirect: "follow",
-  //             body: formData
-  //         })
-  //     } catch (error) {
-  //         console.error(error)
-  //     }
-  // }
 
   const completeUploadExternal = async (file_id: string) => {
     const formData = new FormData();

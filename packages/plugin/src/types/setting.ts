@@ -19,22 +19,24 @@ export type CustomHTTPSyncConfig = {
 export type SyncTaskType = 'github' | 'slack' | 'custom';
 export type SyncConfig = GitHubSyncConfig | SlackSyncConfig | CustomHTTPSyncConfig;
 export interface PluginSetting {
-  git?: {
-    enabled?: boolean;
-    repository?: string;
-    owner?: string;
-    filePath?: string;
-    token?: string;
-  };
-  slack?: {
-    enabled?: boolean;
-    channelId?: string;
-    filename?: string;
-    token?: string;
-  };
+  // git?: {
+  //   enabled?: boolean;
+  //   repository?: string;
+  //   owner?: string;
+  //   filePath?: string;
+  //   token?: string;
+  // };
+  // slack?: {
+  //   enabled?: boolean;
+  //   channelId?: string;
+  //   filename?: string;
+  //   token?: string;
+  // };
   syncTasks: {
     type: SyncTaskType;
     config: SyncConfig;
     enabled: boolean;
   }[];
+  colorFormat?: 'RGB' | 'HEX' | 'HSL';
+  language?: 'en-US' | 'zh-CN';
 }

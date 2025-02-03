@@ -10,7 +10,7 @@ export function VariablePill(props: VariablePillProps) {
   const { type, value } = props;
 
   const styles = {
-    backgroundColor: 'var(--figma-color-bg-secondary)',
+    backgroundColor: 'var(--figma-color-bg)',
     color: 'var(--figma-color-text-primary)',
     border: '1px solid var(--figma-color-border)',
   };
@@ -21,7 +21,7 @@ export function VariablePill(props: VariablePillProps) {
         return (
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17">
             <path
-              fill="#000"
+              fill="var(--figma-color-text)"
               fillOpacity=".5"
               fillRule="evenodd"
               stroke="none"
@@ -33,7 +33,7 @@ export function VariablePill(props: VariablePillProps) {
         return (
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17">
             <path
-              fill="#000"
+              fill="var(--figma-color-text)"
               fillOpacity=".5"
               fillRule="evenodd"
               stroke="none"
@@ -52,7 +52,7 @@ export function VariablePill(props: VariablePillProps) {
 
   return (
     <div
-      className="w-fit max-w-full overflow-hidden whitespace-nowrap text-ellipsis h-5 border rounded-[4px] items-center pl-[3px] pr-[5px] gap-[3px]"
+      className="w-fit max-w-full overflow-hidden whitespace-nowrap text-ellipsis h-5 border rounded-[4px] flex items-center pl-[3px] pr-[5px] gap-[3px]"
       style={{ ...styles }}
     >
       <span className="[&>*]:inline-block">{renderIcon()}</span>

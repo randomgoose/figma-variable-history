@@ -1,12 +1,16 @@
-import { convertRgbColorToHexColor } from '@create-figma-plugin/utilities';
-import { convertFigmaRGBtoString, formatPercentage } from '../../utils/color';
+import {
+  convertFigmaRGBtoHSLString,
+  convertFigmaRGBtoString,
+  convertRgbColorToHexColor,
+  formatPercentage,
+} from '../../utils/color';
 import { useContext, useEffect } from 'react';
 import { AppContext } from '../../AppContext';
 import { VariablePill } from './VariablePill';
 import clsx from 'clsx';
-import { sendMessage } from '../../utils/message';
 import { parsedValue } from '../styles.module.css';
 import { CopyTextWrapper } from './CopyWrapper';
+import { sendMessage } from '../../utils/message';
 
 export function ParsedValue({
   variable,
@@ -16,7 +20,7 @@ export function ParsedValue({
   variable: Variable;
   modeId: string;
   option?: {
-    format?: 'RGB' | 'HEX';
+    format?: 'RGB' | 'HEX' | 'HSL';
     showLabel?: boolean;
     allowCopy?: boolean;
   };
@@ -27,8 +31,13 @@ export function ParsedValue({
   // Resolve the value if it's an alias
   useEffect(() => {
     if (typeof value === 'object' && 'type' in value) {
-      sendMessage('RESOLVE_VARIABLE_VALUE', { id: value.id, modeId });
-      sendMessage('GET_VARIABLE_BY_ID', value.id);
+      if (!resolvedVariableValues[value.id]) {
+        sendMessage('RESOLVE_VARIABLE_VALUE', { id: value.id, modeId });
+      }
+
+      if (!variableAliases[value.id]) {
+        sendMessage('GET_VARIABLE_BY_ID', value.id);
+      }
     }
   }, [value, variable]);
 
@@ -76,12 +85,17 @@ export function ParsedValue({
   if (value && typeof value === 'object') {
     const isAlias = 'id' in value;
     const alias = isAlias ? variableAliases[value.id] : '';
-    const resolvedValue = isAlias
-      ? resolvedVariableValues[value.id]?.valuesByMode[modeId]?.value ||
+    let resolvedValue;
+
+    if (isAlias) {
+      resolvedValue =
+        resolvedVariableValues[value.id]?.valuesByMode[modeId]?.value ||
         resolvedVariableValues[value.id]?.valuesByMode?.[
           Object.keys(resolvedVariableValues?.[value.id]?.valuesByMode)?.[0]
-        ]?.value
-      : value;
+        ]?.value;
+    } else {
+      resolvedValue = value;
+    }
 
     switch (variable.resolvedType) {
       case 'BOOLEAN':
@@ -102,14 +116,26 @@ export function ParsedValue({
         );
       case 'COLOR':
         if (typeof resolvedValue === 'object' && 'r' in resolvedValue) {
-          const parsedValue =
-            option?.format === 'RGB'
-              ? convertFigmaRGBtoString(resolvedValue)
-              : 'a' in resolvedValue
-              ? `#${convertRgbColorToHexColor(resolvedValue)} ${
-                  resolvedValue.a === 1 ? '' : parseFloat(formatPercentage(resolvedValue.a)) + '%'
-                }`
-              : `#${convertRgbColorToHexColor(resolvedValue)}`;
+          let parsedValue = '';
+
+          switch (option?.format) {
+            case 'RGB':
+              parsedValue = convertFigmaRGBtoString(resolvedValue);
+              break;
+            case 'HEX':
+              parsedValue =
+                'a' in resolvedValue
+                  ? `#${convertRgbColorToHexColor(resolvedValue)} ${
+                      resolvedValue.a === 1
+                        ? ''
+                        : parseFloat(formatPercentage(resolvedValue.a)) + '%'
+                    }`
+                  : `#${convertRgbColorToHexColor(resolvedValue)}`;
+              break;
+            case 'HSL':
+              parsedValue = convertFigmaRGBtoHSLString(resolvedValue);
+              break;
+          }
 
           return (
             <CopyTextWrapper text={isAlias ? alias : parsedValue}>

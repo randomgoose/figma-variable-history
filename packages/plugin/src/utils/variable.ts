@@ -239,3 +239,5 @@ export function isAlias(value: VariableValue) {
     return false;
   }
 }
+
+// export function getVariable

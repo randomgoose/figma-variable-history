@@ -9,7 +9,7 @@ export async function sendCustomRequest({
   url: string;
   commit: ICommit;
   content: string;
-  onStageChange: (stage: string) => void;
+  onStageChange: (type: string, message?: string) => void;
 }) {
   // const headers = new Headers()
   // headers.append('')

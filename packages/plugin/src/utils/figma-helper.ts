@@ -1,4 +1,3 @@
-import { cloneObject } from '@create-figma-plugin/utilities';
 import {
   DISABLE_VARIABLE_NAME_PREFIX,
   PLUGIN_DATA_KEY_COMMITS,
@@ -8,6 +7,7 @@ import {
 import { isSameVariable } from './variable';
 import { ICommit } from '../types';
 import { commitBridge } from '../features/CommitBridge';
+import { cloneObject } from './object';
 
 export const figmaHelper = {
   clearPluginData() {
@@ -141,6 +141,7 @@ export const figmaHelper = {
   }) {
     let variable = (await this.getVariableByIdAsync(variableId, { clone: false })) as Variable;
     const commit = commitBridge.getCommitById(commitId);
+    const codeSyntaxPlatforms: CodeSyntaxPlatform[] = ['WEB', 'ANDROID', 'iOS'];
 
     if (!variable && createIfNotExists) {
       const collection = await figmaHelper.getVariableCollection(data.variableCollectionId);
@@ -172,9 +173,15 @@ export const figmaHelper = {
         }
       });
 
-      Object.entries(data.codeSyntax).forEach(([platform, syntax]) =>
-        variable.setVariableCodeSyntax(platform as CodeSyntaxPlatform, syntax)
-      );
+      codeSyntaxPlatforms.forEach((platform) => {
+        if (data.codeSyntax[platform]) {
+          variable.setVariableCodeSyntax(platform, data.codeSyntax[platform]);
+        } else {
+          if (variable.codeSyntax[platform]) {
+            variable.removeVariableCodeSyntax(platform);
+          }
+        }
+      });
     }
 
     return variable;
@@ -194,30 +201,112 @@ export const figmaHelper = {
     }
   },
 
-  async resolveVariableAlias(id: Variable['id'], modeId: string) {
-    const v = await this.getVariableByIdAsync(id, { clone: false });
-    const c = v
-      ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
-          ({ id }) => id === v.variableCollectionId
-        )
-      : null;
+  async resolveVariableAlias(id: Variable['id'], modeId: string, consumer: FrameNode) {
+    if (id.includes('/')) {
+      const key = id.split('/')?.[0].split(':')?.[1];
+      const v = await figma.variables.importVariableByKeyAsync(key);
+      const c = v && (await figma.variables.getVariableCollectionByIdAsync(v.variableCollectionId));
 
-    if (v && c) {
-      const _modeId = c.modes.find((mode) => mode.modeId === modeId)?.modeId || c.defaultModeId;
-      if (_modeId) {
-        try {
-          const consumer = figma.createFrame();
-          consumer.setExplicitVariableModeForCollection(c, _modeId);
-          const resolvedVariableValue = v.resolveForConsumer(consumer);
-          consumer.name = _modeId;
-          consumer.remove();
-          return resolvedVariableValue;
-        } catch (err) {
-          console.error(`Failed to resolve variable alias\n`, err);
+      if (v && c) {
+        const _modeId = c.modes.find((mode) => mode.modeId === modeId)?.modeId || c.defaultModeId;
+        if (_modeId) {
+          try {
+            consumer.setExplicitVariableModeForCollection(c, _modeId);
+            const resolvedVariableValue = v.resolveForConsumer(consumer);
+            consumer.name = _modeId;
+            return resolvedVariableValue;
+          } catch (err) {
+            console.error(`Failed to resolve variable alias\n`, err);
+          }
+        }
+      }
+    } else {
+      const v = await this.getVariableByIdAsync(id, { clone: false });
+      const c = v
+        ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
+            ({ id }) => id === v.variableCollectionId
+          )
+        : null;
+
+      if (v && c) {
+        const _modeId = c.modes.find((mode) => mode.modeId === modeId)?.modeId || c.defaultModeId;
+        if (_modeId) {
+          try {
+            consumer.setExplicitVariableModeForCollection(c, _modeId);
+            const resolvedVariableValue = v.resolveForConsumer(consumer);
+            consumer.name = _modeId;
+            return resolvedVariableValue;
+          } catch (err) {
+            console.error(`Failed to resolve variable alias\n`, err);
+          }
         }
       }
     }
 
     return null;
+  },
+
+  // Added Jan 19, 2025
+  // This function is used to update the variable value in Figma,
+  // Different from `updateVariable`, this function simply update the current variable,
+  // and will not trigger the commit bridge to update the plugin data
+  async setVariable(variableId: string, data: Partial<Variable>) {
+    const variable = await figma.variables.getVariableByIdAsync(variableId);
+
+    if (!variable) return;
+
+    if (data.name) variable.name = data.name;
+    if (data.description) variable.description = data.description;
+    if (data.hiddenFromPublishing) variable.hiddenFromPublishing = data.hiddenFromPublishing;
+    if (data.scopes) variable.scopes = data.scopes;
+    if (data.codeSyntax) {
+      Object.entries(data.codeSyntax).forEach(([platform, syntax]) =>
+        variable.setVariableCodeSyntax(platform as CodeSyntaxPlatform, syntax)
+      );
+    }
+
+    if (data.valuesByMode) {
+      Object.entries(data.valuesByMode).forEach(([modeId, value]) =>
+        variable.setValueForMode(modeId, value)
+      );
+    }
+  },
+  async autoCompleteCodeSyntax() {
+    const variables = await figma.variables.getLocalVariablesAsync();
+    variables.forEach((variable) => {
+      // TODO: Finish iOS and Android syntax completion
+      const WEB_CODE_SYNTAX = `var(--${variable.name
+        .replace(/[/_\\]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')});`;
+      variable.setVariableCodeSyntax('WEB', WEB_CODE_SYNTAX);
+    });
+  },
+
+  async updateVariableGroup({
+    collectionId,
+    source,
+    target,
+    slice,
+  }: {
+    collectionId: string;
+    source: string;
+    target: string;
+    slice: number;
+  }) {
+    try {
+      const variables = (await figma.variables.getLocalVariablesAsync()).filter(
+        (v) => v.variableCollectionId === collectionId
+      );
+
+      variables.forEach((v) => {
+        if (v.name.split('/')[slice] === source) {
+          const newName = v.name.replace(source, target);
+          v.name = newName;
+        }
+      });
+    } catch (err) {
+      console.error(`Failed to update variable group\n`, err);
+    }
   },
 };

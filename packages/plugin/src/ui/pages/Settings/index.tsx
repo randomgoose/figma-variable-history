@@ -1,45 +1,59 @@
 import { useState } from 'react';
 import { Synchronization } from './Synchronization';
-import { IconRefresh } from '@tabler/icons-react';
+import { IconRefresh, IconSettings, IconSettings2 } from '@tabler/icons-react';
 import clsx from 'clsx';
-
-const settingConfig = [
-  {
-    label: 'Synchronization',
-    component: <Synchronization />,
-    icon: <IconRefresh size={14} className="mr-2" />,
-  },
-  // {
-  //   label: 'Language',
-  //   component: <div>hi</div>,
-  //   icon: <IconWorld size={14} className='mr-2' />
-  // }
-];
+import { VariablesSettings } from './VariableSettings';
+import { GeneralSettings } from './GeneralSettings';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 export function Settings() {
-  const [page, setPage] = useState('Synchronization');
+  const [page, setPage] = useState('general');
+  const { t } = useTranslation();
+
+  const settingConfig = [
+    {
+      key: 'general',
+      label: t('general'),
+      component: <GeneralSettings />,
+      icon: <IconSettings size={14} className="mr-2" />,
+    },
+    {
+      key: 'variables',
+      label: t('variables'),
+      component: <VariablesSettings />,
+      icon: <IconSettings2 size={14} className="mr-2" />,
+    },
+    {
+      key: 'synchronization',
+      label: t('synchronization'),
+      component: <Synchronization />,
+      icon: <IconRefresh size={14} className="mr-2" />,
+    },
+  ];
 
   return (
-    <div style={{ height: 'calc(100% - 40px)' }}>
+    <div style={{ height: 'calc(100vh - 40px)' }} className="w-full h-full flex flex-col">
       <div
         className="h-10 px-4 flex items-center border-b"
         style={{ borderColor: 'var(--figma-color-border)' }}
       >
-        <h3 className={'text-[13px] font-medium text-[color:var(--figma-color-text)]'}>Settings</h3>
+        <h3 className={'text-[13px] font-medium text-[color:var(--figma-color-text)]'}>
+          {t('settings')}
+        </h3>
       </div>
 
       <div className="flex h-full">
         <div className="p-2 w-60" style={{ backgroundColor: 'var(--figma-color-bg-secondary)' }}>
-          {settingConfig.map(({ label, icon }) => (
+          {settingConfig.map(({ key, label, icon }) => (
             <div
-              key={label}
+              key={key}
               className={clsx(
-                'cursor-default h-10 flex items-center px-3 text-xs rounded-md hover:bg-[color:var(--figma-color-bg)] mt-1 first:mt-0 active:scale-[99%] transition-all',
-                page === label
+                'cursor-default h-8 flex items-center px-3 text-xs rounded-md hover:bg-[color:var(--figma-color-bg)] mt-1 first:mt-0 active:scale-[99%] transition-all',
+                page === key
                   ? 'bg-[color:var(--figma-color-bg)] text-[color:var(--figma-color-text)] shadow-sm'
                   : 'text-[color:var(--figma-color-text-secondary)]'
               )}
-              onClick={() => setPage(label)}
+              onClick={() => setPage(key)}
             >
               {icon}
               {label}
@@ -48,7 +62,7 @@ export function Settings() {
         </div>
 
         <div className="grow p-4 overflow-auto" style={{ height: 'calc(100% - 40px)' }}>
-          {settingConfig.find(({ label }) => label === page)?.component}
+          {settingConfig.find(({ key }) => key === page)?.component}
         </div>
       </div>
 

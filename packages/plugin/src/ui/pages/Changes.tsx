@@ -7,12 +7,14 @@ import { Search } from '../components/Search';
 import { AnimatePresence } from 'framer-motion';
 import { EmptyState } from '../components';
 import { Preview } from '../components/Preview';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export function Changes() {
   const [, setCollectionList] = useState<VariableCollection['id'][]>([]);
   const [keyword, setKeyword] = useState('');
   const [selected, setSelected] = useState<string>('');
 
+  const { t } = useTranslation();
   const { groupedChanges, collections, variables, commits } = useContext(AppContext);
 
   useEffect(() => {
@@ -52,19 +54,20 @@ export function Changes() {
         className={'flex flex-col border-r shrink-0 w-60'}
         style={{ borderColor: 'var(--figma-color-border)' }}
       >
-        <div style={{ height: 'calc(100% - 57px)', background: 'var(--figma-color-bg-secondary)' }}>
+        <div className="bg-[var(--figma-color-bg-secondary)] h-[calc(100%-48px)]">
           <Search value={keyword} onChange={setKeyword} />
           <div
-            className="[&::-webkit-scrollbar]:w-0"
+            className="[&::-webkit-scrollbar]:w-0 flex"
             style={{ padding: 6, height: 'calc(100% - 40px)', overflow: 'auto' }}
           >
-            <div className="flex flex-col overflow-auto h-full">
+            <div className="flex flex-col h-full w-full">
               {numOfChanges > 0 ? (
                 <GroupedChanges
                   keyword={keyword}
                   selected={selected}
                   groupedChanges={groupedChanges}
                   onClickVariableItem={(id) => setSelected(id)}
+                  // checkbox={true}
                 />
               ) : (
                 <EmptyState />
@@ -75,10 +78,10 @@ export function Changes() {
 
         <div
           style={{ borderColor: 'var(--figma-color-border)' }}
-          className="flex items-center justify-between px-4 py-3 border-t"
+          className="flex items-center justify-between px-4 py-3 border-t h-12 shrink-0"
         >
           <div className="text-[color:var(--figma-color-text-secondary)]">
-            {numOfChanges} changes
+            {numOfChanges} {t('num_of_changes')}
           </div>
 
           <CommitModal disabled={disabled} />

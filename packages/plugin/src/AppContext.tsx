@@ -2,10 +2,10 @@ import { createContext, useMemo, useState, ReactNode, useEffect } from 'react';
 
 import type { ICommit, PluginSetting } from './types';
 import { getVariableChangesGroupedByCollection } from './utils/variable';
+import { ClipboardItem } from './types/clipboard';
 
 interface AppContext {
   setting: PluginSetting;
-  colorFormat: 'RGB' | 'HEX';
   variables: Variable[];
   collections: VariableCollection[];
   commits: ICommit[];
@@ -23,19 +23,31 @@ interface AppContext {
       removed: Variable[];
     };
   };
-  tab: 'changes' | 'commits' | 'settings';
+  tab: 'changes' | 'commits' | 'settings' | 'editor';
   compiledVariables: { css: string };
   selectedCommitId: string;
-  setColorFormat: (format: AppContext['colorFormat']) => void;
   setTab: (tab: AppContext['tab']) => void;
   getCollectionName: (collectionId: string) => string;
   setSelectedCommitId: (id: string) => void;
   clearCompiledVariables: () => void;
+  zoom: number;
+  setZoom: (zoom: number) => void;
+  // Selected variables in Editor
+  selection: string[];
+  setSelection: (selection: string[]) => void;
+  clipboard: ClipboardItem[];
+  setClipboard: (clipboard: ClipboardItem[]) => void;
+  cmdkOpen: boolean;
+  setCMDKOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  search: string;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  // Selected variables in Changes
+  checkedVariableIds: string[];
+  setCheckedVariableIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const AppContext = createContext<AppContext>({
-  setting: { syncTasks: [] },
-  colorFormat: 'HEX',
+  setting: { syncTasks: [], colorFormat: 'RGB' },
   variables: [],
   collections: [],
   commits: [],
@@ -48,13 +60,23 @@ export const AppContext = createContext<AppContext>({
   getCollectionName: () => '',
   setSelectedCommitId: () => null,
   setTab: () => null,
-  setColorFormat: () => null,
   clearCompiledVariables: () => null,
+  zoom: 1,
+  setZoom: () => null,
+  selection: [],
+  setSelection: () => null,
+  clipboard: [],
+  setClipboard: () => null,
+  cmdkOpen: false,
+  setCMDKOpen: () => null,
+  search: '',
+  setSearch: () => null,
+  checkedVariableIds: [],
+  setCheckedVariableIds: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
   const [setting, setSetting] = useState<PluginSetting>({ syncTasks: [] });
-  const [colorFormat, setColorFormat] = useState<AppContext['colorFormat']>('HEX');
   const [variables, setVariables] = useState<AppContext['variables']>([]);
   const [collections, setCollections] = useState<AppContext['collections']>([]);
   const [commits, setCommits] = useState<AppContext['commits']>([]);
@@ -66,7 +88,10 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [tab, setTab] = useState<AppContext['tab']>('changes');
   const [compiledVariables, setCompiledVariables] = useState<{ css: string }>({ css: '' });
   const [selectedCommitId, setSelectedCommitId] = useState<string>('');
-
+  const [zoom, setZoom] = useState<number>(1);
+  const [selection, setSelection] = useState<string[]>([]);
+  const [clipboard, setClipboard] = useState<ClipboardItem[]>([]);
+  const [checkedVariableIds, setCheckedVariableIds] = useState<string[]>([]);
   const groupedChanges = useMemo(() => {
     return getVariableChangesGroupedByCollection({
       prev: {
@@ -76,6 +101,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       current: { variables, collections },
     });
   }, [commits, variables]);
+  const [cmdkOpen, setCMDKOpen] = useState<boolean>(false);
+  const [search, setSearch] = useState<string>('');
 
   useEffect(() => {
     onmessage = async (e) => {
@@ -85,6 +112,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         case 'IMPORT_VARIABLES':
           setVariables(payload.variables);
           setCollections(payload.collections);
+          setCheckedVariableIds(payload.variables.map((v: Variable) => v.id));
           break;
         case 'IMPORT_LOCAL_COMMITS':
           setCommits(payload);
@@ -108,6 +136,20 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
           break;
         case 'CONVERT_VARIABLES_TO_CSS_DONE':
           setCompiledVariables((prev) => ({ ...prev, css: decodeURIComponent(payload) }));
+          break;
+        case 'VARIABLE_ALIAS_RESOLVED':
+          setResolvedVariableValues((prev) => {
+            const values = { ...prev };
+            payload.forEach((v: any) => {
+              values[v.id] = {
+                valuesByMode: {
+                  ...values[v.id]?.valuesByMode,
+                  [v.modeId]: { value: v.value, resolvedType: v.resolvedType },
+                },
+              };
+            });
+            return values;
+          });
           break;
       }
     };
@@ -136,25 +178,34 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const context = useMemo<AppContext>(() => {
     return {
       setting,
-      colorFormat,
       variables,
       collections,
       commits,
       variableAliases,
       resolvedVariableValues,
       groupedChanges,
+      selection,
       tab,
       setTab,
-      setColorFormat: (format) => (format === 'HEX' || format === 'RGB') && setColorFormat(format),
       getCollectionName,
       compiledVariables,
       selectedCommitId,
+      zoom,
+      setZoom,
       setSelectedCommitId,
+      setSelection,
+      clipboard,
+      setClipboard,
       clearCompiledVariables: () => setCompiledVariables({ css: '' }),
+      cmdkOpen,
+      setCMDKOpen,
+      search,
+      setSearch,
+      checkedVariableIds,
+      setCheckedVariableIds,
     };
   }, [
     setting,
-    colorFormat,
     variables,
     collections,
     commits,
@@ -162,7 +213,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     resolvedVariableValues,
     enableGitHubSync,
     setEnableGitHubSync,
-    setColorFormat,
     groupedChanges,
     tab,
     setTab,
@@ -171,6 +221,16 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     selectedCommitId,
     setSelectedCommitId,
     clearCompiledVariables,
+    selection,
+    setSelection,
+    clipboard,
+    setClipboard,
+    cmdkOpen,
+    setCMDKOpen,
+    search,
+    setSearch,
+    checkedVariableIds,
+    setCheckedVariableIds,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

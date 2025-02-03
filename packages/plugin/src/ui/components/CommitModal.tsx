@@ -9,6 +9,7 @@ import { CustomHTTPSyncConfig, GitHubSyncConfig, SlackSyncConfig } from '../../t
 import { IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-react';
 import { sendCustomRequest } from '../../features/send-custom-request';
 import { SyncTaskIcon } from './SyncTaskIcon';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const syncProgressMap: { [key: string]: ReactNode } = {
   pending: 'Pending',
@@ -29,19 +30,20 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
   const [summary, setSummary] = useState('');
   const [description, setDescription] = useState('');
   const [shouldSync, setShouldSync] = useState(false);
-  const [syncTaskStatus, setSyncTaskStatus] = useState<string[]>([]);
+  const [syncTaskStatus, setSyncTaskStatus] = useState<{ type: string; message: string }[]>([]);
   const [syncTaskResults, setSyncTaskResults] = useState<any[]>([]);
   const {
     variables,
     collections,
     setting,
     commits,
-    setTab,
     compiledVariables,
     clearCompiledVariables,
+    setTab,
   } = useContext(AppContext);
   const [view, setView] = useState<'commit' | 'sync'>('commit');
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     clearCompiledVariables();
@@ -53,7 +55,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
     if (shouldSync && commit && compiledVariables.css) {
       setShouldSync(false);
       Promise.all(
-        setting?.syncTasks.map(async ({ type, config }, index) => {
+        setting?.syncTasks?.map(async ({ type, config }, index) => {
           switch (type) {
             case 'github':
               const {
@@ -74,10 +76,10 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                 \n\nThis PR is created by Variable History plugin
                 `,
                 },
-                onStageChange: (stage) => {
+                onStageChange: (stage, message) => {
                   setSyncTaskStatus((prev) => {
                     const status = [...prev];
-                    status[index] = stage;
+                    status[index] = { type: stage, message: message || '' };
                     return status;
                   });
                 },
@@ -98,10 +100,10 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                 token: token,
                 content: compiledVariables.css,
                 commit,
-                onStageChange: (stage) => {
+                onStageChange: (stage, message) => {
                   setSyncTaskStatus((prev) => {
                     const status = [...prev];
-                    status[index] = stage;
+                    status[index] = { type: stage, message: message || '' };
                     return status;
                   });
                 },
@@ -116,7 +118,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                 onStageChange: (stage) => {
                   setSyncTaskStatus((prev) => {
                     const status = [...prev];
-                    status[index] = stage;
+                    status[index] = { type: stage, message: '' };
                     return status;
                   });
                 },
@@ -148,14 +150,14 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
       sendMessage('CONVERT_VARIABLES_TO_CSS');
       setShouldSync(true);
 
-      if (setting?.syncTasks.length > 0) {
+      if (setting?.syncTasks?.length > 0) {
         setView('sync');
       } else {
         setOpen(false);
       }
 
-      setSyncTaskStatus(setting?.syncTasks.map(() => 'pending'));
-      setSyncTaskResults(setting?.syncTasks.map(() => null));
+      setSyncTaskStatus(setting?.syncTasks?.map(() => ({ type: 'pending', message: '' })));
+      setSyncTaskResults(setting?.syncTasks?.map(() => null));
     }
   }, [variables, collections, summary, description]);
 
@@ -183,8 +185,8 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
               ))}
               <div style={{ color: 'var(--figma-color-text-secondary)' }}>
                 {setting?.syncTasks?.length > 0
-                  ? `${setting?.syncTasks.length} Sync tasks in queue`
-                  : 'No sync tasks'}
+                  ? `${setting?.syncTasks.length} ${t('sync_tasks_in_queue')}`
+                  : t('no_sync_tasks')}
               </div>
 
               <button
@@ -192,13 +194,13 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                 className="ml-auto"
                 style={{ color: 'var(--figma-color-text-brand)' }}
               >
-                {setting?.syncTasks?.length > 0 ? 'View tasks' : 'Set up tasks'}
+                {setting?.syncTasks?.length > 0 ? t('view_tasks') : t('set_up_tasks')}
               </button>
             </div>
           }
 
           <button className="btn-primary" disabled={summary.length <= 0} onClick={handleClick}>
-            {setting?.syncTasks?.length > 0 ? 'Commit and sync' : 'Commit'}
+            {setting?.syncTasks?.length > 0 ? t('commit_and_sync') : t('commit')}
           </button>
         </>
       );
@@ -230,13 +232,14 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                       {task.type === 'github' ? 'View PR' : 'View'}
                     </a>
                   ) : null}
-                  {syncProgressMap[syncTaskStatus[index]]}
+                  {syncTaskStatus[index]?.message || ''}
+                  {syncProgressMap[syncTaskStatus[index].type]}
                 </div>
               </div>
             ))}
           </div>
           <button className="btn-outline" onClick={() => setOpen(false)}>
-            Close
+            {t('close')}
           </button>
         </>
       );
@@ -254,7 +257,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
     >
       <Trigger asChild>
         <button className="btn-primary" disabled={disabled} onClick={() => setOpen(true)}>
-          Commit
+          {t('commit')}
         </button>
       </Trigger>
       <Portal>
@@ -265,7 +268,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
           }}
         />
         <Content className="dialog-content h-fit">
-          <Title className="dialog-title">Commit</Title>
+          <Title className="dialog-title">{t('commit')}</Title>
           <div className={'w-80 flex flex-col gap-3 p-3'}>
             <AnimatePresence>
               {view === 'commit' ? (
@@ -274,13 +277,13 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
                     className="input"
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
-                    placeholder="Summary"
+                    placeholder={t('summary')}
                   />
                   <textarea
-                    className="input"
+                    className="input pt-1"
                     onChange={(e) => setDescription(e.target.value)}
                     value={description}
-                    placeholder="Description (optional)"
+                    placeholder={t('description_placeholder')}
                     style={{ height: 96 }}
                   />
                 </div>

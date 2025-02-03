@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { AppContext } from '../../../AppContext';
 import { SyncForm } from '../../components/forms/SyncForm';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -12,16 +12,21 @@ import {
 import { IconBrandGithub, IconBrandSlack, IconPlus, IconWorld } from '@tabler/icons-react';
 import { sendMessage } from '../../../utils/message';
 import { SyncTaskIcon } from '../../components/SyncTaskIcon';
-
-const syncProviderList: { label: string; value: SyncTaskType; icon: any }[] = [
-  { label: 'Github', value: 'github', icon: IconBrandGithub },
-  { label: 'Slack', value: 'slack', icon: IconBrandSlack },
-  { label: 'Custom HTTP Request', value: 'custom', icon: IconWorld },
-];
+import { useTranslation } from '../../../hooks/useTranslation';
 
 export function Synchronization() {
   const { setting } = useContext(AppContext);
   const [formType, setFormType] = useState<SyncTaskType>('github');
+  const { t } = useTranslation();
+
+  const syncProviderList: { label: string; value: SyncTaskType; icon: any }[] = useMemo(
+    () => [
+      { label: 'Github', value: 'github', icon: IconBrandGithub },
+      { label: 'Slack', value: 'slack', icon: IconBrandSlack },
+      { label: t('custom_http_request'), value: 'custom', icon: IconWorld },
+    ],
+    [t]
+  );
 
   const syncComponentMap = {
     github: (
@@ -65,12 +70,12 @@ export function Synchronization() {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-[13px]">Synchronization</h3>
+        <h3 className="settingPage-title mt-0">{t('synchronization')}</h3>
         <Dialog.Root>
           <Dropdown.Root>
             <Dropdown.Trigger className="btn-outline hover:bg-[color:var(--figma-color-bg-secondary)] h-7 border-[color:var(--figma-color-border)] shadow-sm gap-1">
               <IconPlus size={14} />
-              New Sync task
+              {t('new_sync_task')}
             </Dropdown.Trigger>
             <Dropdown.Portal>
               <Dropdown.Content className="dropdown-content">
@@ -124,7 +129,7 @@ export function Synchronization() {
                     {data?.type === 'github'
                       ? (data?.config as GitHubSyncConfig).repository
                       : data?.type === 'slack'
-                      ? `Channel ID: ${(data?.config as SlackSyncConfig).channelId}`
+                      ? `${t('channel_id')}: ${(data?.config as SlackSyncConfig).channelId}`
                       : data?.type === 'custom'
                       ? (data.config as CustomHTTPSyncConfig).address
                       : null}
@@ -137,7 +142,7 @@ export function Synchronization() {
                         sendMessage('SET_PLUGIN_SETTING', { syncTasks: newOptions });
                       }}
                     >
-                      Remove
+                      {t('remove')}
                     </button>
                   </div>
                 </Dialog.Trigger>
@@ -164,7 +169,9 @@ export function Synchronization() {
             );
           })
         ) : (
-          <div className="w-full h-full flex items-center justify-center">No Sync tasks</div>
+          <div className="w-full h-full flex items-center justify-center text-[var(--figma-color-text-secondary)]">
+            {t('no_sync_tasks')}
+          </div>
         )}
       </div>
     </div>

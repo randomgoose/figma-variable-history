@@ -6,6 +6,8 @@ import { isSameVariableValue } from '../../../utils/variable';
 import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-dropdown-menu';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { union } from 'lodash-es';
+import { sendMessage } from '../../../utils/message';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface ValuesByModeDiffProps {
   current: Variable;
@@ -20,7 +22,8 @@ export function ValuesByModeDiff({
   currentCollection,
   prevCollection,
 }: ValuesByModeDiffProps) {
-  const { colorFormat, setColorFormat } = useContext(AppContext);
+  const { t } = useTranslation();
+  const { setting } = useContext(AppContext);
 
   const unionedModeIds = prev
     ? union(Object.keys(current.valuesByMode), Object.keys(prev.valuesByMode))
@@ -49,36 +52,31 @@ export function ValuesByModeDiff({
 
   const showColorFormatPicker = current.resolvedType === 'COLOR';
 
+  const colorFormatOptions = ['RGB', 'HEX', 'HSL'];
+
   return showValuesByMode ? (
     <div className={'variableDetail-section'}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <h3 className={'variableDetail-sectionTitle'} style={{ margin: 0 }}>
-          Values
+          {t('values')}
         </h3>
         {showColorFormatPicker ? (
           <Root>
             <Trigger className="ml-auto flex items-center gap-1">
-              {colorFormat}
+              {setting?.colorFormat || 'RGB'}
               <ChevronDown size={12} style={{ color: 'var(--figma-color-text-tertiary)' }} />
             </Trigger>
             <Portal>
               <Content className="dropdown-content">
-                <Item
-                  className="dropdown-item"
-                  onClick={() => {
-                    setColorFormat('RGB');
-                  }}
-                >
-                  RGB
-                </Item>
-                <Item
-                  className="dropdown-item"
-                  onClick={() => {
-                    setColorFormat('HEX');
-                  }}
-                >
-                  HEX
-                </Item>
+                {colorFormatOptions.map((format) => (
+                  <Item
+                    className="dropdown-item"
+                    key={format}
+                    onClick={() => sendMessage('SET_PLUGIN_SETTING', { colorFormat: format })}
+                  >
+                    {format}
+                  </Item>
+                ))}
               </Content>
             </Portal>
           </Root>
@@ -98,7 +96,7 @@ export function ValuesByModeDiff({
                   <ParsedValue
                     variable={prev}
                     modeId={modeId}
-                    option={{ format: colorFormat, showLabel: true }}
+                    option={{ format: setting?.colorFormat || 'RGB', showLabel: true }}
                   />
                 </div>
                 <div className={'variableDetail-itemArrow'}>
@@ -108,7 +106,7 @@ export function ValuesByModeDiff({
                   <ParsedValue
                     variable={current}
                     modeId={modeId}
-                    option={{ format: colorFormat, showLabel: true }}
+                    option={{ format: setting?.colorFormat || 'RGB', showLabel: true }}
                   />
                 </div>
               </div>
@@ -128,7 +126,7 @@ export function ValuesByModeDiff({
                 <ParsedValue
                   variable={current}
                   modeId={modeId}
-                  option={{ format: colorFormat, showLabel: true }}
+                  option={{ format: setting?.colorFormat || 'RGB', showLabel: true }}
                 />
               </div>
             </div>

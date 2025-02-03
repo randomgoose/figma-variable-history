@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import { CopyTextWrapper } from '../CopyWrapper';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 interface NameDiffProps {
   current: Variable;
@@ -8,12 +9,13 @@ interface NameDiffProps {
 
 export function NameDiff({ current, prev }: NameDiffProps) {
   const hasNameChanged = prev && prev.name !== current.name;
+  const { t } = useTranslation();
 
   return (
     <div className="variableDetail-section">
       {hasNameChanged ? (
         <div className="variableDetail-item items-center">
-          <h3 className={'variableDetail-sectionTitle'}>Name</h3>
+          <h3 className={'variableDetail-sectionTitle'}>{t('name')}</h3>
           <CopyTextWrapper text={prev.name}>{prev?.name}</CopyTextWrapper>
           <div
             className={'flex items-center justify-center'}
@@ -25,7 +27,7 @@ export function NameDiff({ current, prev }: NameDiffProps) {
         </div>
       ) : (
         <div className="variableDetail-item flex">
-          <h3 className={'variableDetail-sectionTitle'}>Name</h3>
+          <h3 className={'variableDetail-sectionTitle'}>{t('name')}</h3>
           <CopyTextWrapper text={current.name}>{current?.name}</CopyTextWrapper>
         </div>
       )}

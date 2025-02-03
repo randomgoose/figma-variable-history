@@ -1,4 +1,8 @@
+import { useTranslation } from '../../hooks/useTranslation';
+
 export function EmptyState() {
+  const { t } = useTranslation();
+
   return (
     <div className="w-full h-full flex flex-col items-center justify-center text-center gap-2">
       <svg
@@ -17,9 +21,7 @@ export function EmptyState() {
         />
       </svg>
 
-      <div style={{ color: 'var(--figma-color-text-tertiary)' }}>
-        Changes to Figma variables will be displayed here
-      </div>
+      <div style={{ color: 'var(--figma-color-text-tertiary)' }}>{t('no_changes_description')}</div>
     </div>
   );
 }
