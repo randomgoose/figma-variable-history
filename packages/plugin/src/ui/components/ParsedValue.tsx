@@ -11,6 +11,7 @@ import clsx from 'clsx';
 import { parsedValue } from '../styles.module.css';
 import { CopyTextWrapper } from './CopyWrapper';
 import { sendMessage } from '../../utils/message';
+import { Swatch } from './Swatch';
 
 export function ParsedValue({
   variable,
@@ -140,12 +141,7 @@ export function ParsedValue({
           return (
             <CopyTextWrapper text={isAlias ? alias : parsedValue}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div
-                  className={
-                    'w-4 h-4 rounded-[1px] border border-black/10 shrink-0 flex items-center'
-                  }
-                  style={{ background: convertFigmaRGBtoString(resolvedValue) }}
-                />
+                <Swatch color={resolvedValue} />
                 {option?.showLabel ? (
                   <div
                     className={clsx(

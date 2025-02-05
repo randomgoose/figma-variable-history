@@ -50,7 +50,14 @@ export default async function () {
 
   consumer.remove();
 
-  figma.showUI(__html__, { width: 720, height: 520, themeColors: true });
+  const windowSize = (await figma.clientStorage.getAsync(
+    `${PLUGIN_DATA_KEY_SETTING}_windowSize`
+  )) || {
+    height: 720,
+    width: 520,
+  };
+
+  figma.showUI(__html__, { width: windowSize.width, height: windowSize.height, themeColors: true });
   // // figma.showUI(__html__, { width: 1440, height: 960, themeColors: true });
 
   figma.ui.postMessage({
@@ -183,6 +190,14 @@ export default async function () {
       case MESSAGE_TYPE.UPDATE_VARIABLE_GROUP:
         await figmaHelper.updateVariableGroup(msg.payload);
         await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.RESIZE:
+        figma.ui.resize(msg.payload.width, msg.payload.height);
+        try {
+          figma.clientStorage.setAsync(`${PLUGIN_DATA_KEY_SETTING}_windowSize`, { ...msg.payload });
+        } catch (err) {
+          console.error('Failed to set plugin data', err);
+        }
         break;
       // case MESSAGE_TYPE.REVERT_ALL_VARIABLE_CHANGES:
       //   break;

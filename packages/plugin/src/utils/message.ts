@@ -8,6 +8,7 @@ export enum MESSAGE_TYPE {
   VARIABLE_ALIAS_RESOLVED = 'VARIABLE_ALIAS_RESOLVED',
   UPDATE_VARIABLE_GROUP = 'UPDATE_VARIABLE_GROUP', // Update variable group name, used when renaming a variable group from the sidebar
   CONVERT_VARIABLES_TO_CSS_DONE = 'CONVERT_VARIABLES_TO_CSS_DONE',
+  RESIZE = 'RESIZE',
 }
 
 export function sendMessage(type: string, payload?: any) {

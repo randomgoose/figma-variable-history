@@ -1,6 +1,5 @@
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '../../AppContext';
-import { useParams } from 'react-router';
 import * as Select from '@radix-ui/react-select';
 import { ChevronDown, MessageSquarePlus } from 'lucide-react';
 import {
@@ -13,12 +12,11 @@ import {
   getExpandedRowModel,
   RowSelectionState,
 } from '@tanstack/react-table';
-import { ParsedValue } from '../components/ParsedValue';
 import clsx from 'clsx';
 import { VariableIcon } from '../components';
-import * as ContextMenu from '@radix-ui/react-context-menu';
 import { MESSAGE_TYPE } from '../../utils/message';
 import { sendMessage } from '../../utils/message';
+import { IconAlertTriangleFilled, IconPlus } from '@tabler/icons-react';
 
 type TreeNode = {
   name: string;
@@ -28,61 +26,74 @@ type TreeNode = {
 
 export function Table() {
   const { variables, collections, setTab } = useContext(AppContext);
-  const { collectionId } = useParams();
+  const [collectionId, setCollectionId] = useState<string | undefined>(collections?.[0]?.id);
   const currentCollection = collections.find((c) => c.id === collectionId);
 
   const columnHelper = createColumnHelper<any>();
 
-  const columns = [
-    columnHelper.group({
-      header: 'Name',
-      id: 'name',
-      cell: ({ row }) => {
-        const name = row.original.name;
-        const lastSlashIndex = name.lastIndexOf('/');
-        return (
-          <div className="flex items-center gap-2 px-4 pr-1 border-r border-[var(--figma-color-border)] h-full group max-w-[200px]">
-            <VariableIcon resolvedType="COLOR" />
-            {lastSlashIndex !== -1 ? name.substring(lastSlashIndex + 1) : name}
-            <button className="btn-icon group-hover:opacity-100 opacity-0 ml-auto">
-              <MessageSquarePlus size={12} />
-            </button>
-          </div>
-        );
-      },
-      enableGrouping: true,
-      getGroupingValue: (row) => {
-        const name = row.name;
-        const parts = name.split('/');
-        if (row._groupingValue && parts.length > 1) {
-          const currentGroupIndex = parts.indexOf(row._groupingValue);
-          if (currentGroupIndex < parts.length - 2) {
-            return parts.slice(0, currentGroupIndex + 2).join('/');
+  // Initialize collectionId if there are collections
+  useEffect(() => {
+    if (collections.length > 0 && !collectionId) {
+      setCollectionId(collections[0]?.id);
+    }
+  }, [collections]);
+
+  const columns = useMemo(
+    () => [
+      columnHelper.group({
+        header: 'Name',
+        id: 'name',
+        cell: ({ row }) => {
+          const name = row.original.name;
+          const lastSlashIndex = name.lastIndexOf('/');
+          return (
+            <div className="flex items-center gap-2 px-4 pr-1 h-full group w-[200px] truncate hover:bg-red-500">
+              <VariableIcon resolvedType="COLOR" />
+              {lastSlashIndex !== -1 ? name.substring(lastSlashIndex + 1) : name}
+              <button className="btn-icon group-hover:opacity-100 opacity-0 ml-auto">
+                <MessageSquarePlus size={12} />
+              </button>
+            </div>
+          );
+        },
+        enableGrouping: true,
+        getGroupingValue: (row) => {
+          const name = row.name;
+          const parts = name.split('/');
+          if (row._groupingValue && parts.length > 1) {
+            const currentGroupIndex = parts.indexOf(row._groupingValue);
+            if (currentGroupIndex < parts.length - 2) {
+              return parts.slice(0, currentGroupIndex + 2).join('/');
+            }
           }
-        }
-        return parts.slice(0, parts.length - 1).join('/');
-      },
-    }),
-    ...(currentCollection?.modes?.map((m) =>
-      columnHelper.accessor(m.name, {
-        header: m.name,
-        cell: ({ row }) => (
-          <ContextMenu.Root>
-            <ContextMenu.Trigger asChild>
-              <div className="px-4 border-r border-[var(--figma-color-border)] h-full flex items-center">
-                <ParsedValue variable={row.original} modeId={m.modeId} />
-              </div>
-            </ContextMenu.Trigger>
-            <ContextMenu.Portal>
-              <ContextMenu.Content className="dropdown-content w-44">
-                <ContextMenu.Item className="dropdown-item">Copy</ContextMenu.Item>
-              </ContextMenu.Content>
-            </ContextMenu.Portal>
-          </ContextMenu.Root>
+          return parts.slice(0, parts.length - 1).join('/');
+        },
+      }),
+      ...(currentCollection?.modes?.map((m) =>
+        columnHelper.accessor(m.name, {
+          header: m.name,
+          cell: ({ cell }) => {
+            return cell.getValue();
+          },
+        })
+      ) ?? []),
+      columnHelper.display({
+        header: () => (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            className="btn-icon"
+          >
+            <IconPlus size={16} strokeWidth={1.5} />
+          </button>
         ),
-      })
-    ) ?? []),
-  ];
+        id: 'action',
+        // cell: () => <button className='btn-icon'><IconPlus /></button>
+      }),
+    ],
+    [currentCollection]
+  );
 
   const [grouping, setGrouping] = useState<GroupingState>(['name']);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -223,7 +234,7 @@ export function Table() {
         >
           {isEditing ? (
             <input
-              className="border border-[var(--figma-color-border)] rounded px-1 w-full focus:outline-none"
+              className="rounded px-1 w-full focus:outline-none"
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleBlur}
@@ -243,12 +254,13 @@ export function Table() {
   };
 
   return (
-    <div className="w-full h-full flex">
-      <aside className="w-60 border-r border-[var(--figma-color-border)] flex flex-col">
+    <div className="w-full flex" style={{ height: 'calc(100vh - 40px)' }}>
+      <aside className="w-[200px] shrink-0 border-r border-[var(--figma-color-border)] flex flex-col">
         <div className="p-2">
           <Select.Root
             value={collectionId}
-            onValueChange={() => {
+            onValueChange={(value) => {
+              setCollectionId(value);
               setTab('editor');
             }}
           >
@@ -291,68 +303,85 @@ export function Table() {
           ))}
         </div>
       </aside>
-      <div className="flex-1 overflow-auto">
-        <table className="w-full border-collapse">
-          <thead className="sticky top-0 bg-[var(--figma-color-background)] h-10">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr
-                key={headerGroup.id}
-                className="border-b border-[var(--figma-color-border)] bg-[var(--figma-color-bg)]"
-              >
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="text-left p-2 font-semibold text-[11px] border-r px-4"
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr
-                key={row.id}
-                className={clsx(
-                  'border-b border-[var(--figma-color-border)]',
-                  row.getIsSelected() && 'bg-[var(--figma-color-bg-selected)]',
-                  !row.getIsGrouped() && ''
-                )}
-                onClick={(e) => handleRowClick(row, e)}
-              >
-                {row.getIsGrouped() ? (
-                  <td
-                    colSpan={row.getVisibleCells().length}
-                    className="font-medium p-2 text-xs border-b border-[var(--figma-color-border)] pt-8"
-                  >
-                    {(row.groupingValue as string).split('/').map((part, index) => {
-                      const isLast = index === (row.groupingValue as string).split('/').length - 1;
-                      return (
-                        <span
-                          key={part}
-                          className={clsx(
-                            isLast
-                              ? 'text-[var(--figma-color-text)] font-semibold'
-                              : 'text-[var(--figma-color-text-secondary)]'
-                          )}
-                        >
-                          {part} {isLast ? '' : '/ '}
-                        </span>
-                      );
-                    })}
-                  </td>
-                ) : (
-                  row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-0 h-10 text-xs">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-auto">
+          <table className="border-collapse">
+            <thead className="sticky top-0 bg-[var(--figma-color-background)] h-10 z-50">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id} className="bg-[var(--figma-color-bg)]">
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className={clsx(
+                        'text-left p-2 font-semibold text-[11px] px-4 table-border',
+                        header.column.id === 'name' &&
+                          'sticky z-10 left-0 bg-[var(--figma-color-bg)]'
+                      )}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className={clsx(
+                    'border-[var(--figma-color-border)]',
+                    row.getIsSelected() && 'bg-[var(--figma-color-bg-selected)]',
+                    !row.getIsGrouped() ? '' : 'border-b'
+                  )}
+                  onClick={(e) => handleRowClick(row, e)}
+                >
+                  {row.getIsGrouped() ? (
+                    <td
+                      colSpan={row.getVisibleCells().length}
+                      className="sticky inline-block w-full left-0 bg-[var(--figma-color-background)] font-medium p-2 pl-4 text-xs pt-8 h-14"
+                    >
+                      {(row.groupingValue as string).split('/').map((part, index) => {
+                        const isLast =
+                          index === (row.groupingValue as string).split('/').length - 1;
+                        return (
+                          <span
+                            key={part}
+                            className={clsx(
+                              isLast
+                                ? 'text-[var(--figma-color-text)] font-semibold'
+                                : 'text-[var(--figma-color-text-secondary)]'
+                            )}
+                          >
+                            {part} {isLast ? '' : '/ '}
+                          </span>
+                        );
+                      })}
                     </td>
-                  ))
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  ) : (
+                    row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className={clsx(
+                          'p-0 h-10 text-xs table-border',
+                          cell.column.id === 'name' && 'sticky z-10 left-0'
+                        )}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="h-10 border-t flex items-center justify-between p-3 pr-2">
+          <button>Create Variable</button>
+
+          <button className="btn-outline flex gap-1">
+            <IconAlertTriangleFilled className="text-yellow-500" size={12} />
+          </button>
+        </div>
       </div>
     </div>
   );

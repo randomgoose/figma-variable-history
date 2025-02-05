@@ -159,6 +159,13 @@ body {
     @apply text-[var(--figma-color-icon)] flex items-center justify-center;
   }
 
+  .table-border {
+    @apply relative after:content-[''] after:absolute after:inset-0 after:border-r after:border-b after:border-[var(--figma-color-border)];
+  }
+
+  .table-border:last-of-type {
+    @apply after:border-r-0;
+  }
   
 }
 

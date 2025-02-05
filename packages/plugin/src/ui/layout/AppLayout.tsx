@@ -1,11 +1,11 @@
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useEffect, useMemo } from 'react';
-import { sendMessage } from './utils/message';
+import { sendMessage } from '../../utils/message';
 import clsx from 'clsx';
 import { Toaster } from 'sonner';
-import { CMDK } from './ui/components/CMDK';
-import { useTranslation } from './hooks/useTranslation';
+import { CMDK } from '../components/CMDK';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function AppLayout() {
   const location = useLocation();
@@ -13,8 +13,8 @@ export default function AppLayout() {
 
   const tabs = useMemo(
     () => [
-      // { label: t('editor'), path: '/editor' },
-      { label: t('changes'), path: '/' },
+      { label: t('editor'), path: '/' },
+      { label: t('changes'), path: '/changes' },
       { label: t('commits'), path: '/commits' },
       { label: t('variables'), path: '/variables' },
       { label: t('settings'), path: '/settings' },
