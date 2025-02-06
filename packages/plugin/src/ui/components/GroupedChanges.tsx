@@ -125,23 +125,25 @@ export function GroupedChanges({
                   ...removed.map((v) => ({ v, type: 'removed' })),
                 ]
                   .filter(({ v }) => v.name.includes(keyword))
-                  .map(({ v, type }) => (
-                    <VariableItem
-                      key={v.id}
-                      variable={v}
-                      type={type as VariableChangeType}
-                      selected={v.id === selected}
-                      onClick={(id) => onClickVariableItem(id)}
-                      allowDiscard={!disableInteraction}
-                      checkbox={checkbox}
-                      checked={checkedVariableIds?.includes(v.id)}
-                      onCheck={(checked) =>
-                        checked
-                          ? setCheckedVariableIds((prev) => [...prev, v.id])
-                          : setCheckedVariableIds((prev) => prev.filter((c) => c !== v.id))
-                      }
-                    />
-                  ))}
+                  .map(({ v, type }) => {
+                    return (
+                      <VariableItem
+                        key={v.id}
+                        variable={v}
+                        type={type as VariableChangeType}
+                        selected={v.id === selected}
+                        onClick={(id) => onClickVariableItem(id)}
+                        allowDiscard={!disableInteraction}
+                        checkbox={checkbox}
+                        checked={checkedVariableIds?.includes(v.id)}
+                        onCheck={(checked) =>
+                          checked
+                            ? setCheckedVariableIds((prev) => [...prev, v.id])
+                            : setCheckedVariableIds((prev) => prev.filter((c) => c !== v.id))
+                        }
+                      />
+                    );
+                  })}
                 {/* </AnimatePresence> */}
               </div>
             </Content>

@@ -126,12 +126,12 @@ export function ParsedValue({
             case 'HEX':
               parsedValue =
                 'a' in resolvedValue
-                  ? `#${convertRgbColorToHexColor(resolvedValue)} ${
+                  ? `${convertRgbColorToHexColor(resolvedValue)} ${
                       resolvedValue.a === 1
                         ? ''
                         : parseFloat(formatPercentage(resolvedValue.a)) + '%'
                     }`
-                  : `#${convertRgbColorToHexColor(resolvedValue)}`;
+                  : `${convertRgbColorToHexColor(resolvedValue)}`;
               break;
             case 'HSL':
               parsedValue = convertFigmaRGBtoHSLString(resolvedValue);

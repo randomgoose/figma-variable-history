@@ -120,6 +120,7 @@ export function ValuesByModeDiff({
             >
               <div>
                 {currentCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
+                  prevCollection?.modes?.find((mode) => mode.modeId === modeId)?.name ||
                   'Removed mode'}
               </div>
               <div>

@@ -64,7 +64,10 @@ export function convertFigmaRGBtoHSLString(data: RGB | RGBA) {
  * Convert Figma RGB color to Hex
  */
 
-export function convertFigmaRGBtoHexString(data: RGB | RGBA) {
+export function convertFigmaRGBtoHexString(
+  data: RGB | RGBA,
+  options?: { hashtag?: boolean; alpha?: boolean }
+) {
   // Convert Figma RGB values (0-1) to hex (00-FF)
   const toHex = (value: number): string => {
     const hex = Math.round(value * 255).toString(16);
@@ -76,12 +79,12 @@ export function convertFigmaRGBtoHexString(data: RGB | RGBA) {
   const b = toHex(data.b);
 
   // If alpha is present and not 1, include it in the hex string
-  if ('a' in data && data.a !== 1) {
+  if (options?.alpha && 'a' in data && data.a !== 1) {
     const a = toHex(data.a);
     return `#${r}${g}${b}${a}`;
   }
 
-  return `#${r}${g}${b}`;
+  return options?.hashtag ? `#${r}${g}${b}` : `${r}${g}${b}`;
 }
 
 /**

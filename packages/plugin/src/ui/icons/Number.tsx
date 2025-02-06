@@ -1,6 +1,6 @@
 export function Number() {
   return (
-    <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <svg width="24" height="24" fill="none" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
       <path
         fill="var(--figma-color-icon)"
         fillRule="evenodd"

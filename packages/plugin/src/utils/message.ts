@@ -3,7 +3,7 @@ export enum MESSAGE_TYPE {
   REVERT_VARIABLE_VALUE = 'REVERT_VARIABLE_VALUE', // aka. Discard changes. Revert variable value to the original value
   REVERT_ALL_VARIABLE_CHANGES = 'REVERT_ALL_VARIABLE_CHANGES',
   UPDATE_VARIABLE_VALUE = 'UPDATE_VARIABLE_VALUE',
-  UPDATE_VARIABLE = 'UPDATE_VARIABLE',
+  SET_VARIABLE = 'SET_VARIABLE',
   AUTOCOMPLETE_CODE_SYNTAX = 'AUTOCOMPLETE_CODE_SYNTAX',
   VARIABLE_ALIAS_RESOLVED = 'VARIABLE_ALIAS_RESOLVED',
   UPDATE_VARIABLE_GROUP = 'UPDATE_VARIABLE_GROUP', // Update variable group name, used when renaming a variable group from the sidebar
@@ -23,3 +23,12 @@ export function sendMessage(type: string, payload?: any) {
     '*'
   );
 }
+
+export const variableManager = {
+  updateVariable: (variableId: string, partialVariable: Partial<Variable>) => {
+    sendMessage(MESSAGE_TYPE.SET_VARIABLE, {
+      id: variableId,
+      update: partialVariable,
+    });
+  },
+};

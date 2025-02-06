@@ -10,7 +10,7 @@ import * as Select from '@radix-ui/react-select';
 // reduce bundle size
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import css from 'react-syntax-highlighter/dist/esm/languages/hljs/css';
-import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { docco, atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 SyntaxHighlighter.registerLanguage('css', css);
 
@@ -535,7 +535,11 @@ export function Commits() {
                     </Select.Root>
                   </div>
                   <SyntaxHighlighter
-                    style={docco}
+                    style={
+                      document.documentElement.classList.contains('figma-light')
+                        ? docco
+                        : atomOneDark
+                    }
                     customStyle={{ height: '100%', margin: 0, overflow: 'auto' }}
                     language="CSS"
                   >

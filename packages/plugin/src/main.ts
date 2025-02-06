@@ -74,7 +74,7 @@ export default async function () {
           payload: figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING),
         });
         break;
-      case 'COMMIT':
+      case MESSAGE_TYPE.COMMIT:
         await commitBridge.commit(msg.payload);
         await commitBridge.emitData();
         break;
@@ -183,8 +183,8 @@ export default async function () {
       //   figma.commitUndo();
       //   await commitBridge.emitData();
       //   break;
-      case MESSAGE_TYPE.UPDATE_VARIABLE:
-        await figmaHelper.setVariable(msg.payload.id, msg.payload);
+      case MESSAGE_TYPE.SET_VARIABLE:
+        await figmaHelper.setVariable(msg.payload.id, msg.payload.update);
         await commitBridge.emitData();
         break;
       case MESSAGE_TYPE.UPDATE_VARIABLE_GROUP:

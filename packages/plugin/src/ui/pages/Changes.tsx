@@ -15,7 +15,8 @@ export function Changes() {
   const [selected, setSelected] = useState<string>('');
 
   const { t } = useTranslation();
-  const { groupedChanges, collections, variables, commits } = useContext(AppContext);
+  const { groupedChanges, collections, variables, commits, checkedVariableIds } =
+    useContext(AppContext);
 
   useEffect(() => {
     setCollectionList(collections.map((c) => c.id));
@@ -23,6 +24,15 @@ export function Changes() {
 
   const numOfChanges = Object.values(groupedChanges).reduce(
     (acc, { added, modified, removed }) => acc + added.length + modified.length + removed.length,
+    0
+  );
+
+  const numOfCheckedChanges = Object.values(groupedChanges).reduce(
+    (acc, { added, modified, removed }) =>
+      acc +
+      added.filter((v) => checkedVariableIds.includes(v.id)).length +
+      modified.filter((v) => checkedVariableIds.includes(v.id)).length +
+      removed.filter((v) => checkedVariableIds.includes(v.id)).length,
     0
   );
 
@@ -41,12 +51,24 @@ export function Changes() {
       ][0];
 
       if (firstChange) {
-        setSelected(firstChange.id);
+        if (!selected) {
+          setSelected(firstChange.id);
+        }
       }
     }
   }, [groupedChanges]);
 
-  const disabled = numOfChanges === 0;
+  const disabled =
+    numOfChanges === 0 ||
+    Object.values(groupedChanges).every((collection) => {
+      const { added, modified, removed } = collection;
+
+      return (
+        added.every((variable) => !checkedVariableIds.includes(variable.id)) &&
+        modified.every((variable) => !checkedVariableIds.includes(variable.id)) &&
+        removed.every((variable) => !checkedVariableIds.includes(variable.id))
+      );
+    });
 
   return (
     <div className="w-full flex" style={{ height: 'calc(100vh - 40px)' }}>
@@ -67,7 +89,7 @@ export function Changes() {
                   selected={selected}
                   groupedChanges={groupedChanges}
                   onClickVariableItem={(id) => setSelected(id)}
-                  // checkbox={true}
+                  checkbox={true}
                 />
               ) : (
                 <EmptyState />
@@ -84,7 +106,11 @@ export function Changes() {
             {numOfChanges} {t('num_of_changes')}
           </div>
 
-          <CommitModal disabled={disabled} />
+          <CommitModal
+            disabled={disabled}
+            numOfChanges={numOfChanges}
+            numOfCheckedChanges={numOfCheckedChanges}
+          />
         </div>
       </div>
 
@@ -97,7 +123,9 @@ export function Changes() {
             )}
             prev={commits?.[0]?.variables.find((v: Variable) => v.id === selected)}
             prevCollection={commits?.[0]?.collections.find(
-              (c) => c.id === variables.find((v) => v.id === selected)?.variableCollectionId
+              (c) =>
+                c.id ===
+                commits?.[0]?.variables.find((v) => v.id === selected)?.variableCollectionId
             )}
           />
         ) : numOfChanges > 0 ? null : (

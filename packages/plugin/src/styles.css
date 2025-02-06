@@ -9,6 +9,21 @@
   font-display: optional;
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input:focus {
+  outline: none;
+}
+
 body {
   background-color: var(--figma-color-bg);
   color: var(--figma-color-text);
@@ -136,7 +151,7 @@ body {
   }
 
   .settingItem-title {
-    @apply text-[11px] font-medium text-neutral-900;
+    @apply text-[11px] font-medium text-[var(--figma-color-text-onreverse)];
   } 
 
   .settingItem-description {
@@ -148,7 +163,7 @@ body {
   }
 
   .tabs-trigger {
-    @apply cursor-default px-2 capitalize rounded-[5px] h-6 flex items-center text-[color:var(--figma-color-text-secondary)] data-[state=active]:font-semibold data-[state=active]:text-[color:var(--figma-color-text)] data-[state=active]:bg-[var(--figma-color-bg-secondary)];
+    @apply text-[11px] cursor-default px-2 capitalize rounded-[5px] h-6 flex items-center text-[color:var(--figma-color-text-secondary)] data-[state=active]:font-semibold data-[state=active]:text-[color:var(--figma-color-text)] data-[state=active]:bg-[var(--figma-color-bg-secondary)];
   }
 
   .checkbox-root {
@@ -160,13 +175,20 @@ body {
   }
 
   .table-border {
-    @apply relative after:content-[''] after:absolute after:inset-0 after:border-r after:border-b after:border-[var(--figma-color-border)];
+    @apply relative after:content-[''] after:absolute after:inset-0 after:border-r after:border-b after:border-[var(--figma-color-border)] after:pointer-events-none;
   }
 
   .table-border:last-of-type {
     @apply after:border-r-0;
   }
+
+  .cell-focus {
+    @apply after:content-[''] after:absolute after:inset-0 after:border-r after:border after:border-[var(--figma-color-border-brand-strong)] after:pointer-events-none;
+  }
   
+  .panel {
+    @apply w-60 rounded-[13px] bg-[var(--figma-color-bg)] shadow-elevation-500 z-50;
+  } 
 }
 
 

@@ -309,4 +309,15 @@ export const figmaHelper = {
       console.error(`Failed to update variable group\n`, err);
     }
   },
+
+  /* 
+    TODO: Get Team Variable Libraries
+  */
+
+  async getTeamVariableLibraries() {
+    const collections = await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync();
+    // const libraries = groupBy(collections, 'libraryName');
+
+    return collections;
+  },
 };

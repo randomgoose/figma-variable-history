@@ -37,6 +37,7 @@
         "figma"
       ],
       "permissions": [
+        "teamlibrary",
         "currentuser"
       ],
       "networkAccess": {

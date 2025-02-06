@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '../../AppContext';
 import * as Select from '@radix-ui/react-select';
-import { ChevronDown, MessageSquarePlus } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -13,10 +13,11 @@ import {
   RowSelectionState,
 } from '@tanstack/react-table';
 import clsx from 'clsx';
-import { VariableIcon } from '../components';
-import { MESSAGE_TYPE } from '../../utils/message';
+import { MESSAGE_TYPE, variableManager } from '../../utils/message';
 import { sendMessage } from '../../utils/message';
 import { IconAlertTriangleFilled, IconPlus } from '@tabler/icons-react';
+import { EditableColorCell } from '../components/table/EditableColorCell';
+import { EditableVariableNameCell } from '../components/table/EditableVariableNameCell';
 
 type TreeNode = {
   name: string;
@@ -28,6 +29,12 @@ export function Table() {
   const { variables, collections, setTab } = useContext(AppContext);
   const [collectionId, setCollectionId] = useState<string | undefined>(collections?.[0]?.id);
   const currentCollection = collections.find((c) => c.id === collectionId);
+
+  const [grouping, setGrouping] = useState<GroupingState>(['name']);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [cellSelection, setCellSelection] = useState<string[]>([]);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+  const [selectedGroupPath, setSelectedGroupPath] = useState<string | null>(null);
 
   const columnHelper = createColumnHelper<any>();
 
@@ -43,17 +50,22 @@ export function Table() {
       columnHelper.group({
         header: 'Name',
         id: 'name',
-        cell: ({ row }) => {
+        cell: ({ row, cell }) => {
           const name = row.original.name;
           const lastSlashIndex = name.lastIndexOf('/');
+          const value = lastSlashIndex !== -1 ? name.substring(lastSlashIndex + 1) : name;
           return (
-            <div className="flex items-center gap-2 px-4 pr-1 h-full group w-[200px] truncate hover:bg-red-500">
-              <VariableIcon resolvedType="COLOR" />
-              {lastSlashIndex !== -1 ? name.substring(lastSlashIndex + 1) : name}
-              <button className="btn-icon group-hover:opacity-100 opacity-0 ml-auto">
-                <MessageSquarePlus size={12} />
-              </button>
-            </div>
+            <EditableVariableNameCell
+              value={value}
+              resolvedType={row.original.resolvedType}
+              isEditing={cell.id === cellSelection[0]}
+              onBlur={(value) => {
+                variableManager.updateVariable(row.original.id, {
+                  name: row.original.name.substring(0, lastSlashIndex) + '/' + value,
+                });
+                setCellSelection([]);
+              }}
+            />
           );
         },
         enableGrouping: true,
@@ -72,8 +84,19 @@ export function Table() {
       ...(currentCollection?.modes?.map((m) =>
         columnHelper.accessor(m.name, {
           header: m.name,
-          cell: ({ cell }) => {
-            return cell.getValue();
+          cell: ({ row }) => {
+            switch (row.original.resolvedType) {
+              case 'COLOR':
+                return (
+                  <EditableColorCell
+                    // onChange={() => { }}
+                    variable={row.original}
+                    modeId={m.modeId}
+                  />
+                );
+              default:
+                return null;
+            }
           },
         })
       ) ?? []),
@@ -92,13 +115,8 @@ export function Table() {
         // cell: () => <button className='btn-icon'><IconPlus /></button>
       }),
     ],
-    [currentCollection]
+    [currentCollection, cellSelection, variables]
   );
-
-  const [grouping, setGrouping] = useState<GroupingState>(['name']);
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
-  const [selectedGroupPath, setSelectedGroupPath] = useState<string | null>(null);
 
   const data = useMemo(() => {
     const filteredData = variables.filter((v) => v.variableCollectionId === collectionId);
@@ -303,19 +321,21 @@ export function Table() {
           ))}
         </div>
       </aside>
-      <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="flex-1 overflow-auto flex flex-col">
         <div className="flex-1 overflow-auto">
           <table className="border-collapse">
-            <thead className="sticky top-0 bg-[var(--figma-color-background)] h-10 z-50">
+            <thead className="sticky top-0 bg-[var(--figma-color-background)] h-10 z-20">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="bg-[var(--figma-color-bg)]">
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
                       className={clsx(
-                        'text-left p-2 font-semibold text-[11px] px-4 table-border',
+                        'bg-[var(--figma-color-bg)] text-left p-2 font-semibold text-[11px] px-4 table-border [&:nth-last-child(-n+1)]:after:border-r-0',
                         header.column.id === 'name' &&
-                          'sticky z-10 left-0 bg-[var(--figma-color-bg)]'
+                          'sticky left-0 bg-[var(--figma-color-bg)] z-10',
+                        header.column.id === 'action' &&
+                          'sticky right-0 w-10 table-border after:border-l'
                       )}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -338,7 +358,7 @@ export function Table() {
                   {row.getIsGrouped() ? (
                     <td
                       colSpan={row.getVisibleCells().length}
-                      className="sticky inline-block w-full left-0 bg-[var(--figma-color-background)] font-medium p-2 pl-4 text-xs pt-8 h-14"
+                      className="sticky left-0 inline-block w-full bg-[var(--figma-color-background)] font-medium p-2 pl-4 text-xs pt-8 h-14"
                     >
                       {(row.groupingValue as string).split('/').map((part, index) => {
                         const isLast =
@@ -361,9 +381,16 @@ export function Table() {
                     row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
+                        onDoubleClick={() => {
+                          setCellSelection([cell.id]);
+                        }}
                         className={clsx(
-                          'p-0 h-10 text-xs table-border',
-                          cell.column.id === 'name' && 'sticky z-10 left-0'
+                          'p-0 h-10 text-xs table-border [&:nth-last-child(-n+2)]:after:border-r-0',
+                          cell.column.id === 'name' &&
+                            'sticky left-0 z-10 bg-[var(--figma-color-bg)]',
+                          cell.column.id === 'action' &&
+                            'sticky right-0 w-10 bg-[var(--figma-color-bg)] table-border after:border-l',
+                          cell.id === cellSelection[0] && 'cell-focus'
                         )}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -380,6 +407,7 @@ export function Table() {
 
           <button className="btn-outline flex gap-1">
             <IconAlertTriangleFilled className="text-yellow-500" size={12} />
+            Usability issues
           </button>
         </div>
       </div>

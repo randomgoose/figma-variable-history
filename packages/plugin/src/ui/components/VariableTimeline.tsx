@@ -21,6 +21,7 @@ import { CopyTextWrapper } from './CopyWrapper';
 import { ICommit } from '../../types';
 import * as Dropdown from '@radix-ui/react-dropdown-menu';
 import { useTranslation } from '../../hooks/useTranslation';
+import { parseDate } from '../../utils/date';
 
 const diffKeys = [
   'name',
@@ -51,8 +52,10 @@ function DiffItem({
   className?: string;
   commitId?: string;
 }) {
-  const { setSelectedCommitId } = useContext(AppContext);
+  const { setSelectedCommitId, commits } = useContext(AppContext);
   const { setTab } = useContext(AppContext);
+
+  const commit = commits.find((c) => c.id === commitId);
 
   return (
     <div className={clsx(styles.commitItem, 'group max-h-12', className)}>
@@ -63,12 +66,16 @@ function DiffItem({
       </div>
 
       <button
-        className=" shadow-sm border absolute opacity-0 group-hover:opacity-100 right-0 group-hover:right-3 top-1/2 -translate-y-1/2 bg-white border-gray-200 w-7 h-7 rounded-md flex items-center justify-center transition-all"
+        className="px-2 shadow-sm border absolute opacity-0 group-hover:opacity-100 right-0 group-hover:right-3 top-1/2 -translate-y-1/2 bg-white border-gray-200 h-7 rounded-md flex items-center justify-center transition-all gap-1"
         onClick={() => {
           setTab('commits');
           commitId && setSelectedCommitId(commitId);
         }}
       >
+        <span className="font-medium">{commit?.date && parseDate(commit?.date)}</span>
+        <span className="text-[var(--figma-color-text-secondary)]">
+          {commit?.collaborators[0]?.name}
+        </span>
         <IconArrowRight size={14} style={{ color: 'var(--figma-color-text-secondary)' }} />
       </button>
     </div>

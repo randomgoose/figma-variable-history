@@ -224,20 +224,45 @@ export class CommitBridge {
       .filter(Boolean) as [];
   }
 
+  /*
+    UPDATE 2025 Feb 06
+    - Add ignoredVariableIds to commit
+  */
   async commit(data: ICommit) {
     const commitInPluginData: CommitInPluginData = {
-      ...omit(data, ['variables', 'collections']),
+      ...omit(data, ['variables', 'collections', 'ignoredVariableIds']),
       collaborators: figma.currentUser ? [figma.currentUser] : [],
       delta: { variables: undefined, collections: undefined },
     };
 
     const { variables: headVariables = [], collections: headCollections = [] } =
       this.pluginData.head || {};
-    commitInPluginData.delta.variables = jsonDiff(headVariables, data.variables);
+
+    const filteredVariables = data.variables
+      ?.map((variable) =>
+        (data.ignoredVariableIds || []).includes(variable.id)
+          ? headVariables.find((v) => v.id === variable.id)
+          : variable
+      )
+      .filter((v) => v !== undefined);
+
+    data.ignoredVariableIds?.forEach((id) => {
+      if (!data.variables.find((v) => v.id === id)) {
+        const prevVariable = headVariables.find((v) => v.id === id);
+        if (prevVariable) {
+          filteredVariables.push(prevVariable);
+        }
+      }
+    });
+
+    commitInPluginData.delta.variables = jsonDiff(headVariables, filteredVariables);
     commitInPluginData.delta.collections = jsonDiff(headCollections, data.collections);
 
     // save updated data to figma.root
-    this.setLocalPluginData(data, [commitInPluginData, ...this.pluginData.commits]);
+    this.setLocalPluginData({ ...data, variables: filteredVariables }, [
+      commitInPluginData,
+      ...this.pluginData.commits,
+    ]);
     await this.emitData();
   }
 

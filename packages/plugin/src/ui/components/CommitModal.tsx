@@ -1,15 +1,17 @@
 import { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../AppContext';
-import { Root, Trigger, Portal, Overlay, Content, Title } from '@radix-ui/react-dialog';
+import { Root, Trigger, Portal, Overlay, Content, Title, Close } from '@radix-ui/react-dialog';
 import { AnimatePresence } from 'framer-motion';
 import { syncToGit } from '../../features/sync-to-git';
-import { sendMessage } from '../../utils/message';
+import { MESSAGE_TYPE, sendMessage } from '../../utils/message';
 import { syncToSlackChannel } from '../../features/sync-to-slack-channel';
 import { CustomHTTPSyncConfig, GitHubSyncConfig, SlackSyncConfig } from '../../types';
 import { IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-react';
 import { sendCustomRequest } from '../../features/send-custom-request';
 import { SyncTaskIcon } from './SyncTaskIcon';
 import { useTranslation } from '../../hooks/useTranslation';
+import { X } from 'lucide-react';
+import { unionBy } from 'lodash-es';
 
 const syncProgressMap: { [key: string]: ReactNode } = {
   pending: 'Pending',
@@ -26,7 +28,15 @@ const syncProgressMap: { [key: string]: ReactNode } = {
   error: <IconCircleXFilled size={14} style={{ color: 'var(--figma-color-text-danger)' }} />,
 };
 
-export function CommitModal({ disabled }: { disabled: boolean }) {
+export function CommitModal({
+  disabled,
+  numOfChanges,
+  numOfCheckedChanges,
+}: {
+  disabled: boolean;
+  numOfChanges?: number;
+  numOfCheckedChanges?: number;
+}) {
   const [summary, setSummary] = useState('');
   const [description, setDescription] = useState('');
   const [shouldSync, setShouldSync] = useState(false);
@@ -40,6 +50,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
     compiledVariables,
     clearCompiledVariables,
     setTab,
+    checkedVariableIds,
   } = useContext(AppContext);
   const [view, setView] = useState<'commit' | 'sync'>('commit');
   const [open, setOpen] = useState(false);
@@ -138,7 +149,11 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
     } else {
       const timestamp = +new Date();
 
-      sendMessage('COMMIT', {
+      const ignoredVariableIds = unionBy(variables, commits?.[0]?.variables, 'id')
+        .filter((variable) => !checkedVariableIds.includes(variable.id))
+        .map((variable) => variable.id);
+
+      sendMessage(MESSAGE_TYPE.COMMIT, {
         id: `${timestamp}`,
         date: timestamp,
         summary,
@@ -146,6 +161,7 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
         variables,
         collections,
         collaborators: [],
+        ignoredVariableIds,
       });
       sendMessage('CONVERT_VARIABLES_TO_CSS');
       setShouldSync(true);
@@ -256,8 +272,18 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
       }}
     >
       <Trigger asChild>
-        <button className="btn-primary" disabled={disabled} onClick={() => setOpen(true)}>
-          {t('commit')}
+        <button className="btn-primary gap-1" disabled={disabled} onClick={() => setOpen(true)}>
+          <span>{t('commit')}</span>
+          {numOfCheckedChanges && numOfCheckedChanges > 0 && (
+            <span className="text-xs text-[var(--figma-color-text-onbrand)]">
+              {numOfCheckedChanges}
+            </span>
+          )}
+          {numOfChanges !== numOfCheckedChanges && (
+            <span className="text-xs text-[var(--figma-color-text-onbrand-tertiary)]">
+              ({numOfChanges})
+            </span>
+          )}
         </button>
       </Trigger>
       <Portal>
@@ -268,7 +294,14 @@ export function CommitModal({ disabled }: { disabled: boolean }) {
           }}
         />
         <Content className="dialog-content h-fit">
-          <Title className="dialog-title">{t('commit')}</Title>
+          <Title className="dialog-title pr-2">
+            {t('commit')}
+            <Close asChild>
+              <button className="btn-icon ml-auto" onClick={() => setOpen(false)}>
+                <X strokeWidth={1.5} size={16} />
+              </button>
+            </Close>
+          </Title>
           <div className={'w-80 flex flex-col gap-3 p-3'}>
             <AnimatePresence>
               {view === 'commit' ? (

@@ -85,13 +85,19 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     AppContext['resolvedVariableValues']
   >({});
   const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
-  const [tab, setTab] = useState<AppContext['tab']>('editor');
+  const [tab, setTab] = useState<AppContext['tab']>('changes');
   const [compiledVariables, setCompiledVariables] = useState<{ css: string }>({ css: '' });
   const [selectedCommitId, setSelectedCommitId] = useState<string>('');
   const [zoom, setZoom] = useState<number>(1);
   const [selection, setSelection] = useState<string[]>([]);
   const [clipboard, setClipboard] = useState<ClipboardItem[]>([]);
   const [checkedVariableIds, setCheckedVariableIds] = useState<string[]>([]);
+
+  // The plugin gets initialized when the plugin:
+  // 1. receives the message from the plugin
+  // 2. check all changed variables
+  const [initialized, setInitialized] = useState<boolean>(false);
+
   const groupedChanges = useMemo(() => {
     return getVariableChangesGroupedByCollection({
       prev: {
@@ -101,6 +107,18 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       current: { variables, collections },
     });
   }, [commits, variables]);
+
+  useEffect(() => {
+    if (!initialized && Object.values(groupedChanges).length > 0) {
+      setCheckedVariableIds(
+        Object.values(groupedChanges)
+          .flatMap(({ added, modified, removed }) => [...added, ...modified, ...removed])
+          .map((v: Variable) => v.id)
+      );
+      setInitialized(true);
+    }
+  }, [groupedChanges, initialized]);
+
   const [cmdkOpen, setCMDKOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
 
@@ -112,7 +130,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         case 'IMPORT_VARIABLES':
           setVariables(payload.variables);
           setCollections(payload.collections);
-          setCheckedVariableIds(payload.variables.map((v: Variable) => v.id));
           break;
         case 'IMPORT_LOCAL_COMMITS':
           setCommits(payload);
