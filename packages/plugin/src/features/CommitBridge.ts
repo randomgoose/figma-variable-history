@@ -1,7 +1,7 @@
 import omit from 'lodash-es/omit';
 import { type Delta } from 'jsondiffpatch';
 
-import type { ICommit, VariableChangeType } from '../types';
+import type { ICommit, VariableChangeType } from '../types/index';
 import { jsonDiff, jsonPatch, jsonUnpatch } from '../utils/json-patch';
 import { figmaHelper } from '../utils/figma-helper';
 import { getVariableChanges } from '../utils/variable';
@@ -238,22 +238,11 @@ export class CommitBridge {
     const { variables: headVariables = [], collections: headCollections = [] } =
       this.pluginData.head || {};
 
-    const filteredVariables = data.variables
-      ?.map((variable) =>
-        (data.ignoredVariableIds || []).includes(variable.id)
-          ? headVariables.find((v) => v.id === variable.id)
-          : variable
-      )
-      .filter((v) => v !== undefined);
-
-    data.ignoredVariableIds?.forEach((id) => {
-      if (!data.variables.find((v) => v.id === id)) {
-        const prevVariable = headVariables.find((v) => v.id === id);
-        if (prevVariable) {
-          filteredVariables.push(prevVariable);
-        }
-      }
-    });
+    const ignoredIds = data.ignoredVariableIds || [];
+    const filteredVariables = [
+      ...data.variables.filter(({ id }) => !ignoredIds.includes(id)),
+      ...headVariables.filter(({ id }) => ignoredIds.includes(id)),
+    ];
 
     commitInPluginData.delta.variables = jsonDiff(headVariables, filteredVariables);
     commitInPluginData.delta.collections = jsonDiff(headCollections, data.collections);
