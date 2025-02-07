@@ -270,7 +270,10 @@ export const figmaHelper = {
         variable.setValueForMode(modeId, value)
       );
     }
+
+    figma.commitUndo();
   },
+
   async autoCompleteCodeSyntax() {
     const variables = await figma.variables.getLocalVariablesAsync();
     variables.forEach((variable) => {

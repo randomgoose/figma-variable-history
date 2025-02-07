@@ -153,6 +153,9 @@ importers:
       ag-grid-react:
         specifier: ^33.0.4
         version: 33.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      chroma-js:
+        specifier: ^3.1.2
+        version: 3.1.2
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -202,6 +205,9 @@ importers:
       '@figma/widget-typings':
         specifier: ^1.9.1
         version: 1.9.1(@figma/plugin-typings@1.96.0)
+      '@types/chroma-js':
+        specifier: ^3.1.1
+        version: 3.1.1
       '@types/diff':
         specifier: ^5.2.1
         version: 5.2.1
@@ -2071,6 +2077,9 @@ packages:
   '@types/babel__traverse@7.20.6':
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
 
+  '@types/chroma-js@3.1.1':
+    resolution: {integrity: sha512-SFCr4edNkZ1bGaLzGz7rgR1bRzVX4MmMxwsIa3/Bh6ose8v+hRpneoizHv0KChdjxaXyjRtaMq7sCuZSzPomQA==}
+
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
 
@@ -2542,6 +2551,9 @@ packages:
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
     engines: {node: '>= 14.16.0'}
+
+  chroma-js@3.1.2:
+    resolution: {integrity: sha512-IJnETTalXbsLx1eKEgx19d5L6SRM7cH4vINw/99p/M11HCuXGRWL+6YmCm7FWFGIo6dtWuQoQi1dc5yQ7ESIHg==}
 
   classcat@5.0.5:
     resolution: {integrity: sha512-JhZUT7JFcQy/EzW605k/ktHtncoo9vnyW/2GspNYwFlN1C/WmjuV/xtS04e9SOkL2sTdw0VAZ2UGCcQ9lR6p6w==}
@@ -7548,6 +7560,8 @@ snapshots:
     dependencies:
       '@babel/types': 7.24.7
 
+  '@types/chroma-js@3.1.1': {}
+
   '@types/cookie@0.6.0': {}
 
   '@types/d3-color@3.1.3': {}
@@ -8114,6 +8128,8 @@ snapshots:
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.1
+
+  chroma-js@3.1.2: {}
 
   classcat@5.0.5: {}
 
