@@ -10,7 +10,6 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { Variables } from './ui/pages/Variables';
 import { sendMessage } from './utils/message';
 import { useTranslation } from './hooks/useTranslation';
-// import { Table } from './ui/pages/Table';
 import { ResizeHandle } from './ui/components/ResizeHandle';
 
 function Plugin() {

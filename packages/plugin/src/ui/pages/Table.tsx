@@ -32,9 +32,13 @@ export function Table() {
 
   const [grouping, setGrouping] = useState<GroupingState>(['name']);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [cellSelection, setCellSelection] = useState<string[]>([]);
+  const [cellSelection] = useState<string[]>([]);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const [selectedGroupPath, setSelectedGroupPath] = useState<string | null>(null);
+  const [selectedCells, setSelectedCells] = useState<{ rowId: string; columnId: string }[]>([]);
+  const [selectionStart, setSelectionStart] = useState<{ rowId: string; columnId: string } | null>(
+    null
+  );
 
   const columnHelper = createColumnHelper<any>();
 
@@ -63,7 +67,7 @@ export function Table() {
                 variableManager.updateVariable(row.original.id, {
                   name: row.original.name.substring(0, lastSlashIndex) + '/' + value,
                 });
-                setCellSelection([]);
+                setSelectedCells([]);
               }}
             />
           );
@@ -89,9 +93,14 @@ export function Table() {
               case 'COLOR':
                 return (
                   <EditableColorCell
-                    // onChange={() => { }}
                     variable={row.original}
                     modeId={m.modeId}
+                    onInputFocus={() => {
+                      row.getToggleSelectedHandler();
+                    }}
+                    onInputBlur={() => {
+                      setSelectedCells([]);
+                    }}
                   />
                 );
               default:
@@ -115,7 +124,7 @@ export function Table() {
         // cell: () => <button className='btn-icon'><IconPlus /></button>
       }),
     ],
-    [currentCollection, cellSelection, variables]
+    [currentCollection]
   );
 
   const data = useMemo(() => {
@@ -271,6 +280,39 @@ export function Table() {
     );
   };
 
+  const handleCellClick = (rowId: string, columnId: string, event: React.MouseEvent) => {
+    if (event.shiftKey && selectionStart) {
+      // Get all rows and columns between selection start and current cell
+      const rows = table.getRowModel().rows;
+      const columns = table.getAllLeafColumns();
+
+      const startRowIndex = rows.findIndex((row) => row.id === selectionStart.rowId);
+      const endRowIndex = rows.findIndex((row) => row.id === rowId);
+      const startColIndex = columns.findIndex((col) => col.id === selectionStart.columnId);
+      const endColIndex = columns.findIndex((col) => col.id === columnId);
+
+      const minRowIndex = Math.min(startRowIndex, endRowIndex);
+      const maxRowIndex = Math.max(startRowIndex, endRowIndex);
+      const minColIndex = Math.min(startColIndex, endColIndex);
+      const maxColIndex = Math.max(startColIndex, endColIndex);
+
+      const newSelection = [];
+      for (let i = minRowIndex; i <= maxRowIndex; i++) {
+        for (let j = minColIndex; j <= maxColIndex; j++) {
+          newSelection.push({
+            rowId: rows[i].id,
+            columnId: columns[j].id,
+          });
+        }
+      }
+      setSelectedCells(newSelection);
+    } else {
+      // Single cell selection
+      setSelectedCells([{ rowId, columnId }]);
+      setSelectionStart({ rowId, columnId });
+    }
+  };
+
   return (
     <div className="w-full flex" style={{ height: 'calc(100vh - 40px)' }}>
       <aside className="w-[200px] shrink-0 border-r border-[var(--figma-color-border)] flex flex-col">
@@ -350,7 +392,6 @@ export function Table() {
                   key={row.id}
                   className={clsx(
                     'border-[var(--figma-color-border)]',
-                    row.getIsSelected() && 'bg-[var(--figma-color-bg-selected)]',
                     !row.getIsGrouped() ? '' : 'border-b'
                   )}
                   onClick={(e) => handleRowClick(row, e)}
@@ -381,15 +422,16 @@ export function Table() {
                     row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        onDoubleClick={() => {
-                          setCellSelection([cell.id]);
-                        }}
+                        onClick={(e) => handleCellClick(row.id, cell.column.id, e)}
                         className={clsx(
                           'p-0 h-10 text-xs table-border [&:nth-last-child(-n+2)]:after:border-r-0',
-                          cell.column.id === 'name' &&
-                            'sticky left-0 z-10 bg-[var(--figma-color-bg)]',
+                          selectedCells.some(
+                            (sel) => sel.rowId === row.id && sel.columnId === cell.column.id
+                          ) && 'cell-focus',
+                          row.getIsSelected() && 'bg-[var(--figma-color-bg-selected)]',
+                          cell.column.id === 'name' && 'sticky left-0 z-10',
                           cell.column.id === 'action' &&
-                            'sticky right-0 w-10 bg-[var(--figma-color-bg)] table-border after:border-l',
+                            'sticky right-0 w-10 table-border after:border-l',
                           cell.id === cellSelection[0] && 'cell-focus'
                         )}
                       >

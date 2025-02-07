@@ -1,11 +1,52 @@
-import { convertFigmaRGBtoHexString } from '../../../utils/color';
+import { convertFigmaRGBtoHexString, convertHexColorToFigmaRGBA } from '../../../utils/color';
 import { Swatch } from '../Swatch';
 import { ColorPicker } from '../panels/ColorPicker';
 import { variableManager } from '../../../utils/message';
-import { useState, MouseEvent } from 'react';
+import { useState, MouseEvent, useRef } from 'react';
+import chroma from 'chroma-js';
 
-export function EditableColorCell({ variable, modeId }: { variable: Variable; modeId: string }) {
+export function EditableColorCell({
+  variable,
+  modeId,
+  onInputFocus,
+  onInputBlur,
+}: {
+  variable: Variable;
+  modeId: string;
+  onInputFocus: () => void;
+  onInputBlur: () => void;
+}) {
   const value = variable.valuesByMode[modeId];
+  const colorInputRef = useRef<HTMLInputElement>(null);
+  const alphaInputRef = useRef<HTMLInputElement>(null);
+
+  const handleColorInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const v = e.target.value;
+
+    if (typeof value === 'object' && 'a' in value) {
+      if (chroma.valid(v)) {
+        const { r, g, b } = convertHexColorToFigmaRGBA(chroma(v).hex());
+        const a = value.a ? value.a : 1;
+
+        variableManager.updateVariable(variable.id, { valuesByMode: { [modeId]: { r, g, b, a } } });
+      } else {
+      }
+    }
+
+    // console.log()
+    onInputBlur();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') {
+      colorInputRef.current?.blur();
+    }
+  };
+
   const [rgb] = useState(
     typeof value === 'object' && 'r' in value
       ? { r: value.r, g: value.g, b: value.b, a: 'a' in value ? value.a : 1 }
@@ -21,6 +62,7 @@ export function EditableColorCell({ variable, modeId }: { variable: Variable; mo
     return (
       <div
         className="flex items-center gap-2 pl-4 pr-2 h-full group w-[200px] truncate"
+        onKeyDown={(e) => e.stopPropagation()}
         onClick={() => {
           // console.log('clicked');
         }}
@@ -29,7 +71,14 @@ export function EditableColorCell({ variable, modeId }: { variable: Variable; mo
           <Swatch color={rgb} />
         </ColorPicker>
         <input
+          ref={colorInputRef}
+          onKeyDown={handleKeyDown}
+          onFocus={() => {
+            colorInputRef.current?.select();
+            onInputFocus();
+          }}
           className="w-full h-full font-medium text-[11px] bg-transparent uppercase"
+          onBlur={handleColorInputBlur}
           defaultValue={convertFigmaRGBtoHexString(rgb, { hashtag: false, alpha: false })}
         />
         {'a' in value ? (
@@ -39,6 +88,10 @@ export function EditableColorCell({ variable, modeId }: { variable: Variable; mo
               type="number"
               value={alpha}
               onChange={(e) => setAlpha(Number(e.target.value))}
+              onFocus={() => {
+                alphaInputRef.current?.select();
+                onInputFocus();
+              }}
             />
 
             <div
