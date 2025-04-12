@@ -66,7 +66,7 @@ export function convertFigmaRGBtoHSLString(data: RGB | RGBA) {
 
 export function convertFigmaRGBtoHexString(
   data: RGB | RGBA,
-  options?: { hashtag?: boolean; alpha?: boolean }
+  options?: { hashtag?: boolean; alpha?: boolean; uppercase?: boolean }
 ) {
   // Convert Figma RGB values (0-1) to hex (00-FF)
   const toHex = (value: number): string => {
@@ -74,9 +74,9 @@ export function convertFigmaRGBtoHexString(
     return hex.length === 1 ? '0' + hex : hex;
   };
 
-  const r = toHex(data.r);
-  const g = toHex(data.g);
-  const b = toHex(data.b);
+  const r = options?.uppercase ? toHex(data.r).toUpperCase() : toHex(data.r);
+  const g = options?.uppercase ? toHex(data.g).toUpperCase() : toHex(data.g);
+  const b = options?.uppercase ? toHex(data.b).toUpperCase() : toHex(data.b);
 
   // If alpha is present and not 1, include it in the hex string
   if (options?.alpha && 'a' in data && data.a !== 1) {
@@ -160,4 +160,37 @@ export function convertRgbColorToHexColor(rgbColor: RGB): null | string {
   const b = toHex(rgbColor.b);
 
   return `#${r}${g}${b}`;
+}
+
+/**
+ * Calculate the relative luminance of a color according to WCAG 2.0
+ */
+function calculateRelativeLuminance(color: RGB): number {
+  const toSRGB = (value: number): number => {
+    value = value * 255;
+    value = value / 255;
+    return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  };
+
+  const r = toSRGB(color.r);
+  const g = toSRGB(color.g);
+  const b = toSRGB(color.b);
+
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * Calculate the contrast ratio between two colors according to WCAG 2.0
+ * @param color1 First color in Figma RGB format
+ * @param color2 Second color in Figma RGB format
+ * @returns Contrast ratio (1-21)
+ */
+export function calculateContrastRatio(color1: RGB, color2: RGB): number {
+  const l1 = calculateRelativeLuminance(color1);
+  const l2 = calculateRelativeLuminance(color2);
+
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+
+  return (lighter + 0.05) / (darker + 0.05);
 }

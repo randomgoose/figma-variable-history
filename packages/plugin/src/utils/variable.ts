@@ -241,3 +241,33 @@ export function isAlias(value: VariableValue) {
 }
 
 // export function getVariable
+
+export function getNextVariableNames(baseNames: string[], variables: Variable[]): string[] {
+  // Get the highest number from existing variables
+  const allNumbers = variables
+    .map((v) => {
+      const match = v.name.match(/^(.*?)\s*(\d*)$/);
+      const num = match?.[2] ? parseInt(match[2]) : 0;
+      return num;
+    })
+    .filter((n) => !isNaN(n));
+
+  // Get the highest number from input baseNames
+  const inputNumbers = baseNames
+    .map((name) => {
+      const match = name.match(/^(.*?)\s*(\d*)$/);
+      const num = match?.[2] ? parseInt(match[2]) : 0;
+      return num;
+    })
+    .filter((n) => !isNaN(n));
+
+  // Find the starting number for new names
+  const startNumber = Math.max(...allNumbers, ...inputNumbers, 0) + 1;
+
+  // Use the first basename as template
+  const baseNameMatch = baseNames[0].match(/^(.*?)\s*(\d*)$/);
+  const basePrefix = baseNameMatch?.[1]?.trim() || baseNames[0];
+
+  // Generate sequential names
+  return Array.from({ length: baseNames.length }, (_, i) => `${basePrefix} ${startNumber + i}`);
+}

@@ -1,12 +1,15 @@
-import { createContext, useMemo, useState, ReactNode, useEffect } from 'react';
+import { createContext, useMemo, useState, ReactNode, useEffect, useCallback } from 'react';
 
 import type { ICommit, PluginSetting } from './types';
 import { getVariableChangesGroupedByCollection } from './utils/variable';
 import { ClipboardItem } from './types/clipboard';
+import { MESSAGE_TYPE, sendMessage } from './utils/message';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 interface AppContext {
   setting: PluginSetting;
   variables: Variable[];
+  setVariables: (variables: Variable[]) => void;
   collections: VariableCollection[];
   commits: ICommit[];
   variableAliases: Record<string, string>;
@@ -44,11 +47,24 @@ interface AppContext {
   // Selected variables in Changes
   checkedVariableIds: string[];
   setCheckedVariableIds: React.Dispatch<React.SetStateAction<string[]>>;
+  teamLibraries: {
+    [key: string]: { variables: Variable[]; variableCollections: VariableCollection[] };
+  };
+  setTeamLibraries: React.Dispatch<
+    React.SetStateAction<{
+      [key: string]: { variables: Variable[]; variableCollections: VariableCollection[] };
+    }>
+  >;
+  currentCollectionId: string | null;
+  setCurrentCollectionId: React.Dispatch<React.SetStateAction<string | null>>;
+  modes: Record<string, string>;
+  invalidateResolvedVariableValue: (variableId: string, modeId: string) => void;
 }
 
 export const AppContext = createContext<AppContext>({
   setting: { syncTasks: [], colorFormat: 'RGB' },
   variables: [],
+  setVariables: () => null,
   collections: [],
   commits: [],
   variableAliases: {},
@@ -73,6 +89,12 @@ export const AppContext = createContext<AppContext>({
   setSearch: () => null,
   checkedVariableIds: [],
   setCheckedVariableIds: () => null,
+  teamLibraries: {},
+  setTeamLibraries: () => null,
+  currentCollectionId: null,
+  setCurrentCollectionId: () => null,
+  modes: {},
+  invalidateResolvedVariableValue: () => null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -85,13 +107,28 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     AppContext['resolvedVariableValues']
   >({});
   const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
-  const [tab, setTab] = useState<AppContext['tab']>('changes');
+  const [tab, setTab] = useState<AppContext['tab']>('editor');
   const [compiledVariables, setCompiledVariables] = useState<{ css: string }>({ css: '' });
   const [selectedCommitId, setSelectedCommitId] = useState<string>('');
   const [zoom, setZoom] = useState<number>(1);
   const [selection, setSelection] = useState<string[]>([]);
   const [clipboard, setClipboard] = useState<ClipboardItem[]>([]);
   const [checkedVariableIds, setCheckedVariableIds] = useState<string[]>([]);
+  const [teamLibraries, setTeamLibraries] = useState<AppContext['teamLibraries']>({});
+  const [currentCollectionId, setCurrentCollectionId] = useState<string | null>(null);
+
+  const invalidateResolvedVariableValue = useCallback((variableId: string, modeId: string) => {
+    setResolvedVariableValues((prev) => {
+      const newValues = { ...prev };
+      delete newValues[variableId]?.valuesByMode[modeId];
+      return newValues;
+    });
+
+    sendMessage(MESSAGE_TYPE.RESOLVE_VARIABLE_VALUE, {
+      id: variableId,
+      modeId,
+    });
+  }, []);
 
   // The plugin gets initialized when the plugin:
   // 1. receives the message from the plugin
@@ -122,14 +159,45 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [cmdkOpen, setCMDKOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
 
+  useHotkeys('meta+z', () => {
+    sendMessage(MESSAGE_TYPE.UNDO);
+  });
+
   useEffect(() => {
     onmessage = async (e) => {
       const { type, payload } = e.data.pluginMessage;
 
       switch (type) {
         case 'IMPORT_VARIABLES':
-          setVariables(payload.variables);
-          setCollections(payload.collections);
+          setVariables((prevVariables) => {
+            // Create maps for faster lookup
+            const prevVariableMap = new Map(prevVariables.map((v) => [v.id, v]));
+
+            // Check for changes: modifications, additions, or removals
+            const hasChanges =
+              prevVariables.length !== payload.variables.length || // Different length means changes
+              payload.variables.some((v: Variable) => {
+                const prevVar = prevVariableMap.get(v.id);
+                return !prevVar || JSON.stringify(prevVar) !== JSON.stringify(v);
+              });
+
+            return hasChanges ? payload.variables : prevVariables;
+          });
+
+          setCollections((prevCollections) => {
+            // Create maps for faster lookup
+            const prevCollectionMap = new Map(prevCollections.map((c) => [c.id, c]));
+
+            // Check for changes: modifications, additions, or removals
+            const hasChanges =
+              prevCollections.length !== payload.collections.length || // Different length means changes
+              payload.collections.some((c: VariableCollection) => {
+                const prevCol = prevCollectionMap.get(c.id);
+                return !prevCol || JSON.stringify(prevCol) !== JSON.stringify(c);
+              });
+
+            return hasChanges ? payload.collections : prevCollections;
+          });
           break;
         case 'IMPORT_LOCAL_COMMITS':
           setCommits(payload);
@@ -146,7 +214,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
           }));
           break;
         case 'SET_VARIABLE_ALIAS':
-          setVariableAliases((prev) => ({ ...prev, [payload.id]: payload.name }));
+          setVariableAliases((prev) => ({ ...prev, ...payload }));
           break;
         case 'PLUGIN_SETTING':
           setSetting(payload);
@@ -167,6 +235,22 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
             });
             return values;
           });
+          break;
+        case MESSAGE_TYPE.IMPORT_TEAM_LIBRARIES:
+          setTeamLibraries(payload);
+          break;
+        case MESSAGE_TYPE.APPEND_VARIABLE_COLLECTION:
+          setCollections((prevCollections) => [...prevCollections, payload]);
+          setCurrentCollectionId(payload.id);
+          break;
+        case MESSAGE_TYPE.IMPORT_COLLECTIONS_AND_VARIABLES_IN_TEAM_LIBRARY:
+          setTeamLibraries((prev) => ({
+            ...prev,
+            [payload.name]: {
+              variables: payload.variables,
+              variableCollections: payload.collections,
+            },
+          }));
           break;
       }
     };
@@ -192,10 +276,17 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
 
   const clearCompiledVariables = () => setCompiledVariables({ css: '' });
 
+  const modes = useMemo(() => {
+    return Object.fromEntries(
+      collections.flatMap((collection) => collection.modes.map((mode) => [mode.modeId, mode.name]))
+    );
+  }, [collections]);
+
   const context = useMemo<AppContext>(() => {
     return {
       setting,
       variables,
+      setVariables,
       collections,
       commits,
       variableAliases,
@@ -220,10 +311,17 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       setSearch,
       checkedVariableIds,
       setCheckedVariableIds,
+      teamLibraries,
+      setTeamLibraries,
+      currentCollectionId,
+      setCurrentCollectionId,
+      modes,
+      invalidateResolvedVariableValue,
     };
   }, [
     setting,
     variables,
+    setVariables,
     collections,
     commits,
     variableAliases,
@@ -248,6 +346,12 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     setSearch,
     checkedVariableIds,
     setCheckedVariableIds,
+    teamLibraries,
+    setTeamLibraries,
+    currentCollectionId,
+    setCurrentCollectionId,
+    modes,
+    invalidateResolvedVariableValue,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

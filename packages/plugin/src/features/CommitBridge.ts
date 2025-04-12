@@ -289,9 +289,13 @@ export class CommitBridge {
 
   async revertVariable(variable: Variable, type: VariableChangeType) {
     const lastCommit = this.getCommits()?.[0];
-    //TODO: Fix this
+    // Updated 2025 Feb 18
+    // Changed disableVariable to remove(), this is only called when drop an uncommitted change.
+    // It's ok to just remove the variable from the local variables.
     if (type === 'added') {
-      await figmaHelper.disableVariable(variable);
+      const v = await figma.variables.getVariableByIdAsync(variable.id);
+      if (v) v.remove();
+      // await figmaHelper.disableVariable(variable);
     } else if (type === 'modified') {
       const v = lastCommit.variables.find((v) => v.id === variable.id);
       if (v)

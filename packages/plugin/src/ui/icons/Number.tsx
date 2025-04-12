@@ -2,13 +2,13 @@ export function Number() {
   return (
     <svg width="24" height="24" fill="none" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
       <path
-        fill="var(--figma-color-icon)"
+        fill="currentColor"
         fillRule="evenodd"
         d="M11.498 9.55a.5.5 0 1 0-.995-.1l-.056.55H9.5a.5.5 0 0 0 0 1h.848l-.2 2H9.5a.5.5 0 0 0 0 1h.547l-.045.45a.5.5 0 0 0 .995.1l.056-.55h1.494l-.045.45a.5.5 0 0 0 .995.1l.056-.55h.947a.5.5 0 0 0 0-1h-.848l.2-2h.648a.5.5 0 0 0 0-1h-.547l.045-.45a.5.5 0 1 0-.995-.1l-.056.55h-1.494zM11.153 13l.2-2h1.495l-.2 2z"
         clipRule="evenodd"
       />
       <path
-        fill="var(--figma-color-icon)"
+        fill="currentColor"
         fillRule="evenodd"
         d="M8 6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zM7 8a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"
         clipRule="evenodd"

@@ -1,0 +1,12 @@
+export function List() {
+  return (
+    <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M6 7a1 1 0 1 1 2 0 1 1 0 0 1-2 0m4.5-.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1zm0 10a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1zm0-5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1zM6 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0m1 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}

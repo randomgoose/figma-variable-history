@@ -4,10 +4,11 @@ import {
   PLUGIN_DATA_KEY_HEAD,
   PLUGIN_DATA_KEY_PREFIX,
 } from '../config';
-import { isSameVariable } from './variable';
+import { getNextVariableNames, isSameVariable } from './variable';
 import { ICommit } from '../types';
 import { commitBridge } from '../features/CommitBridge';
 import { cloneObject } from './object';
+import { groupBy } from 'lodash-es';
 
 export const figmaHelper = {
   clearPluginData() {
@@ -251,27 +252,38 @@ export const figmaHelper = {
   // Different from `updateVariable`, this function simply update the current variable,
   // and will not trigger the commit bridge to update the plugin data
   async setVariable(variableId: string, data: Partial<Variable>) {
+    const codeSyntaxPlatforms: CodeSyntaxPlatform[] = ['WEB', 'ANDROID', 'iOS'];
     const variable = await figma.variables.getVariableByIdAsync(variableId);
 
     if (!variable) return;
 
     if (data.name) variable.name = data.name;
     if (data.description) variable.description = data.description;
-    if (data.hiddenFromPublishing) variable.hiddenFromPublishing = data.hiddenFromPublishing;
     if (data.scopes) variable.scopes = data.scopes;
-    if (data.codeSyntax) {
-      Object.entries(data.codeSyntax).forEach(([platform, syntax]) =>
-        variable.setVariableCodeSyntax(platform as CodeSyntaxPlatform, syntax)
-      );
-    }
+    if (typeof data.hiddenFromPublishing === 'boolean')
+      variable.hiddenFromPublishing = data.hiddenFromPublishing;
 
     if (data.valuesByMode) {
-      Object.entries(data.valuesByMode).forEach(([modeId, value]) =>
-        variable.setValueForMode(modeId, value)
-      );
+      Object.entries(data.valuesByMode).forEach(([modeId, value]) => {
+        variable.setValueForMode(modeId, value);
+      });
+    }
+
+    if (data.codeSyntax) {
+      codeSyntaxPlatforms.forEach((platform) => {
+        if (data?.codeSyntax?.[platform]) {
+          variable.setVariableCodeSyntax(platform, data.codeSyntax[platform]);
+        } else {
+          if (variable.codeSyntax[platform]) {
+            variable.removeVariableCodeSyntax(platform);
+          }
+        }
+      });
     }
 
     figma.commitUndo();
+
+    return variable;
   },
 
   async autoCompleteCodeSyntax() {
@@ -319,8 +331,142 @@ export const figmaHelper = {
 
   async getTeamVariableLibraries() {
     const collections = await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync();
-    // const libraries = groupBy(collections, 'libraryName');
+    const libraries: Record<
+      string,
+      { variables: Variable[]; variableCollections: VariableCollection[] }
+    > = {};
 
-    return collections;
+    Object.entries(groupBy(collections, 'libraryName')).forEach(([key]) => {
+      libraries[key] = {
+        variables: [],
+        variableCollections: [],
+      };
+    });
+
+    return libraries;
+  },
+
+  async detachAlias(id: string, modeId: string) {
+    const variable = await figma.variables.getVariableByIdAsync(id);
+    if (!variable) return;
+
+    const consumer = figma.createFrame();
+    const resolved = await figmaHelper.resolveVariableAlias(id, modeId, consumer);
+    consumer.remove();
+
+    if (resolved) {
+      variable.setValueForMode(modeId, resolved.value);
+    }
+  },
+
+  async createVariable(
+    name: string,
+    collection: VariableCollection,
+    type: VariableResolvedDataType
+  ) {
+    if (!collection) return;
+
+    const variable = figma.variables.createVariable(name, collection, type);
+    return variable;
+  },
+
+  async createVariableCollection() {
+    const collections = await figma.variables.getLocalVariableCollectionsAsync();
+    const existingMaxNameIndex = collections
+      .map((c) => {
+        const match = c.name.match(/^Collection (\d+)$/);
+        return match ? parseInt(match[1], 10) : 0;
+      })
+      .reduce((max, current) => Math.max(max, current), 0);
+
+    const collection = figma.variables.createVariableCollection(
+      `Collection ${existingMaxNameIndex + 1}`
+    );
+    return collection;
+  },
+
+  async renameVariableCollection(id: string, name: string) {
+    const collection = await figma.variables.getVariableCollectionByIdAsync(id);
+    if (!collection) return;
+
+    collection.name = name;
+  },
+
+  async deleteVariableCollection(id: string) {
+    const collection = await figma.variables.getVariableCollectionByIdAsync(id);
+    if (!collection) return;
+
+    collection.remove();
+  },
+
+  async addMode(collectionId: string, name: string) {
+    const collection = await figma.variables.getVariableCollectionByIdAsync(collectionId);
+    if (!collection) return;
+
+    collection.addMode(name);
+  },
+
+  async duplicateVariables(variableIds: string[]) {
+    const localVariables = await figma.variables.getLocalVariablesAsync();
+    if (!variableIds.length) return;
+
+    const variables = await Promise.all(
+      variableIds.map((id) => figma.variables.getVariableByIdAsync(id))
+    );
+    const names = getNextVariableNames(
+      variables.map((v) => v?.name || ''),
+      localVariables
+    );
+
+    return await Promise.all(
+      variables.map(async (variable, index) => {
+        if (!variable) return;
+
+        const collection = (await figma.variables.getLocalVariableCollectionsAsync()).find(
+          (c) => c.id === variable.variableCollectionId
+        );
+        if (!collection) return;
+
+        return figma.variables.createVariable(names[index], collection, variable.resolvedType);
+      })
+    );
+  },
+
+  async getTeamLibraryByName(name: string) {
+    const collectionIds: string[] = [];
+
+    const allCollections = await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync();
+    const variableRefs = (
+      await Promise.all(
+        allCollections
+          .filter((c) => c.libraryName === name)
+          .map((c) => figma.teamLibrary.getVariablesInLibraryCollectionAsync(c.key))
+      )
+    ).flat();
+    const variables = await Promise.all(
+      variableRefs.map((v) => figma.variables.importVariableByKeyAsync(v.key))
+    );
+
+    variables.forEach((v) => {
+      if (!collectionIds.includes(v.variableCollectionId)) {
+        collectionIds.push(v.variableCollectionId);
+      }
+    });
+
+    const collections = await Promise.all(
+      collectionIds.map((id) => figma.variables.getVariableCollectionByIdAsync(id))
+    );
+
+    return {
+      collections: collections.map((c) => cloneObject(c)),
+      variables: variables.map((v) => cloneObject(v)),
+    };
+  },
+
+  async renameMode(collectionId: string, modeId: string, name: string) {
+    const collection = await figma.variables.getVariableCollectionByIdAsync(collectionId);
+    if (!collection) return;
+
+    collection.renameMode(modeId, name);
   },
 };

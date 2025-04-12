@@ -4,11 +4,14 @@ import { commitBridge } from './features/CommitBridge';
 import { figmaHelper } from './utils/figma-helper';
 import { PLUGIN_DATA_KEY_SETTING } from './config';
 import { MESSAGE_TYPE } from './utils/message';
+import { cloneObject } from './utils/object';
+import { getNextVariableNames } from './utils/variable';
 
 export default async function () {
-  figma.notify('Resolving variable aliases...');
   const variables = await figma.variables.getLocalVariablesAsync();
   const collections = await figma.variables.getLocalVariableCollectionsAsync();
+  const libraries = await figmaHelper.getTeamVariableLibraries();
+  const ALIAS_NAME_MAP: Record<string, string> = {};
 
   const consumer = figma.createFrame();
 
@@ -50,6 +53,24 @@ export default async function () {
 
   consumer.remove();
 
+  await Promise.all(
+    variables.map(async (variable) => {
+      const promises = Object.values(variable.valuesByMode).map(async (value) => {
+        if (typeof value === 'object' && 'type' in value) {
+          if (ALIAS_NAME_MAP[value.id]) {
+            return;
+          }
+          const v = await figmaHelper.getVariableByIdAsync(value.id);
+          if (v) {
+            ALIAS_NAME_MAP[v.id] = v.name;
+          }
+        }
+      });
+
+      await Promise.all(promises);
+    })
+  );
+
   const windowSize = (await figma.clientStorage.getAsync(
     `${PLUGIN_DATA_KEY_SETTING}_windowSize`
   )) || {
@@ -64,6 +85,13 @@ export default async function () {
     type: MESSAGE_TYPE.VARIABLE_ALIAS_RESOLVED,
     payload: results,
   });
+
+  figma.ui.postMessage({
+    type: 'SET_VARIABLE_ALIAS',
+    payload: ALIAS_NAME_MAP,
+  });
+
+  figma.ui.postMessage({ type: MESSAGE_TYPE.IMPORT_TEAM_LIBRARIES, payload: libraries });
 
   figma.ui.onmessage = async (msg) => {
     switch (msg.type) {
@@ -109,7 +137,7 @@ export default async function () {
       //   const container = await generateChangeLog();
       //   figma.viewport.center = { x: container.x, y: container.y };
       //   break;
-      case 'RESOLVE_VARIABLE_VALUE':
+      case MESSAGE_TYPE.RESOLVE_VARIABLE_VALUE:
         const consumer = figma.createFrame();
         const resolvedVariableValue = await figmaHelper.resolveVariableAlias(
           msg.payload.id,
@@ -139,7 +167,7 @@ export default async function () {
           if (variable) {
             figma.ui.postMessage({
               type: 'SET_VARIABLE_ALIAS',
-              payload: { id: variable.id, name: variable.name },
+              payload: { [msg.payload]: variable.name }, // Updated to use the original id, because the imported variable has a different id
             });
           }
         } else {
@@ -149,7 +177,7 @@ export default async function () {
           if (variable) {
             figma.ui.postMessage({
               type: 'SET_VARIABLE_ALIAS',
-              payload: { id: variable.id, name: variable.name },
+              payload: { [msg.payload]: variable.name },
             });
           }
         }
@@ -185,6 +213,9 @@ export default async function () {
       //   break;
       case MESSAGE_TYPE.SET_VARIABLE:
         await figmaHelper.setVariable(msg.payload.id, msg.payload.update);
+        // Added Feb 16, 2025
+        // Resolve the variable value
+        // await figmaHelper.resolveVariableAlias(msg.payload.id, msg.payload.modeId, consumer);
         await commitBridge.emitData();
         break;
       case MESSAGE_TYPE.UPDATE_VARIABLE_GROUP:
@@ -199,6 +230,112 @@ export default async function () {
           console.error('Failed to set plugin data', err);
         }
         break;
+      case MESSAGE_TYPE.DETACH_ALIAS:
+        await figmaHelper.detachAlias(msg.payload.id, msg.payload.modeId);
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.CREATE_VARIABLE_COLLECTION:
+        const collection = await figmaHelper.createVariableCollection();
+        figma.ui.postMessage({
+          type: MESSAGE_TYPE.APPEND_VARIABLE_COLLECTION,
+          payload: cloneObject(collection),
+        });
+
+        break;
+      case MESSAGE_TYPE.DELETE_VARIABLE_COLLECTION:
+        await figmaHelper.deleteVariableCollection(msg.payload.id);
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.RENAME_VARIABLE_COLLECTION:
+        await figmaHelper.renameVariableCollection(msg.payload.id, msg.payload.name);
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.ADD_MODE:
+        await figmaHelper.addMode(msg.payload.collectionId, msg.payload.name);
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.CREATE_VARIABLE:
+        let variableId = '';
+        const collections = await figma.variables.getLocalVariableCollectionsAsync();
+        const variables = await figma.variables.getLocalVariablesAsync();
+
+        // Map variable types to proper capitalized names
+        const typeNameMap: Record<string, string> = {
+          COLOR: 'Color',
+          STRING: 'String',
+          FLOAT: 'Number',
+          BOOLEAN: 'Boolean',
+        };
+
+        const baseName = typeNameMap[msg.payload.type] || msg.payload.type;
+        const newNames = getNextVariableNames([baseName], variables);
+        const newName = newNames[0];
+
+        if (collections.length <= 0) {
+          const collection = await figmaHelper.createVariableCollection();
+          const variable = await figmaHelper.createVariable(newName, collection, msg.payload.type);
+          variableId = variable?.id || '';
+        } else {
+          const collection = collections.find((c) => c.id === msg.payload.collectionId);
+          if (collection) {
+            const variable = await figmaHelper.createVariable(
+              newName,
+              collection,
+              msg.payload.type
+            );
+            variableId = variable?.id || '';
+          }
+        }
+        figma.commitUndo();
+        await commitBridge.emitData();
+
+        // Select the newly created variable row
+        figma.ui.postMessage({
+          type: MESSAGE_TYPE.SELECT_VARIABLE_ROWS,
+          payload: [variableId],
+        });
+        break;
+      case MESSAGE_TYPE.DELETE_VARIABLES:
+        await Promise.all(
+          msg.payload.map(async (id: string) => {
+            const variable = await figma.variables.getVariableByIdAsync(id);
+            if (variable) variable.remove();
+          })
+        );
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.DUPLICATE_VARIABLES:
+        const duplicatedVariables = await figmaHelper.duplicateVariables(msg.payload);
+        await commitBridge.emitData();
+        figma.ui.postMessage({
+          type: MESSAGE_TYPE.SELECT_VARIABLE_ROWS,
+          payload: duplicatedVariables?.map((v) => v?.id) || [],
+        });
+        break;
+      case MESSAGE_TYPE.IMPORT_TEAM_LIBRARY_BY_NAME:
+        const result = await figmaHelper.getTeamLibraryByName(msg.payload);
+        figma.ui.postMessage({
+          type: MESSAGE_TYPE.IMPORT_COLLECTIONS_AND_VARIABLES_IN_TEAM_LIBRARY,
+          payload: {
+            name: msg.payload,
+            collections: result.collections,
+            variables: result.variables,
+          },
+        });
+        break;
+      case MESSAGE_TYPE.UNDO:
+        figma.triggerUndo();
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.RENAME_MODE:
+        await figmaHelper.renameMode(
+          msg.payload.collectionId,
+          msg.payload.modeId,
+          msg.payload.name
+        );
+        await commitBridge.emitData();
+        break;
+
       // case MESSAGE_TYPE.REVERT_ALL_VARIABLE_CHANGES:
       //   break;
       // TODO: Drop all changes

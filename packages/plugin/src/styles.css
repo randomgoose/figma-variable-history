@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+
+*:focus {
+  outline: none;
+}
+
 :root {
   font-family: Inter, system-ui, Helvetica, Arial, sans-serif;
   font-display: optional;
@@ -30,6 +35,10 @@ body {
   font-size: 11px;
 }
 
+body * {
+  font-size: 11px;
+}
+
 [cmdk-item] {
   @apply h-8 text-[var(--figma-color-text)] hover:bg-[var(--figma-color-bg-hover)] flex items-center rounded-[5px] cursor-default pr-2;
 }
@@ -51,7 +60,7 @@ body {
     border: 1px dashed var(--figma-color-border-brand);
     border-radius: 13px;
 }
- 
+
 
 @layer components {
   .btn-primary {
@@ -75,7 +84,7 @@ body {
   }
 
   .btn-icon {
-    @apply flex justify-center items-center rounded-[5px] hover:bg-[color:var(--figma-color-bg-secondary)] w-6 h-6;
+    @apply cursor-default flex justify-center items-center rounded-[5px] hover:bg-[#0000000d] w-6 h-6 shrink-0;
   }
 
   .dialog-overlay {
@@ -91,11 +100,11 @@ body {
   }
 
   .input {
-    @apply h-6 border border-[var(--figma-color-border)] rounded-[5px] px-2 focus:outline focus:outline-[var(--figma-color-border-brand-strong)];
+    @apply h-6 leading-6 border border-[var(--figma-color-border)] rounded-[5px] px-2 focus:outline focus:outline-[var(--figma-color-border-brand-strong)];
   }
   
   .input-filled {
-    @apply h-6 bg-[var(--figma-color-bg-secondary)] rounded-[5px] px-2 focus:outline focus:outline-[var(--figma-color-border-brand-strong)];
+    @apply h-6 leading-6 bg-[var(--figma-color-bg-secondary)] rounded-[5px] px-2 focus:outline focus:outline-[var(--figma-color-border-brand-strong)];
   }
 
   .switch-root {
@@ -107,11 +116,15 @@ body {
   }
 
   .dropdown-content {
-    @apply w-[280px] bg-[color:#1e1e1e] rounded-[13px] p-2 shadow-sm rounded-[13px];
+    @apply w-[280px] bg-[color:#1e1e1e] rounded-[13px] p-2 shadow-sm;
   }
 
   .dropdown-item {
-    @apply h-6 flex items-center text-[color:var(--figma-color-text-oncomponent)] px-2 cursor-default rounded-[5px];
+    @apply text-[11px] h-6 flex items-center text-[color:var(--figma-color-text-oncomponent)] px-2 cursor-default rounded-[5px];
+  }
+
+  .dropdown-separator {
+    @apply h-px bg-[#383838] my-[7.5px];
   }
 
   .dropdown-item:hover {
@@ -119,7 +132,7 @@ body {
   }
 
   .tooltip-content {
-    @apply px-2 py-1 max-w-56 rounded-sm bg-[color:var(--figma-color-bg-inverse)] text-[color:var(--figma-color-text-oninverse)];
+    @apply text-[11px] h-6 px-2 py-1 max-w-56 rounded-[5px] bg-[color:var(--figma-color-bg-inverse)] text-[color:var(--figma-color-text-oninverse)] z-50 shadow-[0px_0px_.5px_rgba(0,0,0,.15),0px_5px_12px_rgba(0,0,0,.13),0px_1px_3px_rgba(0,0,0,.1)];
   }
 
   .variableItem {
@@ -178,17 +191,41 @@ body {
     @apply relative after:content-[''] after:absolute after:inset-0 after:border-r after:border-b after:border-[var(--figma-color-border)] after:pointer-events-none;
   }
 
+  .table-border:not(.cell-focus):nth-last-child(-n+2)::after {
+    @apply border-r-0;
+  }
+
   .table-border:last-of-type {
     @apply after:border-r-0;
   }
 
   .cell-focus {
-    @apply after:content-[''] after:absolute after:inset-0 after:border-r after:border after:border-[var(--figma-color-border-brand-strong)] after:pointer-events-none;
+    @apply after:content-[''] after:absolute after:inset-0 after:border after:border-[var(--figma-color-border-brand-strong)] after:pointer-events-none;
   }
   
   .panel {
     @apply w-60 rounded-[13px] bg-[var(--figma-color-bg)] shadow-elevation-500 z-50;
   } 
+
+  .popover {
+    @apply bg-[var(--figma-color-bg)] rounded-[13px] shadow-elevation-500;
+  }
+
+  .select-trigger {
+    @apply w-full h-6 pl-2 pr-1 text-[11px] border border-[var(--figma-color-border)] rounded-[5px] flex items-center justify-between;
+  }
+
+  .alias {
+    @apply flex items-center text-[11px] w-fit h-5 border border-[var(--figma-color-border)] bg-[var(--figma-color-bg)] rounded-[5px] px-1 hover:bg-[var(--figma-color-bg-secondary)] focus:border-[var(--figma-color-border-brand-strong)];
+  }
+
+  .switch-root {
+    @apply w-8 h-4 rounded-full bg-[var(--figma-color-bg-tertiary)] data-[state=checked]:bg-[var(--figma-color-bg-brand)] shrink-0 flex items-center justify-start data-[state=checked]:justify-end;
+  }
+
+  .switch-thumb {
+    @apply w-3.5 h-3.5 rounded-full bg-white;
+  }
 }
 
 
@@ -210,7 +247,14 @@ body {
   }
   }
 
+  .react-colorful {
+    width: 100% !important;
+    height: fit-content !important;
+  }
+
   .react-colorful__saturation {
+    width: 240px !important;
+    height: 240px !important;
     border-radius: 0 !important;
     border: 0px !important;
   }
@@ -218,20 +262,34 @@ body {
   .react-colorful__pointer {
     width: 16px !important;
     height: 16px !important;
+    border-width: 4px !important;
   }
 
   .react-colorful__hue {
+    flex-grow: 1;
     height: 16px !important;
     border-radius: 9999px !important;
     margin-top: 16px !important;
-    margin-left: 24px !important;
-    margin-right: 24px !important;
+    margin-left: 16px !important;
+    margin-right: 16px !important;
   }
 
   .react-colorful__alpha {
+    flex-grow: 1;
     height: 16px !important;
     border-radius: 9999px !important;
     margin-top: 8px !important;
-    margin-left: 24px !important;
-    margin-right: 24px !important;
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+  }
+
+  /* CMDK */
+
+  [cmdk-group-heading] {
+    display: flex;
+    align-items: center;
+    padding-top: 4px;
+    padding-left: 4px;
+    font-size: 11px;
+    color: var(--figma-color-text-secondary);
   }

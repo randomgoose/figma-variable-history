@@ -1,7 +1,7 @@
 import { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../AppContext';
 import { Root, Trigger, Portal, Overlay, Content, Title, Close } from '@radix-ui/react-dialog';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import { syncToGit } from '../../features/sync-to-git';
 import { MESSAGE_TYPE, sendMessage } from '../../utils/message';
 import { syncToSlackChannel } from '../../features/sync-to-slack-channel';

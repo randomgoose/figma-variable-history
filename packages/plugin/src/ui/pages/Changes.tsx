@@ -4,7 +4,7 @@ import { AppContext } from '../../AppContext';
 import { GroupedChanges } from '../components/GroupedChanges';
 import { CommitModal } from '../components/CommitModal';
 import { Search } from '../components/Search';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import { EmptyState } from '../components';
 import { Preview } from '../components/Preview';
 import { useTranslation } from '../../hooks/useTranslation';

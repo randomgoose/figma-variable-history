@@ -8,6 +8,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 const languageOptions = [
   { value: 'en-US', label: 'English' },
   { value: 'zh-CN', label: '简体中文' },
+  { value: 'zh-TW', label: '繁体中文' },
 ];
 
 export function GeneralSettings() {

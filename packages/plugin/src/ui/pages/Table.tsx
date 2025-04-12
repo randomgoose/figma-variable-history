@@ -1,457 +1,215 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { AppContext } from '../../AppContext';
-import * as Select from '@radix-ui/react-select';
-import { ChevronDown } from 'lucide-react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getGroupedRowModel,
-  GroupingState,
-  flexRender,
-  createColumnHelper,
-  getExpandedRowModel,
-  RowSelectionState,
-} from '@tanstack/react-table';
+import { useContext } from 'react';
+import { flexRender, RowSelectionState } from '@tanstack/react-table';
 import clsx from 'clsx';
-import { MESSAGE_TYPE, variableManager } from '../../utils/message';
-import { sendMessage } from '../../utils/message';
-import { IconAlertTriangleFilled, IconPlus } from '@tabler/icons-react';
-import { EditableColorCell } from '../components/table/EditableColorCell';
-import { EditableVariableNameCell } from '../components/table/EditableVariableNameCell';
-
-type TreeNode = {
-  name: string;
-  path: string;
-  children: TreeNode[];
-};
-
+import { UsabilitySuggestions } from '../components/table/UsabilitySuggestions';
+import { TableContext } from '../components/table/TableContext';
+import { ContextMenu } from 'radix-ui';
+import { VariableCreationMenu } from '../components/VariableCreationMenu';
+import { Plus } from 'lucide-react';
+import { variableManager } from '../../utils/message';
 export function Table() {
-  const { variables, collections, setTab } = useContext(AppContext);
-  const [collectionId, setCollectionId] = useState<string | undefined>(collections?.[0]?.id);
-  const currentCollection = collections.find((c) => c.id === collectionId);
-
-  const [grouping, setGrouping] = useState<GroupingState>(['name']);
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [cellSelection] = useState<string[]>([]);
-  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
-  const [selectedGroupPath, setSelectedGroupPath] = useState<string | null>(null);
-  const [selectedCells, setSelectedCells] = useState<{ rowId: string; columnId: string }[]>([]);
-  const [selectionStart, setSelectionStart] = useState<{ rowId: string; columnId: string } | null>(
-    null
-  );
-
-  const columnHelper = createColumnHelper<any>();
-
-  // Initialize collectionId if there are collections
-  useEffect(() => {
-    if (collections.length > 0 && !collectionId) {
-      setCollectionId(collections[0]?.id);
-    }
-  }, [collections]);
-
-  const columns = useMemo(
-    () => [
-      columnHelper.group({
-        header: 'Name',
-        id: 'name',
-        cell: ({ row, cell }) => {
-          const name = row.original.name;
-          const lastSlashIndex = name.lastIndexOf('/');
-          const value = lastSlashIndex !== -1 ? name.substring(lastSlashIndex + 1) : name;
-          return (
-            <EditableVariableNameCell
-              value={value}
-              resolvedType={row.original.resolvedType}
-              isEditing={cell.id === cellSelection[0]}
-              onBlur={(value) => {
-                variableManager.updateVariable(row.original.id, {
-                  name: row.original.name.substring(0, lastSlashIndex) + '/' + value,
-                });
-                setSelectedCells([]);
-              }}
-            />
-          );
-        },
-        enableGrouping: true,
-        getGroupingValue: (row) => {
-          const name = row.name;
-          const parts = name.split('/');
-          if (row._groupingValue && parts.length > 1) {
-            const currentGroupIndex = parts.indexOf(row._groupingValue);
-            if (currentGroupIndex < parts.length - 2) {
-              return parts.slice(0, currentGroupIndex + 2).join('/');
-            }
-          }
-          return parts.slice(0, parts.length - 1).join('/');
-        },
-      }),
-      ...(currentCollection?.modes?.map((m) =>
-        columnHelper.accessor(m.name, {
-          header: m.name,
-          cell: ({ row }) => {
-            switch (row.original.resolvedType) {
-              case 'COLOR':
-                return (
-                  <EditableColorCell
-                    variable={row.original}
-                    modeId={m.modeId}
-                    onInputFocus={() => {
-                      row.getToggleSelectedHandler();
-                    }}
-                    onInputBlur={() => {
-                      setSelectedCells([]);
-                    }}
-                  />
-                );
-              default:
-                return null;
-            }
-          },
-        })
-      ) ?? []),
-      columnHelper.display({
-        header: () => (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="btn-icon"
-          >
-            <IconPlus size={16} strokeWidth={1.5} />
-          </button>
-        ),
-        id: 'action',
-        // cell: () => <button className='btn-icon'><IconPlus /></button>
-      }),
-    ],
-    [currentCollection]
-  );
-
-  const data = useMemo(() => {
-    const filteredData = variables.filter((v) => v.variableCollectionId === collectionId);
-    if (selectedGroupPath) {
-      return filteredData.filter((v) => v.name.startsWith(selectedGroupPath + '/'));
-    }
-    return filteredData;
-  }, [variables, collectionId, selectedGroupPath]);
-
-  const table = useReactTable({
-    data,
-    columns,
-    state: {
-      grouping,
-      expanded: true,
-      rowSelection,
-    },
-    enableRowSelection: true,
-    onGroupingChange: setGrouping,
-    onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getGroupedRowModel: getGroupedRowModel(),
-    groupedColumnMode: 'reorder',
-  });
-
-  const handleRowClick = (row: any, event: React.MouseEvent) => {
-    if (!row.getIsGrouped()) {
-      const rowIndex = row.index;
-
-      if (event.shiftKey && lastSelectedIndex !== null) {
-        // Shift key: select range
-        const start = Math.min(lastSelectedIndex, rowIndex);
-        const end = Math.max(lastSelectedIndex, rowIndex);
-
-        const newSelection: RowSelectionState = {};
-        for (let i = start; i <= end; i++) {
-          newSelection[table.getRowModel().rows[i].id] = true;
-        }
-        setRowSelection(newSelection);
-      } else {
-        // Normal click: select single row
-        const newSelection: RowSelectionState = {
-          [row.id]: true,
-        };
-        setRowSelection(newSelection);
-        setLastSelectedIndex(rowIndex);
-      }
-    }
-  };
-
-  const buildGroupTree = useMemo(() => {
-    const tree: TreeNode[] = [];
-
-    // Get all unique group paths from all variables in this collection
-    const allPaths = variables
-      .filter((v) => v.variableCollectionId === collectionId)
-      .map((v) => {
-        const parts = v.name.split('/');
-        return parts.slice(0, -1).join('/'); // Exclude the variable name itself
-      })
-      .filter((path): path is string => path.length > 0) // Remove empty paths
-      .filter((path, index, self) => self.indexOf(path) === index); // Get unique paths
-
-    // Build tree structure
-    allPaths.forEach((path) => {
-      let currentLevel = tree;
-      const parts = path.split('/');
-
-      let currentPath = '';
-      parts.forEach((part) => {
-        currentPath = currentPath ? `${currentPath}/${part}` : part;
-        let existingNode = currentLevel.find((n) => n.name === part);
-
-        if (!existingNode) {
-          existingNode = {
-            name: part,
-            path: currentPath,
-            children: [],
-          };
-          currentLevel.push(existingNode);
-        }
-        currentLevel = existingNode.children;
-      });
-    });
-
-    return tree;
-  }, [variables, collectionId]);
-
-  const TreeItem = ({ node, depth = 0 }: { node: TreeNode; depth?: number }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [editValue, setEditValue] = useState(node.name);
-
-    const handleDoubleClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setIsEditing(true);
-    };
-
-    const handleBlur = () => {
-      setIsEditing(false);
-      setEditValue(node.name); // Reset to original value
-      sendMessage(MESSAGE_TYPE.UPDATE_VARIABLE_GROUP, {
-        collectionId,
-        source: node.name,
-        target: editValue,
-        slice: depth,
-      });
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        setIsEditing(false);
-        // TODO: Add logic to update the node name
-      } else if (e.key === 'Escape') {
-        setIsEditing(false);
-        setEditValue(node.name);
-      }
-    };
-
-    return (
-      <div>
-        <button
-          className={clsx(
-            'w-full text-left h-8 flex items-center px-2 py-1 text-[11px] hover:bg-[var(--figma-color-bg-hover)] cursor-default',
-            'flex items-center gap-1',
-            selectedGroupPath === node.path && 'bg-[var(--figma-color-bg-secondary)] font-semibold'
-          )}
-          style={{ paddingLeft: `${depth * 16 + 16}px` }}
-          onClick={() => {
-            setSelectedGroupPath(node.path);
-          }}
-          onDoubleClick={handleDoubleClick}
-        >
-          {isEditing ? (
-            <input
-              className="rounded px-1 w-full focus:outline-none"
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              autoFocus
-              onClick={(e) => e.stopPropagation()}
-            />
-          ) : (
-            <span className="text-[var(--figma-color-text)]">{node.name}</span>
-          )}
-        </button>
-        {node.children.map((child) => (
-          <TreeItem key={child.path} node={child} depth={depth + 1} />
-        ))}
-      </div>
-    );
-  };
-
-  const handleCellClick = (rowId: string, columnId: string, event: React.MouseEvent) => {
-    if (event.shiftKey && selectionStart) {
-      // Get all rows and columns between selection start and current cell
-      const rows = table.getRowModel().rows;
-      const columns = table.getAllLeafColumns();
-
-      const startRowIndex = rows.findIndex((row) => row.id === selectionStart.rowId);
-      const endRowIndex = rows.findIndex((row) => row.id === rowId);
-      const startColIndex = columns.findIndex((col) => col.id === selectionStart.columnId);
-      const endColIndex = columns.findIndex((col) => col.id === columnId);
-
-      const minRowIndex = Math.min(startRowIndex, endRowIndex);
-      const maxRowIndex = Math.max(startRowIndex, endRowIndex);
-      const minColIndex = Math.min(startColIndex, endColIndex);
-      const maxColIndex = Math.max(startColIndex, endColIndex);
-
-      const newSelection = [];
-      for (let i = minRowIndex; i <= maxRowIndex; i++) {
-        for (let j = minColIndex; j <= maxColIndex; j++) {
-          newSelection.push({
-            rowId: rows[i].id,
-            columnId: columns[j].id,
-          });
-        }
-      }
-      setSelectedCells(newSelection);
-    } else {
-      // Single cell selection
-      setSelectedCells([{ rowId, columnId }]);
-      setSelectionStart({ rowId, columnId });
-    }
-  };
+  const {
+    selectedCells,
+    table,
+    setRowSelection,
+    rowSelection,
+    inputIndexRef,
+    setSelectedCells,
+    duplicateVariables,
+  } = useContext(TableContext);
 
   return (
-    <div className="w-full flex" style={{ height: 'calc(100vh - 40px)' }}>
-      <aside className="w-[200px] shrink-0 border-r border-[var(--figma-color-border)] flex flex-col">
-        <div className="p-2">
-          <Select.Root
-            value={collectionId}
-            onValueChange={(value) => {
-              setCollectionId(value);
-              setTab('editor');
-            }}
-          >
-            <Select.Trigger className="w-full h-6 pl-2 pr-1 border border-[var(--figma-color-border)] rounded-[5px] flex items-center justify-between">
-              <Select.Value placeholder="Select Collection" />
-              <Select.Icon>
-                <ChevronDown size={12} strokeWidth={1} />
-              </Select.Icon>
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content className="dropdown-content w-44">
-                <Select.Viewport>
-                  {collections?.map((c) => (
-                    <Select.Item className="dropdown-item" key={c.id} value={c.id}>
-                      <Select.ItemText>{c.name}</Select.ItemText>
-                    </Select.Item>
-                  ))}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
-        </div>
+    <div className="flex flex-col w-[calc(100%-200px)]">
+      <div className="flex-1 overflow-auto">
+        <table className="border-collapse">
+          <thead className="sticky top-0 bg-[var(--figma-color-background)] h-10 z-20">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="bg-[var(--figma-color-bg)]">
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className={clsx(
+                      'bg-[var(--figma-color-bg)] text-left p-2 font-semibold table-border',
+                      header.column.id === 'name' &&
+                        'sticky left-0 bg-[var(--figma-color-bg)] z-10',
+                      header.column.id === 'action' &&
+                        'sticky right-0 w-10 p-0 table-border after:border-l',
+                      header.column.id !== 'action' && header.column.id !== 'name' && 'px-2'
+                    )}
+                  >
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => {
+              const tr =
+                row.groupingValue === '' ? null : (
+                  <tr
+                    data-row-id={row.id}
+                    className={clsx(
+                      'border-[var(--figma-color-border)] group/row select-none',
+                      !row.getIsGrouped() ? '' : 'border-b'
+                    )}
+                    onContextMenu={() => {
+                      if (!rowSelection[row.id]) {
+                        setRowSelection({ [row.id]: true });
+                      }
+                    }}
+                    onClick={(e) => {
+                      if (!row.getIsGrouped()) {
+                        if (e.shiftKey) {
+                          // Find the last selected row
+                          const selectedRowIds = Object.entries(rowSelection)
+                            .filter(([, selected]) => selected)
+                            .map(([id]) => id);
 
-        <button
-          className={clsx(
-            'w-full mb-1 text-left h-10 flex items-center px-4 py-1 text-xs hover:bg-[var(--figma-color-bg-hover)] border-y border-[var(--figma-color-border)]',
-            selectedGroupPath === null && 'bg-[var(--figma-color-bg-secondary)] font-semibold'
-          )}
-          onClick={() => setSelectedGroupPath(null)}
-        >
-          All variables{' '}
-          <span className="text-[var(--figma-color-text-secondary)] ml-auto font-normal">
-            {variables.filter((v) => v.variableCollectionId === collectionId)?.length}
-          </span>
-        </button>
+                          if (selectedRowIds.length === 0) {
+                            setRowSelection({ [row.id]: true });
+                            return;
+                          }
 
-        <div className="flex-1 overflow-auto">
-          {buildGroupTree.map((node) => (
-            <TreeItem key={node.path} node={node} />
-          ))}
-        </div>
-      </aside>
-      <div className="flex-1 overflow-auto flex flex-col">
-        <div className="flex-1 overflow-auto">
-          <table className="border-collapse">
-            <thead className="sticky top-0 bg-[var(--figma-color-background)] h-10 z-20">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="bg-[var(--figma-color-bg)]">
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className={clsx(
-                        'bg-[var(--figma-color-bg)] text-left p-2 font-semibold text-[11px] px-4 table-border [&:nth-last-child(-n+1)]:after:border-r-0',
-                        header.column.id === 'name' &&
-                          'sticky left-0 bg-[var(--figma-color-bg)] z-10',
-                        header.column.id === 'action' &&
-                          'sticky right-0 w-10 table-border after:border-l'
-                      )}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className={clsx(
-                    'border-[var(--figma-color-border)]',
-                    !row.getIsGrouped() ? '' : 'border-b'
-                  )}
-                  onClick={(e) => handleRowClick(row, e)}
-                >
-                  {row.getIsGrouped() ? (
-                    <td
-                      colSpan={row.getVisibleCells().length}
-                      className="sticky left-0 inline-block w-full bg-[var(--figma-color-background)] font-medium p-2 pl-4 text-xs pt-8 h-14"
-                    >
-                      {(row.groupingValue as string).split('/').map((part, index) => {
-                        const isLast =
-                          index === (row.groupingValue as string).split('/').length - 1;
+                          const lastSelectedId = selectedRowIds[selectedRowIds.length - 1];
+
+                          // Get all non-grouped rows
+                          const nonGroupedRows = table
+                            .getRowModel()
+                            .rows.filter((row) => !row.getIsGrouped());
+                          const rowIndexMap = new Map(
+                            nonGroupedRows.map((row, index) => [row.id, index])
+                          );
+
+                          const startIdx = rowIndexMap.get(lastSelectedId)!;
+                          const endIdx = rowIndexMap.get(row.id)!;
+
+                          const newSelection: RowSelectionState = {};
+                          // Keep existing selection
+                          Object.entries(rowSelection).forEach(([id, selected]) => {
+                            if (selected) newSelection[id] = true;
+                          });
+
+                          // Add new selection range
+                          const [minIdx, maxIdx] = [
+                            Math.min(startIdx, endIdx),
+                            Math.max(startIdx, endIdx),
+                          ];
+                          for (let i = minIdx; i <= maxIdx; i++) {
+                            newSelection[nonGroupedRows[i].id] = true;
+                          }
+
+                          setRowSelection(newSelection);
+                        } else {
+                          setRowSelection({ [row.id]: true });
+                        }
+                      }
+                    }}
+                  >
+                    {row.getIsGrouped() ? (
+                      <td
+                        colSpan={row.getVisibleCells().length}
+                        className="sticky group left-0 inline-block w-full bg-[var(--figma-color-background)] font-medium p-2 pl-4 text-xs pt-8 h-14 focus:cell-focus"
+                      >
+                        {(row.groupingValue as string).split('/').map((part, index) => {
+                          const isLast =
+                            index === (row.groupingValue as string).split('/').length - 1;
+                          return (
+                            <span
+                              key={part}
+                              className={clsx(
+                                isLast
+                                  ? 'text-[var(--figma-color-text)] font-semibold'
+                                  : 'text-[var(--figma-color-text-secondary)]'
+                              )}
+                            >
+                              {part} {isLast ? '' : '/ '}
+                            </span>
+                          );
+                        })}
+                      </td>
+                    ) : (
+                      row.getVisibleCells().map((cell, index) => {
                         return (
-                          <span
-                            key={part}
+                          <td
+                            tabIndex={-1}
+                            key={cell.id}
+                            onClick={() => {
+                              setSelectedCells([{ rowId: row.id, columnId: cell.column.id }]);
+                            }}
+                            onDoubleClick={() => {
+                              if (cell.column.id === 'name') {
+                                setSelectedCells([{ rowId: row.id, columnId: cell.column.id }]);
+                                setRowSelection({ [row.id]: true });
+                                inputIndexRef && (inputIndexRef.current = `${row.id}-name`);
+                              }
+                            }}
                             className={clsx(
-                              isLast
-                                ? 'text-[var(--figma-color-text)] font-semibold'
-                                : 'text-[var(--figma-color-text-secondary)]'
+                              'p-0 h-10 text-xs table-border min-w-[200px]',
+                              selectedCells.some(
+                                (sel) => sel.rowId === row.id && sel.columnId === cell.column.id
+                              ) && 'cell-focus',
+                              row.getIsSelected() && 'bg-[var(--figma-color-bg-selected)]',
+                              cell.column.id === 'name' &&
+                                'sticky left-0 z-10 bg-[var(--figma-color-bg)] min-w-0',
+                              cell.column.id === 'action' &&
+                                'sticky right-0 w-10 table-border after:border-l bg-[var(--figma-color-bg)]',
+                              cell.row.id === selectedCells[0]?.rowId &&
+                                cell.column.id === selectedCells[0]?.columnId &&
+                                'cell-focus',
+                              cell.column.id === 'action' &&
+                                'flex items-center justify-center min-w-[40px]',
+                              index === row.getVisibleCells().length - 2 && 'w-full'
                             )}
                           >
-                            {part} {isLast ? '' : '/ '}
-                          </span>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </td>
                         );
-                      })}
-                    </td>
-                  ) : (
-                    row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        onClick={(e) => handleCellClick(row.id, cell.column.id, e)}
-                        className={clsx(
-                          'p-0 h-10 text-xs table-border [&:nth-last-child(-n+2)]:after:border-r-0',
-                          selectedCells.some(
-                            (sel) => sel.rowId === row.id && sel.columnId === cell.column.id
-                          ) && 'cell-focus',
-                          row.getIsSelected() && 'bg-[var(--figma-color-bg-selected)]',
-                          cell.column.id === 'name' && 'sticky left-0 z-10',
-                          cell.column.id === 'action' &&
-                            'sticky right-0 w-10 table-border after:border-l',
-                          cell.id === cellSelection[0] && 'cell-focus'
-                        )}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="h-10 border-t flex items-center justify-between p-3 pr-2">
-          <button>Create Variable</button>
+                      })
+                    )}
+                  </tr>
+                );
 
-          <button className="btn-outline flex gap-1">
-            <IconAlertTriangleFilled className="text-yellow-500" size={12} />
-            Usability issues
+              return (
+                <ContextMenu.Root key={row.id}>
+                  <ContextMenu.Trigger asChild>{tr}</ContextMenu.Trigger>
+                  <ContextMenu.Content className="dropdown-content w-[200px] z-[100]">
+                    <ContextMenu.Item className="dropdown-item">Create alias</ContextMenu.Item>
+                    <ContextMenu.Item className="dropdown-item">Copy</ContextMenu.Item>
+                    <ContextMenu.Item className="dropdown-item">Paste</ContextMenu.Item>
+                    <ContextMenu.Separator className="dropdown-separator" />
+                    <ContextMenu.Item
+                      onClick={() => {
+                        duplicateVariables([row.original.id]);
+                      }}
+                      className="dropdown-item"
+                    >
+                      Duplicate variable
+                    </ContextMenu.Item>
+                    <ContextMenu.Item
+                      onClick={() => {
+                        variableManager.deleteVariables([row.original.id]);
+                      }}
+                      className="dropdown-item"
+                    >
+                      Delete variable
+                    </ContextMenu.Item>
+                  </ContextMenu.Content>
+                </ContextMenu.Root>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div className="h-10 border-t flex items-center justify-between p-3 pr-2">
+        <VariableCreationMenu>
+          <button className="flex items-center gap-1">
+            <Plus size={16} strokeWidth={1.5} />
+            Create Variable
           </button>
-        </div>
+        </VariableCreationMenu>
+
+        <UsabilitySuggestions />
       </div>
     </div>
   );

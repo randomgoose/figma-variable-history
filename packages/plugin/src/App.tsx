@@ -11,6 +11,8 @@ import { Variables } from './ui/pages/Variables';
 import { sendMessage } from './utils/message';
 import { useTranslation } from './hooks/useTranslation';
 import { ResizeHandle } from './ui/components/ResizeHandle';
+import { TableContextProvider } from './ui/components/table/TableContext';
+import { Editor } from './ui/pages/Editor';
 
 function Plugin() {
   const { tab, setTab } = useContext(AppContext);
@@ -18,19 +20,29 @@ function Plugin() {
 
   useEffect(() => {
     // Refresh the variables when the plugin is focused
-    addEventListener('focus', () => {
+    const handleFocus = () => {
       sendMessage('REFRESH');
-    });
+    };
 
+    addEventListener('focus', handleFocus);
     sendMessage('INIT');
+
+    // Cleanup function to remove the event listener
+    return () => {
+      removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const tabs = useMemo(
     () => [
-      // {
-      //   value: 'editor',
-      //   children: <Table />,
-      // },
+      {
+        value: 'editor',
+        children: (
+          <TableContextProvider>
+            <Editor />
+          </TableContextProvider>
+        ),
+      },
       {
         value: 'changes',
         children: <Changes />,
