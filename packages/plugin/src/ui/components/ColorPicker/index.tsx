@@ -6,7 +6,6 @@ import { HexInput } from './HexInput';
 import { VariablePicker } from '../VariablePicker';
 import { motion, useDragControls } from 'motion/react';
 import { convertFigmaRGBtoHexString, convertHexColorToFigmaRGBA } from '../../../utils/color';
-import { variableManager } from '../../../utils/message';
 
 const MotionPopoverContent = motion(Popover.Content);
 
@@ -54,7 +53,7 @@ export function ColorPicker({
   const renderColorInput = () => {
     switch (colorFormat) {
       case 'hex':
-        return <HexInput color={color} onChange={onChange} ref={hexInputRef} />;
+        return <HexInput color={color} onChange={onChange} />;
       case 'rgb':
         return <RgbColorPicker />;
     }

@@ -20,7 +20,7 @@ import {
   useState,
 } from 'react';
 import { VariableIcon } from '../VariableIcon';
-import { MESSAGE_TYPE, sendMessage, } from '../../../utils/message';
+import { MESSAGE_TYPE, sendMessage } from '../../../utils/message';
 import { AppContext } from '../../../AppContext';
 import { IconPlus } from '@tabler/icons-react';
 import clsx from 'clsx';
@@ -193,10 +193,10 @@ export const TableContextProvider = ({ children }: { children: React.ReactNode }
 
     const filteredData = filter
       ? groupedData.filter((v) => {
-        if (filter === 'no_description') return !v.description;
-        if (filter === 'no_code_syntax') return Object.keys(v.codeSyntax).length === 0;
-        return true;
-      })
+          if (filter === 'no_description') return !v.description;
+          if (filter === 'no_code_syntax') return Object.keys(v.codeSyntax).length === 0;
+          return true;
+        })
       : groupedData;
 
     // Sort variables so ungrouped ones (no '/' in name) come first
@@ -341,9 +341,9 @@ export const TableContextProvider = ({ children }: { children: React.ReactNode }
                       handleFocus(row.id, m.name, 0);
                     }}
 
-                  // onFocus={(inputIndex: number) => {
-                  //   handleFocus(row.id, m.name, inputIndex);
-                  // }}
+                    // onFocus={(inputIndex: number) => {
+                    //   handleFocus(row.id, m.name, inputIndex);
+                    // }}
                   />
                 );
               default:

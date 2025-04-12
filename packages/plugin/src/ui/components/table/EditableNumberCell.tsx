@@ -15,11 +15,7 @@ interface EditableNumberCellProps {
   onFocus: (inputIndex: number) => void;
 }
 
-export function EditableNumberCell({
-  variable,
-  modeId,
-  onFocus,
-}: EditableNumberCellProps) {
+export function EditableNumberCell({ variable, modeId, onFocus }: EditableNumberCellProps) {
   const value = variable.valuesByMode[modeId];
   const [inputValue, setInputValue] = useState(typeof value === 'number' ? value : '0');
 

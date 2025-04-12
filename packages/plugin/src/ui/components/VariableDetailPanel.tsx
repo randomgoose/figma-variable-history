@@ -2,7 +2,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useTranslation } from '../../hooks/useTranslation';
 import { variableManager } from '../../utils/message';
 import { HexInput } from './ColorPicker/HexInput';
-import { IconCheck, IconCopy, IconMinus, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconCheck, IconMinus, IconPlus } from '@tabler/icons-react';
 import { AppContext } from '../../AppContext';
 import { useContext } from 'react';
 import clsx from 'clsx';
@@ -22,7 +22,6 @@ const platforms: { key: CodeSyntaxPlatform; label: string }[] = [
 
 export function VariableDetailPanel({ variable }: { variable: Variable }) {
   const { modes } = useContext(AppContext);
-  const { t } = useTranslation();
 
   return (
     <>

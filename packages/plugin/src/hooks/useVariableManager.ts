@@ -22,7 +22,6 @@ export const useVariableManager = () => {
 
       if (partialVariable.valuesByMode) {
         Object.entries(partialVariable.valuesByMode).forEach(([modeId, value]) => {
-          console.log(modeId);
           if (typeof value === 'object' && 'type' in value) {
             invalidateResolvedVariableValue(variableId, modeId);
           }

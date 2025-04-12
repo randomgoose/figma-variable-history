@@ -55,7 +55,6 @@ export function CMDK() {
     variables,
     collections,
     setCurrentCollectionId,
-    resolvedVariableValues,
   } = useContext(AppContext);
   const { setRowSelection, table, setSelectedGroupPath } = useContext(TableContext);
 
