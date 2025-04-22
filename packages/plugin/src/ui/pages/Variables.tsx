@@ -22,6 +22,8 @@ import { VariableTimeline } from '../components/VariableTimeline';
 import { VariableIcon } from '../components/VariableIcon';
 import { NoCommitPlaceholder } from '../components/NoCommitPlaceholder';
 import { useTranslation } from '../../hooks/useTranslation';
+import { PLUGIN_DATA_KEY_PREFIX } from '../../config';
+import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
 // const viewOptions = [
 //   { id: 'timeline', icon: <History size={12} /> },
@@ -180,10 +182,17 @@ export function Variables() {
   }, [selectedVariable, variables]);
 
   return (
-    <div style={{ height: 'calc(100vh - 40px)' }} className="w-full h-full flex">
+    <PanelGroup
+      style={{ height: 'calc(100vh - 40px)' }}
+      direction="horizontal"
+      autoSaveId={`${PLUGIN_DATA_KEY_PREFIX}-panel-group-variables`}
+    >
       {commits.length > 0 ? (
         <>
-          <div
+          <Panel
+            defaultSize={25}
+            minSize={20}
+            maxSize={50}
             className="w-60 shrink-0 border-r"
             style={{
               background: 'var(--figma-color-bg-secondary)',
@@ -274,9 +283,11 @@ export function Variables() {
                 })}
               </Root>
             </div>
-          </div>
+          </Panel>
 
-          <div className="w-full h-full grow relative">
+          <PanelResizeHandle />
+
+          <Panel>
             {header}
             <div className="overflow-auto relative" style={{ height: 'calc(100% - 40px)' }}>
               {view === 'node-graph' ? (
@@ -287,12 +298,12 @@ export function Variables() {
                 <VariableTimeline variableId={selectedVariable?.id} />
               ) : null}
             </div>
-          </div>
+          </Panel>
         </>
       ) : (
         <NoCommitPlaceholder title={t('no_commit_yet')} description={t('make_your_first_commit')} />
       )}
-    </div>
+    </PanelGroup>
   );
 }
 

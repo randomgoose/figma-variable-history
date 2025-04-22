@@ -1,5 +1,4 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { useTranslation } from '../../hooks/useTranslation';
 import { variableManager } from '../../utils/message';
 import { HexInput } from './ColorPicker/HexInput';
 import { IconCheck, IconMinus, IconPlus } from '@tabler/icons-react';

@@ -27,6 +27,8 @@ import { MESSAGE_TYPE, sendMessage } from '../../utils/message';
 import { NoCommitPlaceholder } from '../components/NoCommitPlaceholder';
 import { IconChevronDown } from '@tabler/icons-react';
 import { useTranslation } from '../../hooks/useTranslation';
+import { PLUGIN_DATA_KEY_PREFIX } from '../../config';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 export function Commits() {
   const {
@@ -434,8 +436,15 @@ export function Commits() {
                 </button>
               </div>
               <div className="grow flex overflow-hidden">
-                <div className="relative flex grow">
-                  <div
+                <PanelGroup
+                  className="relative flex grow"
+                  direction="horizontal"
+                  autoSaveId={`${PLUGIN_DATA_KEY_PREFIX}-panel-group-commits`}
+                >
+                  <Panel
+                    defaultSize={25}
+                    minSize={20}
+                    maxSize={50}
                     className="overflow-auto p-2 w-60 shrink-0"
                     style={{ background: 'var(--figma-color-bg-secondary)' }}
                   >
@@ -447,9 +456,11 @@ export function Commits() {
                         setSelectedVariableId(id);
                       }}
                     />
-                  </div>
+                  </Panel>
 
-                  <div
+                  <PanelResizeHandle />
+
+                  <Panel
                     className="grow overflow-auto"
                     style={{ background: 'var(--figma-color-bg)' }}
                   >
@@ -483,8 +494,8 @@ export function Commits() {
                         )}
                       />
                     ) : null}
-                  </div>
-                </div>
+                  </Panel>
+                </PanelGroup>
               </div>
             </div>
           ) : null}

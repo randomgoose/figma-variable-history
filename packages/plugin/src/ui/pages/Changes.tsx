@@ -8,6 +8,8 @@ import { AnimatePresence } from 'motion/react';
 import { EmptyState } from '../components';
 import { Preview } from '../components/Preview';
 import { useTranslation } from '../../hooks/useTranslation';
+import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
+import { PLUGIN_DATA_KEY_PREFIX } from '../../config';
 
 export function Changes() {
   const [, setCollectionList] = useState<VariableCollection['id'][]>([]);
@@ -71,67 +73,75 @@ export function Changes() {
     });
 
   return (
-    <div className="w-full flex" style={{ height: 'calc(100vh - 40px)' }}>
-      <div
-        className={'flex flex-col border-r shrink-0 w-60'}
-        style={{ borderColor: 'var(--figma-color-border)' }}
-      >
-        <div className="bg-[var(--figma-color-bg-secondary)] h-[calc(100%-48px)]">
-          <Search value={keyword} onChange={setKeyword} />
-          <div
-            className="[&::-webkit-scrollbar]:w-0 flex"
-            style={{ padding: 6, height: 'calc(100% - 40px)', overflow: 'auto' }}
-          >
-            <div className="flex flex-col h-full w-full">
-              {numOfChanges > 0 ? (
-                <GroupedChanges
-                  keyword={keyword}
-                  selected={selected}
-                  groupedChanges={groupedChanges}
-                  onClickVariableItem={(id) => setSelected(id)}
-                  checkbox={true}
-                />
-              ) : (
-                <EmptyState />
-              )}
+    <PanelGroup
+      style={{ height: 'calc(100vh - 40px)' }}
+      direction="horizontal"
+      autoSaveId={`${PLUGIN_DATA_KEY_PREFIX}-panel-group`}
+    >
+      <Panel defaultSize={25} minSize={20} maxSize={50}>
+        <div
+          className={'h-full flex flex-col border-r shrink-0'}
+          style={{ borderColor: 'var(--figma-color-border)' }}
+        >
+          <div className="bg-[var(--figma-color-bg-secondary)] h-[calc(100%-48px)]">
+            <Search value={keyword} onChange={setKeyword} />
+            <div
+              className="[&::-webkit-scrollbar]:w-0 flex"
+              style={{ padding: 6, height: 'calc(100% - 40px)', overflow: 'auto' }}
+            >
+              <div className="flex flex-col h-full w-full">
+                {numOfChanges > 0 ? (
+                  <GroupedChanges
+                    keyword={keyword}
+                    selected={selected}
+                    groupedChanges={groupedChanges}
+                    onClickVariableItem={(id) => setSelected(id)}
+                    checkbox={true}
+                  />
+                ) : (
+                  <EmptyState />
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div
-          style={{ borderColor: 'var(--figma-color-border)' }}
-          className="flex items-center justify-between px-4 py-3 border-t h-12 shrink-0"
-        >
-          <div className="text-[color:var(--figma-color-text-secondary)]">
-            {numOfChanges} {t('num_of_changes')}
+          <div
+            style={{ borderColor: 'var(--figma-color-border)' }}
+            className="flex items-center justify-between px-4 py-3 border-t h-12 shrink-0"
+          >
+            <div className="text-[color:var(--figma-color-text-secondary)]">
+              {numOfChanges} {t('num_of_changes')}
+            </div>
+
+            <CommitModal
+              disabled={disabled}
+              numOfChanges={numOfChanges}
+              numOfCheckedChanges={numOfCheckedChanges}
+            />
           </div>
-
-          <CommitModal
-            disabled={disabled}
-            numOfChanges={numOfChanges}
-            numOfCheckedChanges={numOfCheckedChanges}
-          />
         </div>
-      </div>
-
-      <AnimatePresence>
-        {selected ? (
-          <VariableDetail
-            current={variables.find((v) => v.id === selected)}
-            currentCollection={collections.find(
-              (c) => c.id === variables.find((v) => v.id === selected)?.variableCollectionId
-            )}
-            prev={commits?.[0]?.variables.find((v: Variable) => v.id === selected)}
-            prevCollection={commits?.[0]?.collections.find(
-              (c) =>
-                c.id ===
-                commits?.[0]?.variables.find((v) => v.id === selected)?.variableCollectionId
-            )}
-          />
-        ) : numOfChanges > 0 ? null : (
-          <Preview />
-        )}
-      </AnimatePresence>
-    </div>
+      </Panel>
+      <PanelResizeHandle />
+      <Panel>
+        <AnimatePresence>
+          {selected ? (
+            <VariableDetail
+              current={variables.find((v) => v.id === selected)}
+              currentCollection={collections.find(
+                (c) => c.id === variables.find((v) => v.id === selected)?.variableCollectionId
+              )}
+              prev={commits?.[0]?.variables.find((v: Variable) => v.id === selected)}
+              prevCollection={commits?.[0]?.collections.find(
+                (c) =>
+                  c.id ===
+                  commits?.[0]?.variables.find((v) => v.id === selected)?.variableCollectionId
+              )}
+            />
+          ) : (
+            <Preview />
+          )}
+        </AnimatePresence>
+      </Panel>
+    </PanelGroup>
   );
 }

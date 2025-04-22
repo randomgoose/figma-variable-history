@@ -100,7 +100,7 @@ body * {
   }
 
   .input {
-    @apply h-6 leading-6 border border-[var(--figma-color-border)] rounded-[5px] px-2 focus:outline focus:outline-[var(--figma-color-border-brand-strong)];
+    @apply h-6 leading-6 border bg-[var(--figma-color-bg)] border-[var(--figma-color-border)] rounded-[5px] px-2 focus:outline focus:outline-[var(--figma-color-border-brand-strong)];
   }
   
   .input-filled {

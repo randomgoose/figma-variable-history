@@ -66,7 +66,7 @@ function DiffItem({
       </div>
 
       <button
-        className="px-2 shadow-sm border absolute opacity-0 group-hover:opacity-100 right-0 group-hover:right-3 top-1/2 -translate-y-1/2 bg-white border-gray-200 h-7 rounded-md flex items-center justify-center transition-all gap-1"
+        className="bg-[var(--figma-color-bg)] px-2 shadow-sm border absolute opacity-0 group-hover:opacity-100 right-0 group-hover:right-3 top-1/2 -translate-y-1/2 border-[var(--figma-color-border)] h-7 rounded-md flex items-center justify-center transition-all gap-1"
         onClick={() => {
           setTab('commits');
           commitId && setSelectedCommitId(commitId);

@@ -70,7 +70,7 @@ export const AppContext = createContext<AppContext>({
   variableAliases: {},
   resolvedVariableValues: {},
   groupedChanges: {},
-  tab: 'editor',
+  tab: 'changes',
   compiledVariables: { css: '' },
   selectedCommitId: '',
   getCollectionName: () => '',
@@ -107,7 +107,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     AppContext['resolvedVariableValues']
   >({});
   const [enableGitHubSync, setEnableGitHubSync] = useState<boolean>(false);
-  const [tab, setTab] = useState<AppContext['tab']>('editor');
+  const [tab, setTab] = useState<AppContext['tab']>('changes');
   const [compiledVariables, setCompiledVariables] = useState<{ css: string }>({ css: '' });
   const [selectedCommitId, setSelectedCommitId] = useState<string>('');
   const [zoom, setZoom] = useState<number>(1);

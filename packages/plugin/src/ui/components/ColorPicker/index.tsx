@@ -98,7 +98,7 @@ export function ColorPicker({
               <HexAlphaColorPicker
                 color={hex}
                 onChange={(color) => setColor(convertHexColorToFigmaRGBA(color))}
-                onPointerUp={(e) => {
+                onPointerUp={() => {
                   onChange(color);
                 }}
               />
