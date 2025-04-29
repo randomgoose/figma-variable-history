@@ -1,10 +1,16 @@
+import clsx from 'clsx';
 import { useState } from 'react';
 import { Synchronization } from './Synchronization';
-import { IconRefresh, IconSettings, IconSettings2 } from '@tabler/icons-react';
-import clsx from 'clsx';
+import {
+  IconArrowRightSquare,
+  IconRefresh,
+  IconSettings,
+  IconSettings2,
+} from '@tabler/icons-react';
 import { VariablesSettings } from './VariableSettings';
 import { GeneralSettings } from './GeneralSettings';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { Mirgation } from './Migration';
 
 export function Settings() {
   const [page, setPage] = useState('general');
@@ -28,6 +34,12 @@ export function Settings() {
       label: t('synchronization'),
       component: <Synchronization />,
       icon: <IconRefresh size={14} className="mr-2" />,
+    },
+    {
+      key: 'mirgation',
+      label: t('mirgation'),
+      component: <Mirgation />,
+      icon: <IconArrowRightSquare size={14} className="mr-2" />,
     },
   ];
 

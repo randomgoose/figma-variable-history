@@ -101,6 +101,10 @@ export default async function () {
           type: 'PLUGIN_SETTING',
           payload: figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING),
         });
+        figma.ui.postMessage({
+          type: MESSAGE_TYPE.SET_FILE_UUID,
+          payload: figmaHelper.getFileUUID(),
+        });
         break;
       case MESSAGE_TYPE.COMMIT:
         await commitBridge.commit(msg.payload);
@@ -335,6 +339,40 @@ export default async function () {
         );
         await commitBridge.emitData();
         break;
+      case MESSAGE_TYPE.CREATE_FILE_MIGRATION:
+        const commits = commitBridge.getCommits();
+
+        try {
+          const response = await fetch(
+            'https://jyjihmqnancgnorqwoxc.supabase.co/functions/v1/create-file',
+            {
+              method: 'POST',
+              headers: {
+                Authorization:
+                  'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5amlobXFuYW5jZ25vcnF3b3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5MDE3MzksImV4cCI6MjA2MDQ3NzczOX0.gHxjrkd0JOgy644VVuo252tVrDdLIFEIeQgFx-7WZE8',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ commits }),
+            }
+          );
+          const data = await response.json();
+          if (data.id && typeof data.id === 'string' && data.id !== '') {
+            figmaHelper.setFileUUID(data.id);
+
+            figma.ui.postMessage({
+              type: MESSAGE_TYPE.SET_FILE_UUID,
+              payload: data.id,
+            });
+          }
+        } catch (error) {
+          console.error(error);
+        }
+        break;
+      // -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5amlobXFuYW5jZ25vcnF3b3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5MDE3MzksImV4cCI6MjA2MDQ3NzczOX0.gHxjrkd0JOgy644VVuo252tVrDdLIFEIeQgFx-7WZE8' \
+      // -H 'Content-Type: application/json' \
+      // --data '{"name":"Functions"}')
+      // const { data, error } = await supabaseServiceRoleClient.from('files').insert({ commits });
+      // console.log(data, error);
 
       // case MESSAGE_TYPE.REVERT_ALL_VARIABLE_CHANGES:
       //   break;

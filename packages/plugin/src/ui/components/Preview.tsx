@@ -1,11 +1,14 @@
-import { IconWorld } from '@tabler/icons-react';
+import { IconAlertTriangleFilled, IconWorld } from '@tabler/icons-react';
 import { GitHubLogo } from '../icons/GitHubLogo';
 import { SlackLogo } from '../icons/SlackLogo';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
+import { AppContext } from '../../AppContext';
 
 export function Preview() {
   const { t } = useTranslation();
+  const { setTab } = useContext(AppContext);
+  const { fileUUID } = useContext(AppContext);
 
   const tutorials = useMemo(
     () => [
@@ -112,7 +115,35 @@ export function Preview() {
   );
 
   return (
-    <div className="p-8 w-full h-full">
+    <div className="p-8 w-full h-full overflow-auto">
+      {fileUUID ? null : (
+        <div className="bg-[var(--figma-color-bg-warning-tertiary)] rounded-lg p-4">
+          <div className="flex gap-2 items-center">
+            <IconAlertTriangleFilled className="text-[var(--figma-color-text-warning)] w-4 h-4" />
+            <p className="text-sm font-semibold">{t('data_migration_notification_title')}</p>
+          </div>
+          <div>
+            <p className="text-xs mt-2" style={{ color: 'var(--figma-color-text-secondary)' }}>
+              {t('data_migration_notification_description')}
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2 mt-2">
+            <button
+              onClick={() => {
+                setTab('settings');
+              }}
+              className="btn-outline grow bg-[var(--figma-color-bg-warning)] border-[var(--figma-color-border-warning)] text-[var(--figma-color-text-warning)]"
+            >
+              {t('data_migration_notification_button_migrate')}
+            </button>
+
+            <button className="btn-outline grow border-[var(--figma-color-border-warning-strong)] text-[var(--figma-color-text-warning)]">
+              {t('data_migration_notification_button_export')}
+            </button>
+          </div>
+        </div>
+      )}
       <h2 className="text-base font-semibold">{t('no_changes_title')}</h2>
       <p className="mt-2" style={{ color: 'var(--figma-color-text-secondary)' }}>
         {t('no_changes_description_2')}

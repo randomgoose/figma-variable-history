@@ -75,6 +75,10 @@ body * {
     @apply flex justify-center items-center px-[8px] py-2 max-h-6 rounded-md border border-[color:var(--figma-color-border)] font-medium shrink-0;
   }
 
+  .btn-outline-danger {
+    @apply flex justify-center items-center px-[8px] py-2 max-h-6 rounded-md border border-[color:var(--figma-color-border-danger-strong)] text-[color:var(--figma-color-text-danger)] font-medium shrink-0 disabled:opacity-30 disabled:cursor-not-allowed;
+  }
+
   .btn-outline:disabled {
     @apply border-[color:var(--figma-color-border-disabled)] text-[color:var(--figma-color-text-disabled)];
   }

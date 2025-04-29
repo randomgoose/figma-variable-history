@@ -256,4 +256,28 @@ export const translations: Record<string, Record<string, string>> = {
     'zh-CN': '缺少代码语法',
     'zh-TW': '缺少程式語法',
   },
+  // Data migration
+  data_migration_notification_title: {
+    'en-US': 'Data Migration',
+    'zh-CN': '数据迁移',
+    'zh-TW': '數據遷移',
+  },
+  data_migration_notification_description: {
+    'en-US':
+      'From May 13th 2025, Figma will limit the usage of its pluginData API, which may cause the plugin to malfunction and lose your data. To continue using the plugin, you can:',
+    'zh-CN':
+      '从2025年5月13日起，Figma 将限制其 pluginData API 的使用，这可能会导致插件无法正常工作并丢失您的数据。若您希望继续使用插件，您可以：',
+    'zh-TW':
+      '從2025年5月13日起，Figma 將限制其 pluginData API 的使用，這可能會導致插件無法正常工作並遺失您的數據。若您希望繼續使用插件，您可以：',
+  },
+  data_migration_notification_button_migrate: {
+    'en-US': 'Migrate to cloud storage',
+    'zh-CN': '迁移到云存储',
+    'zh-TW': '遷移到雲端儲存',
+  },
+  data_migration_notification_button_export: {
+    'en-US': 'Export data and create your own build',
+    'zh-CN': '导出数据并创建自己的构建',
+    'zh-TW': '導出數據並創建自己的構建',
+  },
 };

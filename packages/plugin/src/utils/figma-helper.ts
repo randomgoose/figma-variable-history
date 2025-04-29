@@ -1,6 +1,7 @@
 import {
   DISABLE_VARIABLE_NAME_PREFIX,
   PLUGIN_DATA_KEY_COMMITS,
+  PLUGIN_DATA_KEY_FILE_UUID,
   PLUGIN_DATA_KEY_HEAD,
   PLUGIN_DATA_KEY_PREFIX,
 } from '../config';
@@ -468,5 +469,13 @@ export const figmaHelper = {
     if (!collection) return;
 
     collection.renameMode(modeId, name);
+  },
+
+  setFileUUID(uuid: string) {
+    figma.root.setSharedPluginData(PLUGIN_DATA_KEY_PREFIX, PLUGIN_DATA_KEY_FILE_UUID, uuid);
+  },
+
+  getFileUUID() {
+    return figma.root.getSharedPluginData(PLUGIN_DATA_KEY_PREFIX, PLUGIN_DATA_KEY_FILE_UUID);
   },
 };

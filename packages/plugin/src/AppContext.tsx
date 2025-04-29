@@ -59,6 +59,7 @@ interface AppContext {
   setCurrentCollectionId: React.Dispatch<React.SetStateAction<string | null>>;
   modes: Record<string, string>;
   invalidateResolvedVariableValue: (variableId: string, modeId: string) => void;
+  fileUUID: string | null;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -95,6 +96,7 @@ export const AppContext = createContext<AppContext>({
   setCurrentCollectionId: () => null,
   modes: {},
   invalidateResolvedVariableValue: () => null,
+  fileUUID: null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -116,7 +118,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [checkedVariableIds, setCheckedVariableIds] = useState<string[]>([]);
   const [teamLibraries, setTeamLibraries] = useState<AppContext['teamLibraries']>({});
   const [currentCollectionId, setCurrentCollectionId] = useState<string | null>(null);
-
+  const [fileUUID, setFileUUID] = useState<string | null>(null);
   const invalidateResolvedVariableValue = useCallback((variableId: string, modeId: string) => {
     setResolvedVariableValues((prev) => {
       const newValues = { ...prev };
@@ -252,6 +254,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
             },
           }));
           break;
+        case MESSAGE_TYPE.SET_FILE_UUID:
+          setFileUUID(payload);
+          break;
       }
     };
   }, []);
@@ -317,6 +322,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       setCurrentCollectionId,
       modes,
       invalidateResolvedVariableValue,
+      fileUUID,
     };
   }, [
     setting,
@@ -350,6 +356,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     setTeamLibraries,
     currentCollectionId,
     setCurrentCollectionId,
+    fileUUID,
     modes,
     invalidateResolvedVariableValue,
   ]);
