@@ -94,10 +94,9 @@ export default async function () {
   figma.ui.postMessage({ type: MESSAGE_TYPE.IMPORT_TEAM_LIBRARIES, payload: libraries });
 
   figma.ui.onmessage = async (msg) => {
-    console.log(figmaHelper.getFileUUID())
     switch (msg.type) {
       case 'INIT':
-        await commitBridge.emitData();
+        // await commitBridge.emitData();
         figma.ui.postMessage({
           type: 'PLUGIN_SETTING',
           payload: figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING),
@@ -106,15 +105,11 @@ export default async function () {
           type: MESSAGE_TYPE.SET_FILE_UUID,
           payload: figmaHelper.getFileUUID(),
         });
-        figma.ui.postMessage({
-          type: MESSAGE_TYPE.SET_CURRENT_USER,
-          payload: figma.currentUser,
-        });
         break;
-      // case MESSAGE_TYPE.COMMIT:
-      //   await commitBridge.commit(msg.payload);
-      //   await commitBridge.emitData();
-      //   break;
+      case MESSAGE_TYPE.COMMIT:
+        await commitBridge.commit(msg.payload);
+        await commitBridge.emitData();
+        break;
       case 'RESET_COMMIT':
         await commitBridge.reset(msg.payload);
         await commitBridge.emitData();
@@ -123,11 +118,13 @@ export default async function () {
         await commitBridge.emitData();
         break;
       case MESSAGE_TYPE.REVERT_VARIABLE_VALUE:
-        await commitBridge.revertVariable(msg.payload.variable, msg.payload.type, msg.payload.commit);
+        await commitBridge.revertVariable(msg.payload.variable, msg.payload.type);
         await commitBridge.emitData();
         break;
       case 'CONVERT_VARIABLES_TO_CSS':
-        const commit = msg.payload
+        const commit = msg.paylod
+          ? commitBridge.getCommitById(msg.payload)
+          : commitBridge.getCommits()?.[0];
 
         if (commit) {
           const content = await convertVariablesToCss(
@@ -151,8 +148,6 @@ export default async function () {
           msg.payload.modeId,
           consumer
         );
-
-        console.log('resolvedVariableValue', resolvedVariableValue)
         if (resolvedVariableValue) {
           figma.ui.postMessage({
             type: 'RESOLVE_VARIABLE_VALUE_DONE',
@@ -250,6 +245,18 @@ export default async function () {
           payload: cloneObject(collection),
         });
 
+        break;
+      case MESSAGE_TYPE.DELETE_VARIABLE_COLLECTION:
+        await figmaHelper.deleteVariableCollection(msg.payload.id);
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.RENAME_VARIABLE_COLLECTION:
+        await figmaHelper.renameVariableCollection(msg.payload.id, msg.payload.name);
+        await commitBridge.emitData();
+        break;
+      case MESSAGE_TYPE.ADD_MODE:
+        await figmaHelper.addMode(msg.payload.collectionId, msg.payload.name);
+        await commitBridge.emitData();
         break;
       case MESSAGE_TYPE.CREATE_VARIABLE:
         let variableId = '';
@@ -374,19 +381,15 @@ export default async function () {
         });
 
         break;
+      // -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5amlobXFuYW5jZ25vcnF3b3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5MDE3MzksImV4cCI6MjA2MDQ3NzczOX0.gHxjrkd0JOgy644VVuo252tVrDdLIFEIeQgFx-7WZE8' \
+      // -H 'Content-Type: application/json' \
+      // --data '{"name":"Functions"}')
+      // const { data, error } = await supabaseServiceRoleClient.from('files').insert({ commits });
+      // console.log(data, error);
 
-      // case MESSAGE_TYPE.DELETE_VARIABLE_COLLECTION:
-      //   await figmaHelper.deleteVariableCollection(msg.payload.id);
-      //   await commitBridge.emitData();
+      // case MESSAGE_TYPE.REVERT_ALL_VARIABLE_CHANGES:
       //   break;
-      // case MESSAGE_TYPE.RENAME_VARIABLE_COLLECTION:
-      //   await figmaHelper.renameVariableCollection(msg.payload.id, msg.payload.name);
-      //   await commitBridge.emitData();
-      //   break;
-      // case MESSAGE_TYPE.ADD_MODE:
-      //   await figmaHelper.addMode(msg.payload.collectionId, msg.payload.name);
-      //   await commitBridge.emitData();
-      //   break;
+      // TODO: Drop all changes
     }
   };
 }

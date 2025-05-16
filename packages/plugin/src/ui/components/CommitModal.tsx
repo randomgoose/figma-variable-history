@@ -6,12 +6,13 @@ import { syncToGit } from '../../features/sync-to-git';
 import { MESSAGE_TYPE, sendMessage } from '../../utils/message';
 import { syncToSlackChannel } from '../../features/sync-to-slack-channel';
 import { CustomHTTPSyncConfig, GitHubSyncConfig, SlackSyncConfig } from '../../types';
-import { IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-react';
+import { IconCircleCheckFilled, IconCircleXFilled, IconLoader } from '@tabler/icons-react';
 import { sendCustomRequest } from '../../features/send-custom-request';
 import { SyncTaskIcon } from './SyncTaskIcon';
 import { useTranslation } from '../../hooks/useTranslation';
 import { X } from 'lucide-react';
 import { unionBy } from 'lodash-es';
+import { useCommitBridge } from '../../hooks/useCommitBridge';
 
 const syncProgressMap: { [key: string]: ReactNode } = {
   pending: 'Pending',
@@ -51,10 +52,13 @@ export function CommitModal({
     clearCompiledVariables,
     setTab,
     checkedVariableIds,
+    fileUUID,
+    currentUser,
   } = useContext(AppContext);
   const [view, setView] = useState<'commit' | 'sync'>('commit');
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
+  const { commitMutation, isCommitPending } = useCommitBridge(fileUUID);
 
   useEffect(() => {
     clearCompiledVariables();
@@ -64,6 +68,7 @@ export function CommitModal({
     const commit = commits[0];
 
     if (shouldSync && commit && compiledVariables.css) {
+      console.log(compiledVariables.css)
       setShouldSync(false);
       Promise.all(
         setting?.syncTasks?.map(async ({ type, config }, index) => {
@@ -153,27 +158,31 @@ export function CommitModal({
         .filter((variable) => !checkedVariableIds.includes(variable.id))
         .map((variable) => variable.id);
 
-      sendMessage(MESSAGE_TYPE.COMMIT, {
+      commitMutation.mutate({
         id: `${timestamp}`,
         date: timestamp,
         summary,
         description,
         variables,
         collections,
-        collaborators: [],
+        collaborators: currentUser ? [currentUser] : [],
         ignoredVariableIds,
+      }, {
+        onSuccess: () => {
+          if (setting?.syncTasks?.length > 0) {
+            setView('sync');
+            sendMessage('CONVERT_VARIABLES_TO_CSS', commits[0]);
+            setShouldSync(true);
+            setSyncTaskStatus(setting?.syncTasks?.map(() => ({ type: 'pending', message: '' })));
+            setSyncTaskResults(setting?.syncTasks?.map(() => null));
+          } else {
+            setOpen(false);
+          }
+        },
+        onError: (error) => {
+          console.error(error);
+        }
       });
-      sendMessage('CONVERT_VARIABLES_TO_CSS');
-      setShouldSync(true);
-
-      if (setting?.syncTasks?.length > 0) {
-        setView('sync');
-      } else {
-        setOpen(false);
-      }
-
-      setSyncTaskStatus(setting?.syncTasks?.map(() => ({ type: 'pending', message: '' })));
-      setSyncTaskResults(setting?.syncTasks?.map(() => null));
     }
   }, [variables, collections, summary, description]);
 
@@ -210,12 +219,16 @@ export function CommitModal({
                 className="ml-auto"
                 style={{ color: 'var(--figma-color-text-brand)' }}
               >
-                {setting?.syncTasks?.length > 0 ? t('view_tasks') : t('set_up_tasks')}
+                {isCommitPending ? <IconLoader size={14} /> : setting?.syncTasks?.length > 0 ? t('view_tasks') : t('set_up_tasks')}
               </button>
             </div>
           }
 
-          <button className="btn-primary" disabled={summary.length <= 0} onClick={handleClick}>
+          <button
+            className="btn-primary"
+            disabled={summary.length <= 0 || isCommitPending}
+            onClick={handleClick}
+          >
             {setting?.syncTasks?.length > 0 ? t('commit_and_sync') : t('commit')}
           </button>
         </>
@@ -237,10 +250,10 @@ export function CommitModal({
                   {task.type === 'github'
                     ? (task.config as GitHubSyncConfig).repository
                     : task.type === 'slack'
-                    ? (task.config as SlackSyncConfig).channelId
-                    : task.type === 'custom'
-                    ? (task.config as CustomHTTPSyncConfig).address
-                    : null}
+                      ? (task.config as SlackSyncConfig).channelId
+                      : task.type === 'custom'
+                        ? (task.config as CustomHTTPSyncConfig).address
+                        : null}
                 </div>
                 <div className="ml-auto flex items-center gap-1 underline w-fit whitespace-nowrap">
                   {syncTaskResults[index] ? (
@@ -307,6 +320,7 @@ export function CommitModal({
               {view === 'commit' ? (
                 <div className="w-full flex flex-col gap-3">
                   <input
+                    disabled={isCommitPending}
                     className="input"
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
@@ -314,6 +328,7 @@ export function CommitModal({
                   />
                   <textarea
                     className="input pt-1"
+                    disabled={isCommitPending}
                     onChange={(e) => setDescription(e.target.value)}
                     value={description}
                     placeholder={t('description_placeholder')}

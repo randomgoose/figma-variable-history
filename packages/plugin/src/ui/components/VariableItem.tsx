@@ -2,11 +2,13 @@ import { Root, Portal, Content, Item, Trigger } from '@radix-ui/react-context-me
 import { VariableChangeType } from '../../types';
 import clsx from 'clsx';
 import { MESSAGE_TYPE, sendMessage } from '../../utils/message';
-import { ReactNode, useEffect } from 'react';
+import { CSSProperties, ReactNode, useContext, useEffect } from 'react';
 import { ParsedValue } from './ParsedValue';
 import { VariableIcon } from './VariableIcon';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { IconCheck } from '@tabler/icons-react';
+import { useCommitBridge } from '../../hooks/useCommitBridge';
+import { AppContext } from '../../AppContext';
 
 export function VariableItem({
   variable,
@@ -18,6 +20,7 @@ export function VariableItem({
   checkbox,
   checked,
   onCheck,
+  style,
 }: {
   variable: Variable;
   type?: VariableChangeType;
@@ -28,15 +31,21 @@ export function VariableItem({
   checkbox?: boolean;
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
+  style?: CSSProperties;
 }) {
   const { id, name, resolvedType, valuesByMode } = variable;
+  const { fileUUID, resolvedVariableValues } = useContext(AppContext)
+  const { commits } = useCommitBridge(fileUUID)
 
   useEffect(() => {
     const defaultMode = Object.keys(valuesByMode)[0];
     const value = valuesByMode[defaultMode];
 
     if (typeof value === 'object' && 'type' in value) {
-      sendMessage('RESOLVE_VARIABLE_VALUE', { id: variable.id, modeId: defaultMode });
+      if (!resolvedVariableValues[variable.id]) {
+        console.log(name)
+        sendMessage('RESOLVE_VARIABLE_VALUE', { id: variable.id, modeId: defaultMode });
+      }
     }
   }, []);
 
@@ -117,13 +126,14 @@ export function VariableItem({
       <Trigger
         disabled={!allowDiscard}
         asChild
-        // transition={{ duration: 0.4, delay: custom * 0.01, ease: ['linear'] }}
+      // transition={{ duration: 0.4, delay: custom * 0.01, ease: ['linear'] }}
       >
         {/* <Link key={id} href={`/variable/${id}`} className={styles.variableItem}> */}
         <div
+          style={style}
           id={id}
           className={clsx(
-            'flex items-center h-7 p-2 cursor-default text-[color:var(--figma-color-text)] rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)] hover:scale-[1.005] active:scale-[0.995]',
+            'flex items-center h-7 p-2 cursor-default text-[color:var(--figma-color-text)] rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)]',
             selected ? 'bg-[color:var(--figma-color-bg-brand-tertiary)]' : 'bg-none',
             resolvedType === 'COLOR' ? 'gap-2' : checkbox ? 'gap-1' : 'gap-1',
             checkbox ? 'pl-1' : resolvedType === 'COLOR' ? 'pl-2' : 'pl-1'
@@ -148,9 +158,7 @@ export function VariableItem({
         <Content className={'dropdown-content'} style={{ width: 200 }}>
           <Item
             className={'dropdown-item'}
-            onClick={() => {
-              sendMessage(MESSAGE_TYPE.REVERT_VARIABLE_VALUE, { variable, type });
-            }}
+            onClick={() => { sendMessage(MESSAGE_TYPE.REVERT_VARIABLE_VALUE, { variable, type, commit: commits[0] }) }}
           >
             Discard changes
           </Item>

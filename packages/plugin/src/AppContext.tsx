@@ -1,10 +1,18 @@
-import { createContext, useMemo, useState, ReactNode, useEffect, useCallback } from 'react';
+import {
+  createContext,
+  useMemo,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from 'react';
 
 import type { ICommit, PluginSetting } from './types';
 import { getVariableChangesGroupedByCollection } from './utils/variable';
 import { ClipboardItem } from './types/clipboard';
 import { MESSAGE_TYPE, sendMessage } from './utils/message';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useCommitBridge } from './hooks/useCommitBridge';
 
 interface AppContext {
   setting: PluginSetting;
@@ -60,6 +68,8 @@ interface AppContext {
   modes: Record<string, string>;
   invalidateResolvedVariableValue: (variableId: string, modeId: string) => void;
   fileUUID: string | null;
+  legacyCommits: ICommit[];
+  currentUser: User | null;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -97,13 +107,19 @@ export const AppContext = createContext<AppContext>({
   modes: {},
   invalidateResolvedVariableValue: () => null,
   fileUUID: null,
+  legacyCommits: [],
+  currentUser: null,
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
+  const [fileUUID, setFileUUID] = useState<string | null>(null);
+  const { commits } = useCommitBridge(fileUUID);
+  const [legacyCommits, setLegacyCommits] = useState<ICommit[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
   const [setting, setSetting] = useState<PluginSetting>({ syncTasks: [] });
   const [variables, setVariables] = useState<AppContext['variables']>([]);
   const [collections, setCollections] = useState<AppContext['collections']>([]);
-  const [commits, setCommits] = useState<AppContext['commits']>([]);
   const [variableAliases, setVariableAliases] = useState<AppContext['variableAliases']>({});
   const [resolvedVariableValues, setResolvedVariableValues] = useState<
     AppContext['resolvedVariableValues']
@@ -118,7 +134,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [checkedVariableIds, setCheckedVariableIds] = useState<string[]>([]);
   const [teamLibraries, setTeamLibraries] = useState<AppContext['teamLibraries']>({});
   const [currentCollectionId, setCurrentCollectionId] = useState<string | null>(null);
-  const [fileUUID, setFileUUID] = useState<string | null>(null);
+
   const invalidateResolvedVariableValue = useCallback((variableId: string, modeId: string) => {
     setResolvedVariableValues((prev) => {
       const newValues = { ...prev };
@@ -138,14 +154,16 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [initialized, setInitialized] = useState<boolean>(false);
 
   const groupedChanges = useMemo(() => {
+    const cmts = (fileUUID && commits.length > 0) ? commits : legacyCommits;
+
     return getVariableChangesGroupedByCollection({
       prev: {
-        variables: commits[0] ? commits[0].variables : [],
-        collections: commits[0] ? commits[0].collections : [],
+        variables: cmts[0] ? cmts[0].variables : [],
+        collections: cmts[0] ? cmts[0].collections : [],
       },
       current: { variables, collections },
-    });
-  }, [commits, variables]);
+    })
+  }, [commits, legacyCommits, variables, collections]);
 
   useEffect(() => {
     if (!initialized && Object.values(groupedChanges).length > 0) {
@@ -170,6 +188,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       const { type, payload } = e.data.pluginMessage;
 
       switch (type) {
+        case MESSAGE_TYPE.SET_CURRENT_USER:
+          setCurrentUser(payload);
+          break;
         case 'IMPORT_VARIABLES':
           setVariables((prevVariables) => {
             // Create maps for faster lookup
@@ -202,7 +223,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
           });
           break;
         case 'IMPORT_LOCAL_COMMITS':
-          setCommits(payload);
+          setLegacyCommits(payload);
           break;
         case 'RESOLVE_VARIABLE_VALUE_DONE':
           setResolvedVariableValues((prev) => ({
@@ -323,6 +344,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       modes,
       invalidateResolvedVariableValue,
       fileUUID,
+      legacyCommits,
+      currentUser,
     };
   }, [
     setting,
@@ -359,6 +382,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     fileUUID,
     modes,
     invalidateResolvedVariableValue,
+    legacyCommits,
+    currentUser,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

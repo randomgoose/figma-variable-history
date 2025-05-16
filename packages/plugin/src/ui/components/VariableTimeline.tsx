@@ -83,9 +83,11 @@ function DiffItem({
 }
 
 export function VariableTimeline({ variableId }: { variableId: string }) {
-  const { commits } = useContext(AppContext);
+  const { commits: cloudCommits, fileUUID, legacyCommits } = useContext(AppContext);
   const [selectedDiffKeys, setSelectedDiffKeys] = useState(diffKeys);
   const { t } = useTranslation();
+
+  const commits = (fileUUID && cloudCommits.length > 0) ? cloudCommits : legacyCommits ? legacyCommits : [];
 
   const commitsIncludingVariable = useMemo(() => {
     return commits.filter((c) => c.variables.find((v) => v.id === variableId));

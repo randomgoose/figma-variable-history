@@ -29,6 +29,8 @@ export enum MESSAGE_TYPE {
   CREATE_FILE_MIGRATION = 'CREATE_FILE_MIGRATION',
   SET_FILE_UUID = 'SET_FILE_UUID',
   DELETE_STORAGE = 'DELETE_STORAGE',
+  SET_PLUGIN_DATA = 'SET_PLUGIN_DATA',
+  SET_CURRENT_USER = 'SET_CURRENT_USER',
 }
 
 export function sendMessage(type: string, payload?: any) {

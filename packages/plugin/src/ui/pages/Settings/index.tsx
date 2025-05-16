@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import { useState } from 'react';
 import { Synchronization } from './Synchronization';
 import {
-  IconArrowRightSquare,
+  IconDatabase,
   IconRefresh,
   IconSettings,
   IconSettings2,
@@ -10,9 +10,9 @@ import {
 import { VariablesSettings } from './VariableSettings';
 import { GeneralSettings } from './GeneralSettings';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { Mirgation } from './Migration';
+import { Storage } from './Storage';
 
-export function Settings() {
+function Settings() {
   const [page, setPage] = useState('general');
   const { t } = useTranslation();
 
@@ -36,10 +36,10 @@ export function Settings() {
       icon: <IconRefresh size={14} className="mr-2" />,
     },
     {
-      key: 'mirgation',
-      label: t('mirgation'),
-      component: <Mirgation />,
-      icon: <IconArrowRightSquare size={14} className="mr-2" />,
+      key: 'storage',
+      label: t('storage'),
+      component: <Storage />,
+      icon: <IconDatabase size={14} className="mr-2" />,
     },
   ];
 
@@ -119,3 +119,5 @@ export function Settings() {
     </div>
   );
 }
+
+export default Settings;

@@ -29,14 +29,18 @@ import { IconChevronDown } from '@tabler/icons-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { PLUGIN_DATA_KEY_PREFIX } from '../../config';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import { useCommitBridge } from '../../hooks/useCommitBridge';
 
-export function Commits() {
+function Commits() {
   const {
-    commits,
+    commits: cloudCommits,
+    legacyCommits,
     groupedChanges: currentGroupedChanges,
     selectedCommitId,
     setSelectedCommitId,
     setting,
+    fileUUID,
+    currentUser,
   } = useContext(AppContext);
   const ref = useRef<HTMLAnchorElement>(null);
   const [selectedVariableId, setSelectedVariableId] = useState('');
@@ -44,7 +48,10 @@ export function Commits() {
   const [exportModalContent, setExportModalContent] = useState('');
   const [searching, setSearching] = useState(false);
   const [keyword, setKeyword] = useState('');
+  const { commitMutation, updateIdInStorageAsync } = useCommitBridge(fileUUID);
   const { t } = useTranslation();
+
+  const commits = (fileUUID && cloudCommits.length > 0) ? cloudCommits : legacyCommits ? legacyCommits : [];
 
   const numOfChanges = Object.values(currentGroupedChanges).reduce(
     (acc, { added, modified, removed }) => acc + added.length + modified.length + removed.length,
@@ -72,12 +79,25 @@ export function Commits() {
     parent.postMessage({ pluginMessage: { type: 'GENERATE_CHANGE_LOG' }, pluginId: '*' }, '*');
   }, []);
 
-  const resetCommit = useCallback((commit: ICommit) => {
-    sendMessage('RESET_COMMIT', commit.id);
+  const resetCommit = useCallback(async (commit: ICommit) => {
+    const timestamp = +new Date();
+
+    commitMutation.mutate({
+      ...commit,
+      id: timestamp + '',
+      summary: `[Reset] ${commit.summary}`,
+      collaborators: currentUser ? [currentUser] : commit.collaborators,
+      date: timestamp
+    }, {
+      onSuccess: () => {
+        sendMessage('RESET_COMMIT', commit);
+
+      }
+    });
   }, []);
 
   const convertCommitVariablesToCss = useCallback((commit: ICommit) => {
-    sendMessage('CONVERT_VARIABLES_TO_CSS', commit.id);
+    sendMessage('CONVERT_VARIABLES_TO_CSS', commit);
   }, []);
 
   useEffect(() => {
@@ -91,15 +111,15 @@ export function Commits() {
     const index = commits.findIndex((c) => c.id === selectedCommitId);
     return index > -1
       ? getVariableChangesGroupedByCollection({
-          current: {
-            variables: commits[index]?.variables,
-            collections: commits[index]?.collections,
-          },
-          prev: {
-            variables: commits[index + 1]?.variables || [],
-            collections: commits[index + 1]?.collections || [],
-          },
-        })
+        current: {
+          variables: commits[index]?.variables,
+          collections: commits[index]?.collections,
+        },
+        prev: {
+          variables: commits[index + 1]?.variables || [],
+          collections: commits[index + 1]?.collections || [],
+        },
+      })
       : {};
   }, [commits, selectedCommitId]);
 
@@ -179,15 +199,15 @@ export function Commits() {
                         const groupedChanges =
                           index > -1
                             ? getVariableChangesGroupedByCollection({
-                                current: {
-                                  variables: commits[index]?.variables,
-                                  collections: commits[index]?.collections,
-                                },
-                                prev: {
-                                  variables: commits[index + 1]?.variables || [],
-                                  collections: commits[index + 1]?.collections || [],
-                                },
-                              })
+                              current: {
+                                variables: commits[index]?.variables,
+                                collections: commits[index]?.collections,
+                              },
+                              prev: {
+                                variables: commits[index + 1]?.variables || [],
+                                collections: commits[index + 1]?.collections || [],
+                              },
+                            })
                             : {};
 
                         const matchedVariables = Object.entries(groupedChanges).filter(
@@ -437,7 +457,7 @@ export function Commits() {
               </div>
               <div className="grow flex overflow-hidden">
                 <PanelGroup
-                  className="relative flex grow"
+                  className="relative flex grow overflow-hidden"
                   direction="horizontal"
                   autoSaveId={`${PLUGIN_DATA_KEY_PREFIX}-panel-group-commits`}
                 >
@@ -445,17 +465,19 @@ export function Commits() {
                     defaultSize={25}
                     minSize={20}
                     maxSize={50}
-                    className="overflow-auto p-2 w-60 shrink-0"
-                    style={{ background: 'var(--figma-color-bg-secondary)' }}
+                    className="p-2 w-60 shrink-0"
+                    style={{ background: 'var(--figma-color-bg)' }}
                   >
-                    <GroupedChanges
-                      disableInteraction
-                      selected={selectedVariableId}
-                      groupedChanges={groupedChanges}
-                      onClickVariableItem={(id) => {
-                        setSelectedVariableId(id);
-                      }}
-                    />
+                    <div className="h-full overflow-auto">
+                      <GroupedChanges
+                        disableInteraction
+                        selected={selectedVariableId}
+                        groupedChanges={groupedChanges}
+                        onClickVariableItem={(id) => {
+                          setSelectedVariableId(id);
+                        }}
+                      />
+                    </div>
                   </Panel>
 
                   <PanelResizeHandle />
@@ -584,3 +606,4 @@ export function Commits() {
     </div>
   );
 }
+export default Commits;

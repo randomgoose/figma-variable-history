@@ -257,27 +257,77 @@ export const translations: Record<string, Record<string, string>> = {
     'zh-TW': '缺少程式語法',
   },
   // Data migration
+  action_needed: {
+    'en-US': 'Action needed before May 13th',
+    'zh-CN': '5月13日前需要操作',
+    'zh-TW': '5月13日前需要操作',
+  },
+  action_done: {
+    'en-US': 'Switched to cloud storage',
+    'zh-CN': '已切换到云存储',
+    'zh-TW': '已切換到雲端儲存',
+  },
+  action_new_file: {
+    'en-US': 'From now on, Variable History will by default use cloud storage in new files.',
+    'zh-CN': '从现在开始，Variable History 将在新文件中默认使用云存储。',
+    'zh-TW': '從現在開始，Variable History 將在新文件中預設使用雲端儲存。',
+  },
+  legacy_changes: {
+    'en-US': 'Switch to cloud storage to make new commits',
+    'zh-CN': '切换到云存储以继续使用插件',
+    'zh-TW': '切換到雲端儲存以繼續使用插件',
+  },
   data_migration_notification_title: {
-    'en-US': 'Data Migration',
-    'zh-CN': '数据迁移',
-    'zh-TW': '數據遷移',
+    'en-US': 'Switch to cloud storage',
+    'zh-CN': '切换到云存储',
+    'zh-TW': '切換到雲端儲存',
   },
   data_migration_notification_description: {
     'en-US':
-      'From May 13th 2025, Figma will limit the usage of its pluginData API, which may cause the plugin to malfunction and lose your data. To continue using the plugin, you can:',
+      'From May 13th 2025, Figma will limit the usage of its pluginData API to 100kb. To make the plugin continue working and keep your data, you will need to switch to cloud storage or export your data and create your own build.',
     'zh-CN':
       '从2025年5月13日起，Figma 将限制其 pluginData API 的使用，这可能会导致插件无法正常工作并丢失您的数据。若您希望继续使用插件，您可以：',
     'zh-TW':
       '從2025年5月13日起，Figma 將限制其 pluginData API 的使用，這可能會導致插件無法正常工作並遺失您的數據。若您希望繼續使用插件，您可以：',
   },
+  data_migration_notification_description_done: {
+    'en-US': 'Successfully switched to cloud storage. You can download your previous data before May 13th.',
+    'zh-CN': '成功切换到云存储。在5月13日前您可以随时下载您的数据。',
+    'zh-TW': '成功切換到雲端儲存。在5月13日前您可以隨時下載您的數據。',
+  },
   data_migration_notification_button_migrate: {
-    'en-US': 'Migrate to cloud storage',
+    'en-US': 'Switch to cloud storage',
+    'zh-CN': '迁移到云存储',
+    'zh-TW': '遷移到雲端儲存',
+  },
+  data_migration_notification_button_migrate_success: {
+    'en-US': 'Switched to cloud storage',
     'zh-CN': '迁移到云存储',
     'zh-TW': '遷移到雲端儲存',
   },
   data_migration_notification_button_export: {
-    'en-US': 'Export data and create your own build',
-    'zh-CN': '导出数据并创建自己的构建',
-    'zh-TW': '導出數據並創建自己的構建',
+    'en-US': 'Download data',
+    'zh-CN': '下载数据',
+    'zh-TW': '下載數據',
+  },
+  storage: {
+    'en-US': 'Storage',
+    'zh-CN': '存储',
+    'zh-TW': '儲存',
+  },
+  storage_download_legacy_data: {
+    'en-US': 'Download legacy data',
+    'zh-CN': '下载旧数据',
+    'zh-TW': '下載舊數據',
+  },
+  storage_download_data: {
+    'en-US': 'Download cloud data',
+    'zh-CN': '下载云端数据',
+    'zh-TW': '下載雲端數據',
+  },
+  storage_delete_legacy_data: {
+    'en-US': 'Delete data',
+    'zh-CN': '删除数据',
+    'zh-TW': '刪除數據',
   },
 };

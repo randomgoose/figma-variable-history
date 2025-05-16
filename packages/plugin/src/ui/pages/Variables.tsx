@@ -30,14 +30,16 @@ import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 //   { id: 'node-graph', icon: <CornerDownLeft size={12} /> },
 // ];
 
-export function Variables() {
-  const { variables, collections, getCollectionName, commits } = useContext(AppContext);
+function Variables() {
+  const { variables, collections, getCollectionName, commits: cloudCommits, legacyCommits, fileUUID } = useContext(AppContext);
   const [view] = useState<'timeline' | 'node-graph'>('timeline');
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedVariable, setSelectedVariable] = useState<Variable | null>(variables[0]);
   const [keyword, setKeyword] = useState<string>('');
   const { t } = useTranslation();
+
+  const commits = (fileUUID && cloudCommits.length > 0) ? cloudCommits : legacyCommits ? legacyCommits : [];
 
   const modeMap = useMemo(() => {
     return Object.fromEntries(
@@ -325,3 +327,5 @@ function NodeGraph({ nodes, edges }: { nodes: Node[]; edges: Edge[] }) {
     </ReactFlow>
   );
 }
+
+export default Variables;

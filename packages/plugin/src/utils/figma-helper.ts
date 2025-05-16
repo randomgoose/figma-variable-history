@@ -134,15 +134,14 @@ export const figmaHelper = {
     data,
     createIfNotExists = false,
     variableId,
-    commitId,
+    commit,
   }: {
     data: Variable;
     createIfNotExists?: boolean;
     variableId: string;
-    commitId: string;
+    commit: ICommit;
   }) {
     let variable = (await this.getVariableByIdAsync(variableId, { clone: false })) as Variable;
-    const commit = commitBridge.getCommitById(commitId);
     const codeSyntaxPlatforms: CodeSyntaxPlatform[] = ['WEB', 'ANDROID', 'iOS'];
 
     if (!variable && createIfNotExists) {
@@ -226,8 +225,8 @@ export const figmaHelper = {
       const v = await this.getVariableByIdAsync(id, { clone: false });
       const c = v
         ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
-            ({ id }) => id === v.variableCollectionId
-          )
+          ({ id }) => id === v.variableCollectionId
+        )
         : null;
 
       if (v && c) {
@@ -472,10 +471,10 @@ export const figmaHelper = {
   },
 
   setFileUUID(uuid: string) {
-    figma.root.setSharedPluginData(PLUGIN_DATA_KEY_PREFIX, PLUGIN_DATA_KEY_FILE_UUID, uuid);
+    figmaHelper.setPluginData(PLUGIN_DATA_KEY_FILE_UUID, uuid);
   },
 
   getFileUUID() {
-    return figma.root.getSharedPluginData(PLUGIN_DATA_KEY_PREFIX, PLUGIN_DATA_KEY_FILE_UUID);
+    return figmaHelper.getPluginData(PLUGIN_DATA_KEY_FILE_UUID);
   },
 };

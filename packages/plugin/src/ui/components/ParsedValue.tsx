@@ -32,9 +32,9 @@ export function ParsedValue({
   // Resolve the value if it's an alias
   useEffect(() => {
     if (typeof value === 'object' && 'type' in value) {
-      // if (!resolvedVariableValues[value.id]) {
-      //   sendMessage('RESOLVE_VARIABLE_VALUE', { id: value.id, modeId });
-      // }
+      if (!resolvedVariableValues[value.id]) {
+        sendMessage('RESOLVE_VARIABLE_VALUE', { id: value.id, modeId });
+      }
 
       if (value.id && !variableAliases[value.id]) {
         sendMessage('GET_VARIABLE_BY_ID', value.id);

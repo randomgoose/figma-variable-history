@@ -1,6 +1,5 @@
 import { MessageSquarePlus } from 'lucide-react';
 import { VariableIcon } from '../VariableIcon';
-import { useEffect, useRef } from 'react';
 import { variableManager } from '../../../utils/message';
 
 export function EditableVariableNameCell({
