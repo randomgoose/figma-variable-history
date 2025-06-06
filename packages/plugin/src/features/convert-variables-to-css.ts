@@ -8,7 +8,7 @@ import {
 
 export async function convertVariablesToCss(
   commit: Pick<ICommit, 'variables' | 'collections'>,
-  colorFormat: 'HEX' | 'RGB' | 'HSL' = 'RGB',
+  colorFormat: 'HEX' | 'RGB' | 'HSL' = 'RGB'
 ) {
   const { variables, collections } = commit;
   const modes = [];
@@ -35,7 +35,9 @@ export async function convertVariablesToCss(
               switch (typeof value) {
                 case 'object':
                   if ('type' in value) {
-                    const alias = (await figma.variables.getVariableByIdAsync(value.id))?.name.replaceAll('/', '-');
+                    const alias = (
+                      await figma.variables.getVariableByIdAsync(value.id)
+                    )?.name.replaceAll('/', '-');
                     alias && (cssValue = `var(--${alias})`);
                     // Remove this code because both remote and local variables can be imported with getVariableByIdAsync
 

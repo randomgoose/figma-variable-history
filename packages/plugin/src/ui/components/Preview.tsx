@@ -1,4 +1,9 @@
-import { IconAlertTriangleFilled, IconCircleCheck, IconCircleCheckFilled, IconWorld } from '@tabler/icons-react';
+import {
+  IconAlertTriangleFilled,
+  IconCircleCheck,
+  IconCircleCheckFilled,
+  IconWorld,
+} from '@tabler/icons-react';
 import { GitHubLogo } from '../icons/GitHubLogo';
 import { SlackLogo } from '../icons/SlackLogo';
 import { useTranslation } from '../../hooks/useTranslation';

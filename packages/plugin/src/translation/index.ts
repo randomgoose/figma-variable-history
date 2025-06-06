@@ -291,7 +291,8 @@ export const translations: Record<string, Record<string, string>> = {
       '從2025年5月13日起，Figma 將限制其 pluginData API 的使用，這可能會導致插件無法正常工作並遺失您的數據。若您希望繼續使用插件，您可以：',
   },
   data_migration_notification_description_done: {
-    'en-US': 'Successfully switched to cloud storage. You can download your previous data before May 13th.',
+    'en-US':
+      'Successfully switched to cloud storage. You can download your previous data before May 13th.',
     'zh-CN': '成功切换到云存储。在5月13日前您可以随时下载您的数据。',
     'zh-TW': '成功切換到雲端儲存。在5月13日前您可以隨時下載您的數據。',
   },

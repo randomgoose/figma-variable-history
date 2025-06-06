@@ -31,7 +31,14 @@ import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 // ];
 
 function Variables() {
-  const { variables, collections, getCollectionName, commits: cloudCommits, legacyCommits, fileUUID } = useContext(AppContext);
+  const {
+    variables,
+    collections,
+    getCollectionName,
+    commits: cloudCommits,
+    legacyCommits,
+    fileUUID,
+  } = useContext(AppContext);
   const [view] = useState<'timeline' | 'node-graph'>('timeline');
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -39,7 +46,8 @@ function Variables() {
   const [keyword, setKeyword] = useState<string>('');
   const { t } = useTranslation();
 
-  const commits = (fileUUID && cloudCommits.length > 0) ? cloudCommits : legacyCommits ? legacyCommits : [];
+  const commits =
+    fileUUID && cloudCommits.length > 0 ? cloudCommits : legacyCommits ? legacyCommits : [];
 
   const modeMap = useMemo(() => {
     return Object.fromEntries(

@@ -1,11 +1,11 @@
-import { Content, Title, Dialog, Portal, Overlay, Trigger, Close } from "@radix-ui/react-dialog";
-import { useTranslation } from "../../hooks/useTranslation";
-import { IconCheck, IconCloudFilled, IconLoader, IconX } from "@tabler/icons-react";
-import { AppContext } from "../../AppContext";
-import { useContext, useState } from "react";
-import clsx from "clsx";
-import { MESSAGE_TYPE, sendMessage } from "../../utils/message";
-import { downloadAsJson } from "../../utils/download";
+import { Content, Title, Dialog, Portal, Overlay, Trigger, Close } from '@radix-ui/react-dialog';
+import { useTranslation } from '../../hooks/useTranslation';
+import { IconCheck, IconCloudFilled, IconLoader, IconX } from '@tabler/icons-react';
+import { AppContext } from '../../AppContext';
+import { useContext, useState } from 'react';
+import clsx from 'clsx';
+import { MESSAGE_TYPE, sendMessage } from '../../utils/message';
+import { downloadAsJson } from '../../utils/download';
 
 export function SwitchToCloudDialog() {
   const { t } = useTranslation();
@@ -18,7 +18,14 @@ export function SwitchToCloudDialog() {
   return (
     <Dialog>
       <Trigger asChild>
-        <button className={clsx('ml-auto border rounded-md px-2 py-0.5 flex items-center gap-1', !fileUUID ? ' border-[var(--figma-color-border-warning)] text-[var(--figma-color-text-warning)] bg-[var(--figma-color-bg-warning-tertiary)]' : 'border-[var(--figma-color-border-success)] text-[var(--figma-color-text-success)] bg-[var(--figma-color-bg-success-tertiary)]')}>
+        <button
+          className={clsx(
+            'ml-auto border rounded-md px-2 py-0.5 flex items-center gap-1',
+            !fileUUID
+              ? ' border-[var(--figma-color-border-warning)] text-[var(--figma-color-text-warning)] bg-[var(--figma-color-bg-warning-tertiary)]'
+              : 'border-[var(--figma-color-border-success)] text-[var(--figma-color-text-success)] bg-[var(--figma-color-bg-success-tertiary)]'
+          )}
+        >
           {isLegacy ? t('action_needed') : t('action_done')}
           {fileUUID && <IconCheck size={14} />}
         </button>
@@ -44,29 +51,36 @@ export function SwitchToCloudDialog() {
               {isLegacy
                 ? t('data_migration_notification_description')
                 : isNewFile
-                  ? t('data_migration_notification_description_done')
-                  : t('action_new_file')}
+                ? t('data_migration_notification_description_done')
+                : t('action_new_file')}
             </p>
 
             <div className="flex flex-col gap-1.5 mt-4">
-              {
-                isLegacy && <button onClick={() => {
-                  setIsLoading(true);
-                  sendMessage(MESSAGE_TYPE.CREATE_FILE_MIGRATION);
-                }} className={clsx('btn-primary grow', isLoading && 'opacity-50')}>
-                  {isLoading ? <IconLoader size={14} className="animate-spin" /> : t('data_migration_notification_button_migrate')}
+              {isLegacy && (
+                <button
+                  onClick={() => {
+                    setIsLoading(true);
+                    sendMessage(MESSAGE_TYPE.CREATE_FILE_MIGRATION);
+                  }}
+                  className={clsx('btn-primary grow', isLoading && 'opacity-50')}
+                >
+                  {isLoading ? (
+                    <IconLoader size={14} className="animate-spin" />
+                  ) : (
+                    t('data_migration_notification_button_migrate')
+                  )}
                 </button>
-              }
+              )}
 
-              {
-                legacyCommits?.length > 0 && <button className="btn-outline grow" onClick={() => downloadAsJson(legacyCommits)}>
+              {legacyCommits?.length > 0 && (
+                <button className="btn-outline grow" onClick={() => downloadAsJson(legacyCommits)}>
                   {t('data_migration_notification_button_export')}
                 </button>
-              }
+              )}
             </div>
           </div>
         </Content>
       </Portal>
     </Dialog>
-  )
+  );
 }

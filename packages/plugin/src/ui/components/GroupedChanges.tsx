@@ -52,40 +52,43 @@ export function GroupedChanges({
 
   // Find collection name from history commits
 
-  return <AutoSizer>
-    {({ width, height }) => (
-      <FixedSizeList
-        width={width}
-        height={height}
-        itemCount={allChanges.length}
-        itemSize={32}
-        itemData={allChanges}
-        className='bg-[var(--figma-color-bg)] rounded-md'
-      >
-        {({ index, style, data }) => (
-          <div style={style} className='px-1 first-of-type:pt-1 flex items-center justify-between w-full'>
-            <VariableItem
-              key={data[index].v.id}
-              variable={data[index].v}
-              type={data[index].type as VariableChangeType}
-              selected={data[index].v.id === selected}
-              onClick={(id) => onClickVariableItem(id)}
-              allowDiscard={!disableInteraction}
-              checkbox={checkbox}
-              checked={checkedVariableIds?.includes(data[index].v.id)}
-              onCheck={(checked) =>
-                checked
-                  ? setCheckedVariableIds((prev) => [...prev, data[index].v.id])
-                  : setCheckedVariableIds((prev) =>
-                    prev.filter((c) => c !== data[index].v.id)
-                  )
-              }
-            />
-          </div>
-        )}
-      </FixedSizeList>
-    )}
-  </AutoSizer>
+  return (
+    <AutoSizer>
+      {({ width, height }) => (
+        <FixedSizeList
+          width={width}
+          height={height}
+          itemCount={allChanges.length}
+          itemSize={32}
+          itemData={allChanges}
+          className="bg-[var(--figma-color-bg)] rounded-md"
+        >
+          {({ index, style, data }) => (
+            <div
+              style={style}
+              className="px-1 first-of-type:pt-1 flex items-center justify-between w-full"
+            >
+              <VariableItem
+                key={data[index].v.id}
+                variable={data[index].v}
+                type={data[index].type as VariableChangeType}
+                selected={data[index].v.id === selected}
+                onClick={(id) => onClickVariableItem(id)}
+                allowDiscard={!disableInteraction}
+                checkbox={checkbox}
+                checked={checkedVariableIds?.includes(data[index].v.id)}
+                onCheck={(checked) =>
+                  checked
+                    ? setCheckedVariableIds((prev) => [...prev, data[index].v.id])
+                    : setCheckedVariableIds((prev) => prev.filter((c) => c !== data[index].v.id))
+                }
+              />
+            </div>
+          )}
+        </FixedSizeList>
+      )}
+    </AutoSizer>
+  );
   // <Root type="multiple" value={collectionList}>
   //   {Object.entries(groupedChanges).map(([collectionId, { added, modified, removed }]) => {
   //     const hasChanges = added.length + modified.length + removed.length > 0;

@@ -28,9 +28,9 @@ export class CommitBridge {
       head: ICommit | null;
       commits: CommitInPluginData[];
     } = {
-        head: null,
-        commits: [],
-      }
+      head: null,
+      commits: [],
+    }
   ) {
     this.getLocalPluginData();
   }

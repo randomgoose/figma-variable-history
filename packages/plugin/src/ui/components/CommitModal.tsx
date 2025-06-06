@@ -68,7 +68,7 @@ export function CommitModal({
     const commit = commits[0];
 
     if (shouldSync && commit && compiledVariables.css) {
-      console.log(compiledVariables.css)
+      console.log(compiledVariables.css);
       setShouldSync(false);
       Promise.all(
         setting?.syncTasks?.map(async ({ type, config }, index) => {
@@ -158,31 +158,34 @@ export function CommitModal({
         .filter((variable) => !checkedVariableIds.includes(variable.id))
         .map((variable) => variable.id);
 
-      commitMutation.mutate({
-        id: `${timestamp}`,
-        date: timestamp,
-        summary,
-        description,
-        variables,
-        collections,
-        collaborators: currentUser ? [currentUser] : [],
-        ignoredVariableIds,
-      }, {
-        onSuccess: () => {
-          if (setting?.syncTasks?.length > 0) {
-            setView('sync');
-            sendMessage('CONVERT_VARIABLES_TO_CSS', commits[0]);
-            setShouldSync(true);
-            setSyncTaskStatus(setting?.syncTasks?.map(() => ({ type: 'pending', message: '' })));
-            setSyncTaskResults(setting?.syncTasks?.map(() => null));
-          } else {
-            setOpen(false);
-          }
+      commitMutation.mutate(
+        {
+          id: `${timestamp}`,
+          date: timestamp,
+          summary,
+          description,
+          variables,
+          collections,
+          collaborators: currentUser ? [currentUser] : [],
+          ignoredVariableIds,
         },
-        onError: (error) => {
-          console.error(error);
+        {
+          onSuccess: () => {
+            if (setting?.syncTasks?.length > 0) {
+              setView('sync');
+              sendMessage('CONVERT_VARIABLES_TO_CSS', commits[0]);
+              setShouldSync(true);
+              setSyncTaskStatus(setting?.syncTasks?.map(() => ({ type: 'pending', message: '' })));
+              setSyncTaskResults(setting?.syncTasks?.map(() => null));
+            } else {
+              setOpen(false);
+            }
+          },
+          onError: (error) => {
+            console.error(error);
+          },
         }
-      });
+      );
     }
   }, [variables, collections, summary, description]);
 
@@ -219,7 +222,13 @@ export function CommitModal({
                 className="ml-auto"
                 style={{ color: 'var(--figma-color-text-brand)' }}
               >
-                {isCommitPending ? <IconLoader size={14} /> : setting?.syncTasks?.length > 0 ? t('view_tasks') : t('set_up_tasks')}
+                {isCommitPending ? (
+                  <IconLoader size={14} />
+                ) : setting?.syncTasks?.length > 0 ? (
+                  t('view_tasks')
+                ) : (
+                  t('set_up_tasks')
+                )}
               </button>
             </div>
           }
@@ -250,10 +259,10 @@ export function CommitModal({
                   {task.type === 'github'
                     ? (task.config as GitHubSyncConfig).repository
                     : task.type === 'slack'
-                      ? (task.config as SlackSyncConfig).channelId
-                      : task.type === 'custom'
-                        ? (task.config as CustomHTTPSyncConfig).address
-                        : null}
+                    ? (task.config as SlackSyncConfig).channelId
+                    : task.type === 'custom'
+                    ? (task.config as CustomHTTPSyncConfig).address
+                    : null}
                 </div>
                 <div className="ml-auto flex items-center gap-1 underline w-fit whitespace-nowrap">
                   {syncTaskResults[index] ? (

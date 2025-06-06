@@ -87,7 +87,8 @@ export function VariableTimeline({ variableId }: { variableId: string }) {
   const [selectedDiffKeys, setSelectedDiffKeys] = useState(diffKeys);
   const { t } = useTranslation();
 
-  const commits = (fileUUID && cloudCommits.length > 0) ? cloudCommits : legacyCommits ? legacyCommits : [];
+  const commits =
+    fileUUID && cloudCommits.length > 0 ? cloudCommits : legacyCommits ? legacyCommits : [];
 
   const commitsIncludingVariable = useMemo(() => {
     return commits.filter((c) => c.variables.find((v) => v.id === variableId));

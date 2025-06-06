@@ -51,7 +51,8 @@ function Commits() {
   const { commitMutation, updateIdInStorageAsync } = useCommitBridge(fileUUID);
   const { t } = useTranslation();
 
-  const commits = (fileUUID && cloudCommits.length > 0) ? cloudCommits : legacyCommits ? legacyCommits : [];
+  const commits =
+    fileUUID && cloudCommits.length > 0 ? cloudCommits : legacyCommits ? legacyCommits : [];
 
   const numOfChanges = Object.values(currentGroupedChanges).reduce(
     (acc, { added, modified, removed }) => acc + added.length + modified.length + removed.length,
@@ -82,18 +83,20 @@ function Commits() {
   const resetCommit = useCallback(async (commit: ICommit) => {
     const timestamp = +new Date();
 
-    commitMutation.mutate({
-      ...commit,
-      id: timestamp + '',
-      summary: `[Reset] ${commit.summary}`,
-      collaborators: currentUser ? [currentUser] : commit.collaborators,
-      date: timestamp
-    }, {
-      onSuccess: () => {
-        sendMessage('RESET_COMMIT', commit);
-
+    commitMutation.mutate(
+      {
+        ...commit,
+        id: timestamp + '',
+        summary: `[Reset] ${commit.summary}`,
+        collaborators: currentUser ? [currentUser] : commit.collaborators,
+        date: timestamp,
+      },
+      {
+        onSuccess: () => {
+          sendMessage('RESET_COMMIT', commit);
+        },
       }
-    });
+    );
   }, []);
 
   const convertCommitVariablesToCss = useCallback((commit: ICommit) => {
@@ -111,15 +114,15 @@ function Commits() {
     const index = commits.findIndex((c) => c.id === selectedCommitId);
     return index > -1
       ? getVariableChangesGroupedByCollection({
-        current: {
-          variables: commits[index]?.variables,
-          collections: commits[index]?.collections,
-        },
-        prev: {
-          variables: commits[index + 1]?.variables || [],
-          collections: commits[index + 1]?.collections || [],
-        },
-      })
+          current: {
+            variables: commits[index]?.variables,
+            collections: commits[index]?.collections,
+          },
+          prev: {
+            variables: commits[index + 1]?.variables || [],
+            collections: commits[index + 1]?.collections || [],
+          },
+        })
       : {};
   }, [commits, selectedCommitId]);
 
@@ -199,15 +202,15 @@ function Commits() {
                         const groupedChanges =
                           index > -1
                             ? getVariableChangesGroupedByCollection({
-                              current: {
-                                variables: commits[index]?.variables,
-                                collections: commits[index]?.collections,
-                              },
-                              prev: {
-                                variables: commits[index + 1]?.variables || [],
-                                collections: commits[index + 1]?.collections || [],
-                              },
-                            })
+                                current: {
+                                  variables: commits[index]?.variables,
+                                  collections: commits[index]?.collections,
+                                },
+                                prev: {
+                                  variables: commits[index + 1]?.variables || [],
+                                  collections: commits[index + 1]?.collections || [],
+                                },
+                              })
                             : {};
 
                         const matchedVariables = Object.entries(groupedChanges).filter(
@@ -602,9 +605,8 @@ function Commits() {
           title={t('no_commit_yet')}
           description={t('no_commit_yet_description')}
         />
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 }
 export default Commits;

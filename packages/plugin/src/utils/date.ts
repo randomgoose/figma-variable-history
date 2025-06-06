@@ -20,8 +20,9 @@ export function parseDate(
     if (d < minute) {
       return translations['just_now'][option?.language || 'en-US'];
     } else if (d < hour) {
-      return `${Math.floor(d / minute)} ${translations['minutes_ago'][option?.language || 'en-US']
-        }`;
+      return `${Math.floor(d / minute)} ${
+        translations['minutes_ago'][option?.language || 'en-US']
+      }`;
     } else if (d < day) {
       return `${Math.floor(d / hour)} ${translations['hours_ago'][option?.language || 'en-US']}`;
     } else {

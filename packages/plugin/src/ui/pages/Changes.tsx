@@ -16,13 +16,21 @@ function Changes() {
   const [, setCollectionList] = useState<VariableCollection['id'][]>([]);
   const [keyword, setKeyword] = useState('');
   const [selected, setSelected] = useState<string>('');
-  const { groupedChanges, collections, variables, commits: cloudCommits, legacyCommits, fileUUID, checkedVariableIds } =
-    useContext(AppContext);
+  const {
+    groupedChanges,
+    collections,
+    variables,
+    commits: cloudCommits,
+    legacyCommits,
+    fileUUID,
+    checkedVariableIds,
+  } = useContext(AppContext);
   const { isLoading } = useCommitBridge(fileUUID);
 
   const { t } = useTranslation();
 
-  const commits = (fileUUID && cloudCommits.length > 0) ? cloudCommits : legacyCommits ? legacyCommits : [];
+  const commits =
+    fileUUID && cloudCommits.length > 0 ? cloudCommits : legacyCommits ? legacyCommits : [];
   const isLegacy = legacyCommits?.length > 0 && !fileUUID;
 
   useEffect(() => {
@@ -48,7 +56,12 @@ function Changes() {
   }, [numOfChanges]);
 
   useEffect(() => {
-    const firstCollection = Object.values(groupedChanges).find((collection) => collection.added.length > 0 || collection.modified.length > 0 || collection.removed.length > 0);
+    const firstCollection = Object.values(groupedChanges).find(
+      (collection) =>
+        collection.added.length > 0 ||
+        collection.modified.length > 0 ||
+        collection.removed.length > 0
+    );
 
     if (firstCollection) {
       const firstChange = [
@@ -95,7 +108,7 @@ function Changes() {
               style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}
             >
               <div className="flex flex-col h-full w-full">
-                {(numOfChanges > 0 && (!fileUUID || fileUUID && !isLoading)) ? (
+                {numOfChanges > 0 && (!fileUUID || (fileUUID && !isLoading)) ? (
                   <GroupedChanges
                     keyword={keyword}
                     selected={selected}
@@ -125,34 +138,35 @@ function Changes() {
                 numOfCheckedChanges={numOfCheckedChanges}
               />
             </div>
-          ) : <div
-            className="text-[color:var(--figma-color-text-secondary)] flex items-center justify-center h-12 border-t"
-            style={{ borderColor: 'var(--figma-color-border)' }}
-          >
-            {t('legacy_changes')}
-          </div>}
+          ) : (
+            <div
+              className="text-[color:var(--figma-color-text-secondary)] flex items-center justify-center h-12 border-t"
+              style={{ borderColor: 'var(--figma-color-border)' }}
+            >
+              {t('legacy_changes')}
+            </div>
+          )}
         </div>
       </Panel>
       <PanelResizeHandle />
       <Panel>
         <AnimatePresence>
-          {
-            selected ? (
-              <VariableDetail
-                current={variables.find((v) => v.id === selected)}
-                currentCollection={collections.find(
-                  (c) => c.id === variables.find((v) => v.id === selected)?.variableCollectionId
-                )}
-                prev={commits?.[0]?.variables.find((v: Variable) => v.id === selected)}
-                prevCollection={commits?.[0]?.collections.find(
-                  (c) =>
-                    c.id ===
-                    commits?.[0]?.variables.find((v) => v.id === selected)?.variableCollectionId
-                )}
-              />
-            ) : (
-              <Preview />
-            )}
+          {selected ? (
+            <VariableDetail
+              current={variables.find((v) => v.id === selected)}
+              currentCollection={collections.find(
+                (c) => c.id === variables.find((v) => v.id === selected)?.variableCollectionId
+              )}
+              prev={commits?.[0]?.variables.find((v: Variable) => v.id === selected)}
+              prevCollection={commits?.[0]?.collections.find(
+                (c) =>
+                  c.id ===
+                  commits?.[0]?.variables.find((v) => v.id === selected)?.variableCollectionId
+              )}
+            />
+          ) : (
+            <Preview />
+          )}
         </AnimatePresence>
       </Panel>
     </PanelGroup>

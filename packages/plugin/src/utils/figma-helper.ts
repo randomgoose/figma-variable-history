@@ -226,8 +226,8 @@ export const figmaHelper = {
       const v = await this.getVariableByIdAsync(id, { clone: false });
       const c = v
         ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
-          ({ id }) => id === v.variableCollectionId
-        )
+            ({ id }) => id === v.variableCollectionId
+          )
         : null;
 
       if (v && c) {
@@ -487,7 +487,11 @@ export const figmaHelper = {
         height: 720,
         width: 520,
       };
-      figma.showUI(__html__, { width: windowSize.width, height: windowSize.height, themeColors: true });
+      figma.showUI(__html__, {
+        width: windowSize.width,
+        height: windowSize.height,
+        themeColors: true,
+      });
       figma.ui.postMessage({
         type: 'SET_MODE',
         payload: 'default',
@@ -499,5 +503,5 @@ export const figmaHelper = {
         payload: 'dev',
       });
     }
-  }
+  },
 };

@@ -2,7 +2,12 @@
 import { convertVariablesToCss } from './features';
 import { commitBridge } from './features/CommitBridge';
 import { figmaHelper } from './utils/figma-helper';
-import { PLUGIN_DATA_KEY_COMMITS, PLUGIN_DATA_KEY_FILE_UUID, PLUGIN_DATA_KEY_HEAD, PLUGIN_DATA_KEY_SETTING } from './config';
+import {
+  PLUGIN_DATA_KEY_COMMITS,
+  PLUGIN_DATA_KEY_FILE_UUID,
+  PLUGIN_DATA_KEY_HEAD,
+  PLUGIN_DATA_KEY_SETTING,
+} from './config';
 import { MESSAGE_TYPE } from './utils/message';
 import { cloneObject } from './utils/object';
 import { getNextVariableNames } from './utils/variable';
@@ -27,8 +32,8 @@ export default async function () {
         const v = await figma.variables.getVariableByIdAsync(variable.id);
         const c = v
           ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
-            ({ id }) => id === v.variableCollectionId
-          )
+              ({ id }) => id === v.variableCollectionId
+            )
           : null;
 
         if (v && c) {
@@ -119,11 +124,15 @@ export default async function () {
         await commitBridge.emitData();
         break;
       case MESSAGE_TYPE.REVERT_VARIABLE_VALUE:
-        await commitBridge.revertVariable(msg.payload.variable, msg.payload.type, msg.payload.commit);
+        await commitBridge.revertVariable(
+          msg.payload.variable,
+          msg.payload.type,
+          msg.payload.commit
+        );
         await commitBridge.emitData();
         break;
       case 'CONVERT_VARIABLES_TO_CSS':
-        const commit = msg.payload
+        const commit = msg.payload;
 
         if (commit) {
           const content = await convertVariablesToCss(
@@ -372,13 +381,14 @@ export default async function () {
 
         break;
       case MESSAGE_TYPE.EXPORT_CODE:
-        const colorFormat = figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING)?.colorFormat || 'RGB';
+        const colorFormat =
+          figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING)?.colorFormat || 'RGB';
         const webCode = await convertVariablesToCss(msg.payload.commit, colorFormat);
         const code = {
           WEB: {
             'variables.css': webCode,
           },
-        }
+        };
         figma.ui.postMessage({
           type: MESSAGE_TYPE.EXPORT_CODE_DONE,
           payload: {

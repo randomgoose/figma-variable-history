@@ -34,8 +34,8 @@ export function VariableItem({
   style?: CSSProperties;
 }) {
   const { id, name, resolvedType, valuesByMode } = variable;
-  const { fileUUID, resolvedVariableValues } = useContext(AppContext)
-  const { commits } = useCommitBridge(fileUUID)
+  const { fileUUID, resolvedVariableValues } = useContext(AppContext);
+  const { commits } = useCommitBridge(fileUUID);
 
   useEffect(() => {
     const defaultMode = Object.keys(valuesByMode)[0];
@@ -125,7 +125,7 @@ export function VariableItem({
       <Trigger
         disabled={!allowDiscard}
         asChild
-      // transition={{ duration: 0.4, delay: custom * 0.01, ease: ['linear'] }}
+        // transition={{ duration: 0.4, delay: custom * 0.01, ease: ['linear'] }}
       >
         {/* <Link key={id} href={`/variable/${id}`} className={styles.variableItem}> */}
         <div
@@ -147,9 +147,13 @@ export function VariableItem({
             </Checkbox.Root>
           ) : null}
           <div style={{ flexShrink: 0 }}>{icon()}</div>
-          <div className={clsx("max-w-full text-ellipsis whitespace-nowrap overflow-hidden", {
-            "line-through": type === 'removed'
-          })}>{name}</div>
+          <div
+            className={clsx('max-w-full text-ellipsis whitespace-nowrap overflow-hidden', {
+              'line-through': type === 'removed',
+            })}
+          >
+            {name}
+          </div>
           {type ? <div className="ml-auto">{renderType(type)}</div> : null}
           {slot ? slot : null}
         </div>
@@ -159,7 +163,13 @@ export function VariableItem({
         <Content className={'dropdown-content'} style={{ width: 200 }}>
           <Item
             className={'dropdown-item'}
-            onClick={() => { sendMessage(MESSAGE_TYPE.REVERT_VARIABLE_VALUE, { variable, type, commit: commits[0] }) }}
+            onClick={() => {
+              sendMessage(MESSAGE_TYPE.REVERT_VARIABLE_VALUE, {
+                variable,
+                type,
+                commit: commits[0],
+              });
+            }}
           >
             Discard changes
           </Item>

@@ -1,12 +1,7 @@
 import clsx from 'clsx';
 import { useState } from 'react';
 import { Synchronization } from './Synchronization';
-import {
-  IconDatabase,
-  IconRefresh,
-  IconSettings,
-  IconSettings2,
-} from '@tabler/icons-react';
+import { IconDatabase, IconRefresh, IconSettings, IconSettings2 } from '@tabler/icons-react';
 import { VariablesSettings } from './VariableSettings';
 import { GeneralSettings } from './GeneralSettings';
 import { useTranslation } from '../../../hooks/useTranslation';

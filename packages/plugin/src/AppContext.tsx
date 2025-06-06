@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useMemo,
-  useState,
-  ReactNode,
-  useEffect,
-  useCallback,
-} from 'react';
+import { createContext, useMemo, useState, ReactNode, useEffect, useCallback } from 'react';
 
 import type { ICommit, PluginSetting } from './types';
 import { getVariableChangesGroupedByCollection } from './utils/variable';
@@ -73,11 +66,14 @@ interface AppContext {
   // Dev Mode
   mode: 'default' | 'dev';
   setMode: (mode: 'default' | 'dev') => void;
-  exportCode: Record<string, {
-    WEB?: Record<string, string>;
-    ANDROID?: Record<string, string>;
-    iOS?: Record<string, string>;
-  }>;
+  exportCode: Record<
+    string,
+    {
+      WEB?: Record<string, string>;
+      ANDROID?: Record<string, string>;
+      iOS?: Record<string, string>;
+    }
+  >;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -167,7 +163,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [initialized, setInitialized] = useState<boolean>(false);
 
   const groupedChanges = useMemo(() => {
-    const cmts = (fileUUID && commits.length > 0) ? commits : legacyCommits;
+    const cmts = fileUUID && commits.length > 0 ? commits : legacyCommits;
 
     return getVariableChangesGroupedByCollection({
       prev: {
@@ -175,7 +171,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         collections: cmts[0] ? cmts[0].collections : [],
       },
       current: { variables, collections },
-    })
+    });
   }, [commits, legacyCommits, variables, collections]);
 
   useEffect(() => {
@@ -295,7 +291,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
           setMode(payload);
           break;
         case MESSAGE_TYPE.EXPORT_CODE_DONE:
-          setExportCode(prev => ({
+          setExportCode((prev) => ({
             ...prev,
             [payload.commitId]: {
               ...prev[payload.commitId],

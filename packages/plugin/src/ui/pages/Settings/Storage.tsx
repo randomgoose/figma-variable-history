@@ -25,8 +25,16 @@ export function Storage() {
   return (
     <div>
       <h3 className="settingPage-title mb-4">{t('storage')}</h3>
-      {legacyCommits?.length > 0 && <button className="btn-outline" onClick={async () => downloadAsJson(legacyCommits)}>{t('storage_download_legacy_data')}</button>}
-      {fileUUID && <button className="btn-outline" onClick={async () => downloadAsJson(await downloadData())}>{t('storage_download_data')}</button>}
+      {legacyCommits?.length > 0 && (
+        <button className="btn-outline" onClick={async () => downloadAsJson(legacyCommits)}>
+          {t('storage_download_legacy_data')}
+        </button>
+      )}
+      {fileUUID && (
+        <button className="btn-outline" onClick={async () => downloadAsJson(await downloadData())}>
+          {t('storage_download_data')}
+        </button>
+      )}
     </div>
   );
 }
