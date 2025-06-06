@@ -70,6 +70,14 @@ interface AppContext {
   fileUUID: string | null;
   legacyCommits: ICommit[];
   currentUser: User | null;
+  // Dev Mode
+  mode: 'default' | 'dev';
+  setMode: (mode: 'default' | 'dev') => void;
+  exportCode: Record<string, {
+    WEB?: Record<string, string>;
+    ANDROID?: Record<string, string>;
+    iOS?: Record<string, string>;
+  }>;
 }
 
 export const AppContext = createContext<AppContext>({
@@ -109,6 +117,9 @@ export const AppContext = createContext<AppContext>({
   fileUUID: null,
   legacyCommits: [],
   currentUser: null,
+  mode: 'default',
+  setMode: () => null,
+  exportCode: {},
 });
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -134,6 +145,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [checkedVariableIds, setCheckedVariableIds] = useState<string[]>([]);
   const [teamLibraries, setTeamLibraries] = useState<AppContext['teamLibraries']>({});
   const [currentCollectionId, setCurrentCollectionId] = useState<string | null>(null);
+  const [mode, setMode] = useState<AppContext['mode']>('dev');
+  const [exportCode, setExportCode] = useState<AppContext['exportCode']>({});
 
   const invalidateResolvedVariableValue = useCallback((variableId: string, modeId: string) => {
     setResolvedVariableValues((prev) => {
@@ -278,6 +291,18 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         case MESSAGE_TYPE.SET_FILE_UUID:
           setFileUUID(payload);
           break;
+        case MESSAGE_TYPE.SET_MODE:
+          setMode(payload);
+          break;
+        case MESSAGE_TYPE.EXPORT_CODE_DONE:
+          setExportCode(prev => ({
+            ...prev,
+            [payload.commitId]: {
+              ...prev[payload.commitId],
+              ...payload.code,
+            },
+          }));
+          break;
       }
     };
   }, []);
@@ -346,6 +371,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       fileUUID,
       legacyCommits,
       currentUser,
+      mode,
+      setMode,
+      exportCode,
     };
   }, [
     setting,
@@ -384,6 +412,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     invalidateResolvedVariableValue,
     legacyCommits,
     currentUser,
+    mode,
+    setMode,
+    exportCode,
   ]);
 
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;

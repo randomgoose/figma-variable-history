@@ -4,7 +4,11 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 export function parseDate(
   timestamp: number,
-  option: { relative?: boolean; language?: string } = { relative: true, language: 'en-US' }
+  option: {
+    relative?: boolean;
+    language?: string;
+    showTime?: boolean;
+  } = { relative: true, language: 'en-US', showTime: true }
 ) {
   const d = Date.now() - timestamp;
   const minute = 1000 * 60;
@@ -16,16 +20,15 @@ export function parseDate(
     if (d < minute) {
       return translations['just_now'][option?.language || 'en-US'];
     } else if (d < hour) {
-      return `${Math.floor(d / minute)} ${
-        translations['minutes_ago'][option?.language || 'en-US']
-      }`;
+      return `${Math.floor(d / minute)} ${translations['minutes_ago'][option?.language || 'en-US']
+        }`;
     } else if (d < day) {
       return `${Math.floor(d / hour)} ${translations['hours_ago'][option?.language || 'en-US']}`;
     } else {
       return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()} ${date
         .getHours()
         .toString()
-        .padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        .padStart(2, '0')}:${option.showTime ? date.getMinutes().toString().padStart(2, '0') : ''}`;
     }
   }
 

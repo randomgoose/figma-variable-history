@@ -4,6 +4,7 @@ import {
   PLUGIN_DATA_KEY_FILE_UUID,
   PLUGIN_DATA_KEY_HEAD,
   PLUGIN_DATA_KEY_PREFIX,
+  PLUGIN_DATA_KEY_SETTING,
 } from '../config';
 import { getNextVariableNames, isSameVariable } from './variable';
 import { ICommit } from '../types';
@@ -477,4 +478,26 @@ export const figmaHelper = {
   getFileUUID() {
     return figmaHelper.getPluginData(PLUGIN_DATA_KEY_FILE_UUID);
   },
+
+  async loadUI(mode: 'default' | 'dev') {
+    if (mode === 'default') {
+      const windowSize = (await figma.clientStorage.getAsync(
+        `${PLUGIN_DATA_KEY_SETTING}_windowSize`
+      )) || {
+        height: 720,
+        width: 520,
+      };
+      figma.showUI(__html__, { width: windowSize.width, height: windowSize.height, themeColors: true });
+      figma.ui.postMessage({
+        type: 'SET_MODE',
+        payload: 'default',
+      });
+    } else {
+      figma.showUI(__html__);
+      figma.ui.postMessage({
+        type: 'SET_MODE',
+        payload: 'dev',
+      });
+    }
+  }
 };

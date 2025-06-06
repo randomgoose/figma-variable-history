@@ -6,85 +6,82 @@ import { PLUGIN_DATA_KEY_COMMITS, PLUGIN_DATA_KEY_FILE_UUID, PLUGIN_DATA_KEY_HEA
 import { MESSAGE_TYPE } from './utils/message';
 import { cloneObject } from './utils/object';
 import { getNextVariableNames } from './utils/variable';
+import { initDevModeApp } from './features/init-dev-mode-app';
 
 export default async function () {
-  const variables = await figma.variables.getLocalVariablesAsync();
-  const collections = await figma.variables.getLocalVariableCollectionsAsync();
   const libraries = await figmaHelper.getTeamVariableLibraries();
   const ALIAS_NAME_MAP: Record<string, string> = {};
 
-  const consumer = figma.createFrame();
+  if (figma.mode === 'default') {
+    const variables = await figma.variables.getLocalVariablesAsync();
+    const collections = await figma.variables.getLocalVariableCollectionsAsync();
+    const consumer = figma.createFrame();
 
-  const results = await Promise.all(
-    variables.map(async (variable) => {
-      const collection = collections.find((c) => c.id === variable.variableCollectionId);
-      const modeId = collection?.defaultModeId || Object.keys(variable.valuesByMode)[0];
-      // const resolvedVariable = await figmaHelper.resolveVariableAlias(v.id, modeId, consumer);
-      let resolvedVariableValue;
+    const results = await Promise.all(
+      variables.map(async (variable) => {
+        const collection = collections.find((c) => c.id === variable.variableCollectionId);
+        const modeId = collection?.defaultModeId || Object.keys(variable.valuesByMode)[0];
+        // const resolvedVariable = await figmaHelper.resolveVariableAlias(v.id, modeId, consumer);
+        let resolvedVariableValue;
 
-      const v = await figma.variables.getVariableByIdAsync(variable.id);
-      const c = v
-        ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
-          ({ id }) => id === v.variableCollectionId
-        )
-        : null;
+        const v = await figma.variables.getVariableByIdAsync(variable.id);
+        const c = v
+          ? (await figma.variables.getLocalVariableCollectionsAsync()).find(
+            ({ id }) => id === v.variableCollectionId
+          )
+          : null;
 
-      if (v && c) {
-        const _modeId = c.modes.find((mode) => mode.modeId === modeId)?.modeId || c.defaultModeId;
-        if (_modeId) {
-          try {
-            consumer.setExplicitVariableModeForCollection(c, _modeId);
-            resolvedVariableValue = v.resolveForConsumer(consumer);
-            consumer.name = _modeId;
-          } catch (err) {
-            console.error(`Failed to resolve variable alias\n`, err);
+        if (v && c) {
+          const _modeId = c.modes.find((mode) => mode.modeId === modeId)?.modeId || c.defaultModeId;
+          if (_modeId) {
+            try {
+              consumer.setExplicitVariableModeForCollection(c, _modeId);
+              resolvedVariableValue = v.resolveForConsumer(consumer);
+              consumer.name = _modeId;
+            } catch (err) {
+              console.error(`Failed to resolve variable alias\n`, err);
+            }
           }
         }
-      }
 
-      return {
-        id: variable.id,
-        modeId,
-        value: resolvedVariableValue?.value,
-        resolvedType: resolvedVariableValue?.resolvedType,
-      };
-    })
-  );
+        return {
+          id: variable.id,
+          modeId,
+          value: resolvedVariableValue?.value,
+          resolvedType: resolvedVariableValue?.resolvedType,
+        };
+      })
+    );
 
-  consumer.remove();
+    consumer.remove();
 
-  await Promise.all(
-    variables.map(async (variable) => {
-      const promises = Object.values(variable.valuesByMode).map(async (value) => {
-        if (typeof value === 'object' && 'type' in value) {
-          if (ALIAS_NAME_MAP[value.id]) {
-            return;
+    await Promise.all(
+      variables.map(async (variable) => {
+        const promises = Object.values(variable.valuesByMode).map(async (value) => {
+          if (typeof value === 'object' && 'type' in value) {
+            if (ALIAS_NAME_MAP[value.id]) {
+              return;
+            }
+            const v = await figmaHelper.getVariableByIdAsync(value.id);
+            if (v) {
+              ALIAS_NAME_MAP[v.id] = v.name;
+            }
           }
-          const v = await figmaHelper.getVariableByIdAsync(value.id);
-          if (v) {
-            ALIAS_NAME_MAP[v.id] = v.name;
-          }
-        }
-      });
+        });
 
-      await Promise.all(promises);
-    })
-  );
+        await Promise.all(promises);
+      })
+    );
 
-  const windowSize = (await figma.clientStorage.getAsync(
-    `${PLUGIN_DATA_KEY_SETTING}_windowSize`
-  )) || {
-    height: 720,
-    width: 520,
-  };
+    await figmaHelper.loadUI('default');
 
-  figma.showUI(__html__, { width: windowSize.width, height: windowSize.height, themeColors: true });
-  // // figma.showUI(__html__, { width: 1440, height: 960, themeColors: true });
-
-  figma.ui.postMessage({
-    type: MESSAGE_TYPE.VARIABLE_ALIAS_RESOLVED,
-    payload: results,
-  });
+    figma.ui.postMessage({
+      type: MESSAGE_TYPE.VARIABLE_ALIAS_RESOLVED,
+      payload: results,
+    });
+  } else if (figma.mode === 'inspect') {
+    await initDevModeApp();
+  }
 
   figma.ui.postMessage({
     type: 'SET_VARIABLE_ALIAS',
@@ -94,7 +91,6 @@ export default async function () {
   figma.ui.postMessage({ type: MESSAGE_TYPE.IMPORT_TEAM_LIBRARIES, payload: libraries });
 
   figma.ui.onmessage = async (msg) => {
-    console.log(figmaHelper.getFileUUID())
     switch (msg.type) {
       case 'INIT':
         await commitBridge.emitData();
@@ -145,6 +141,8 @@ export default async function () {
       //   figma.viewport.center = { x: container.x, y: container.y };
       //   break;
       case MESSAGE_TYPE.RESOLVE_VARIABLE_VALUE:
+        if (figma.mode === 'inspect') return;
+
         const consumer = figma.createFrame();
         const resolvedVariableValue = await figmaHelper.resolveVariableAlias(
           msg.payload.id,
@@ -152,7 +150,6 @@ export default async function () {
           consumer
         );
 
-        console.log('resolvedVariableValue', resolvedVariableValue)
         if (resolvedVariableValue) {
           figma.ui.postMessage({
             type: 'RESOLVE_VARIABLE_VALUE_DONE',
@@ -373,6 +370,22 @@ export default async function () {
           }
         });
 
+        break;
+      case MESSAGE_TYPE.EXPORT_CODE:
+        const colorFormat = figmaHelper.getPluginData(PLUGIN_DATA_KEY_SETTING)?.colorFormat || 'RGB';
+        const webCode = await convertVariablesToCss(msg.payload.commit, colorFormat);
+        const code = {
+          WEB: {
+            'variables.css': webCode,
+          },
+        }
+        figma.ui.postMessage({
+          type: MESSAGE_TYPE.EXPORT_CODE_DONE,
+          payload: {
+            commitId: msg.payload.commit?.id,
+            code,
+          },
+        });
         break;
 
       // case MESSAGE_TYPE.DELETE_VARIABLE_COLLECTION:

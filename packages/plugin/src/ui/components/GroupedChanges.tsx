@@ -60,9 +60,10 @@ export function GroupedChanges({
         itemCount={allChanges.length}
         itemSize={32}
         itemData={allChanges}
+        className='bg-[var(--figma-color-bg)] rounded-md'
       >
         {({ index, style, data }) => (
-          <div style={style}>
+          <div style={style} className='px-1 first-of-type:pt-1 flex items-center justify-between w-full'>
             <VariableItem
               key={data[index].v.id}
               variable={data[index].v}

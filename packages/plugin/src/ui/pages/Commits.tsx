@@ -465,8 +465,8 @@ function Commits() {
                     defaultSize={25}
                     minSize={20}
                     maxSize={50}
-                    className="p-2 w-60 shrink-0"
-                    style={{ background: 'var(--figma-color-bg)' }}
+                    className="bg-[var(--figma-color-bg-secondary)] p-1 w-60 shrink-0"
+                    style={{ borderRight: '1px solid var(--figma-color-border)' }}
                   >
                     <div className="h-full overflow-auto">
                       <GroupedChanges
@@ -602,8 +602,9 @@ function Commits() {
           title={t('no_commit_yet')}
           description={t('no_commit_yet_description')}
         />
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
 export default Commits;

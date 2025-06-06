@@ -12,3 +12,13 @@ export const downloadAsJson = async (data: any) => {
         URL.revokeObjectURL(url);
     }
 };
+
+export const download = (data: any, type: string, filename: string) => {
+    const dataStr = 'data:text/' + type + ';charset=utf-8,' + data;
+    const dl = document.createElement('a');
+    dl.setAttribute('href', dataStr);
+    dl.setAttribute('download', filename);
+    document.body.appendChild(dl);
+    dl.click();
+    document.body.removeChild(dl);
+}

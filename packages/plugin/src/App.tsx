@@ -13,9 +13,10 @@ import { useTranslation } from './hooks/useTranslation';
 import { ResizeHandle } from './ui/components/ResizeHandle';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SwitchToCloudDialog } from './ui/components/SwitchToCloudDialog';
+import { DevModeApp } from './DevModeApp';
 
 function Plugin() {
-  const { tab, setTab } = useContext(AppContext);
+  const { tab, setTab, mode } = useContext(AppContext);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -51,7 +52,7 @@ function Plugin() {
     []
   );
 
-  return (
+  return mode === 'default' ? (
     <Root
       className="overflow-hidden w-full h-screen flex flex-col"
       value={tab}
@@ -84,6 +85,8 @@ function Plugin() {
         <Settings />
       </Content>
     </Root>
+  ) : (
+    <DevModeApp />
   );
 }
 

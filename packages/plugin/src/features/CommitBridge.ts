@@ -216,7 +216,6 @@ export class CommitBridge {
 
   getCommits(): ICommit[] {
     let lastCommitInfo: { commit: ICommit; index: number } | null = null;
-    console.log(this.pluginData.head, this.pluginData.commits)
 
     return this.pluginData.commits
       .map((_, index) => {
@@ -291,7 +290,6 @@ export class CommitBridge {
   // }
 
   async revertVariable(variable: Variable, type: VariableChangeType, targetCommit: ICommit) {
-    console.log('revertVariable', variable, type, targetCommit)
     // Updated 2025 Feb 18
     // Changed disableVariable to remove(), this is only called when drop an uncommitted change.
     // It's ok to just remove the variable from the local variables.
@@ -300,7 +298,6 @@ export class CommitBridge {
       if (v) v.remove();
       // await figmaHelper.disableVariable(variable);
     } else if (type === 'modified') {
-      console.log(targetCommit.variables)
       const v = targetCommit.variables.find((v) => v.id === variable.id);
       if (v)
         await figmaHelper.updateVariable({

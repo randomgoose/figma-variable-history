@@ -43,7 +43,6 @@ export function VariableItem({
 
     if (typeof value === 'object' && 'type' in value) {
       if (!resolvedVariableValues[variable.id]) {
-        console.log(name)
         sendMessage('RESOLVE_VARIABLE_VALUE', { id: variable.id, modeId: defaultMode });
       }
     }
@@ -133,7 +132,7 @@ export function VariableItem({
           style={style}
           id={id}
           className={clsx(
-            'flex items-center h-7 p-2 cursor-default text-[color:var(--figma-color-text)] rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)]',
+            'w-full flex items-center h-7 p-2 cursor-default text-[color:var(--figma-color-text)] rounded-md transition-all max-w-full hover:bg-[color:var(--figma-color-bg-hover)]',
             selected ? 'bg-[color:var(--figma-color-bg-brand-tertiary)]' : 'bg-none',
             resolvedType === 'COLOR' ? 'gap-2' : checkbox ? 'gap-1' : 'gap-1',
             checkbox ? 'pl-1' : resolvedType === 'COLOR' ? 'pl-2' : 'pl-1'
@@ -148,7 +147,9 @@ export function VariableItem({
             </Checkbox.Root>
           ) : null}
           <div style={{ flexShrink: 0 }}>{icon()}</div>
-          <div className="max-w-full text-ellipsis whitespace-nowrap overflow-hidden">{name}</div>
+          <div className={clsx("max-w-full text-ellipsis whitespace-nowrap overflow-hidden", {
+            "line-through": type === 'removed'
+          })}>{name}</div>
           {type ? <div className="ml-auto">{renderType(type)}</div> : null}
           {slot ? slot : null}
         </div>

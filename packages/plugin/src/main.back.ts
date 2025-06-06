@@ -118,7 +118,7 @@ export default async function () {
         await commitBridge.emitData();
         break;
       case MESSAGE_TYPE.REVERT_VARIABLE_VALUE:
-        await commitBridge.revertVariable(msg.payload.variable, msg.payload.type);
+        await commitBridge.revertVariable(msg.payload.variable, msg.payload.type, msg.payload.targetCommit);
         await commitBridge.emitData();
         break;
       case 'CONVERT_VARIABLES_TO_CSS':

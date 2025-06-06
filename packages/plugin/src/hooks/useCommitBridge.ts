@@ -20,7 +20,7 @@ export function useCommitBridge(fileUUID: string | null) {
         queryKey: ['file', fileUUID],
         queryFn: async () => await supabase.from('files').select('*').eq('id', fileUUID).single(),
         enabled: !!fileUUID,
-        refetchOnWindowFocus: true
+        refetchOnWindowFocus: true,
     });
 
     const commitDiffPatches: CommitInPluginData[] = data?.data?.commits || [];

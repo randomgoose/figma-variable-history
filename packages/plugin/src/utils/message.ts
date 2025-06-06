@@ -31,6 +31,10 @@ export enum MESSAGE_TYPE {
   DELETE_STORAGE = 'DELETE_STORAGE',
   SET_PLUGIN_DATA = 'SET_PLUGIN_DATA',
   SET_CURRENT_USER = 'SET_CURRENT_USER',
+  // DEV MODE
+  SET_MODE = 'SET_MODE',
+  EXPORT_CODE = 'EXPORT_CODE',
+  EXPORT_CODE_DONE = 'EXPORT_CODE_DONE',
 }
 
 export function sendMessage(type: string, payload?: any) {

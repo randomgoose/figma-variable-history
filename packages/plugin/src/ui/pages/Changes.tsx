@@ -91,7 +91,7 @@ function Changes() {
           <div className="bg-[var(--figma-color-bg)] h-[calc(100%-48px)]">
             <Search value={keyword} onChange={setKeyword} />
             <div
-              className="[&::-webkit-scrollbar]:w-0 flex p-2"
+              className="[&::-webkit-scrollbar]:w-0 flex bg-[var(--figma-color-bg-secondary)] p-1"
               style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}
             >
               <div className="flex flex-col h-full w-full">
